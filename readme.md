@@ -14,12 +14,6 @@ A modern web-based configuration manager for Arch Linux systems, focused on Hypr
 
 https://github.com/user-attachments/assets/3668c0e2-6877-4993-8702-92a0ed695692
 
-[![Watch the video](https://img.youtube.com/vi/XSAIlEFOU5k/hqdefault.jpg)](https://www.youtube.com/embed/XSAIlEFOU5k)
-
-[<img src="https://img.youtube.com/vi/XSAIlEFOU5k/hqdefault.jpg" width="600" height="300"
-/>](https://www.youtube.com/embed/XSAIlEFOU5k)
-
-
 ## Requirements
 
 - Python 3.10+
