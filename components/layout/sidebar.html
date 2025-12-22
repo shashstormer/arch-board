@@ -67,11 +67,13 @@
       archboardNav.forEach(item => {
         if (item.type === 'item') {
           const isActive = currentPage === item.id;
-          const icon = icons[item.icon] || icons.default;
+          // Use custom icon_svg if provided, otherwise fall back to icon key
+          const icon = item.icon_svg || icons[item.icon] || icons.default;
           html += `<a href="${item.url}" class="sidebar-link ${isActive ? 'active' : ''}">${icon}${item.title}</a>`;
         } else if (item.type === 'group') {
           const isExpanded = item.item_ids && item.item_ids.includes(currentPage);
-          const icon = icons[item.icon] || icons.menu;
+          // Use custom icon_svg if provided, otherwise fall back to icon key
+          const icon = item.icon_svg || icons[item.icon] || icons.menu;
           const arrowClass = isExpanded ? 'rotate-90' : '';
           const menuClass = isExpanded ? '' : 'hidden';
 

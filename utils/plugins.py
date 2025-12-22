@@ -31,7 +31,6 @@ def get_routers() -> List[APIRouter]:
     :return:
     """
     plugins = list_plugins()
-    print(plugins)
     routers = []
     for plugin_name, router_name in plugins.items():
         try:

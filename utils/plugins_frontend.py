@@ -12,7 +12,8 @@ class NavItem:
     id: str
     title: str
     url: str
-    icon: str = "default"  # Icon key (svg name)
+    icon: str = "default"  # Icon key (svg name) or use icon_svg for custom
+    icon_svg: Optional[str] = None  # Custom SVG markup (takes priority over icon key)
     group: Optional[str] = None  # Group ID (e.g., "config") or None for top-level
     order: int = 100  # Lower = appears first
     
@@ -26,6 +27,7 @@ class NavGroup:
     id: str
     title: str
     icon: str
+    icon_svg: Optional[str] = None  # Custom SVG markup (takes priority over icon key)
     order: int = 50
     items: List[NavItem] = field(default_factory=list)
     
@@ -35,6 +37,7 @@ class NavGroup:
             "id": self.id,
             "title": self.title,
             "icon": self.icon,
+            "icon_svg": self.icon_svg,
             "order": self.order,
             "items": [item.to_dict() for item in sorted_items],
             "item_ids": [item.id for item in sorted_items]  # Pre-computed for template
