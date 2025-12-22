@@ -20,9 +20,9 @@ def list_plugins() -> Dict[str, str]:
                 final_plugins["plugins."+line[0].strip()] = line[1].strip()  # plugin_name, router name
     default_routers = ["dashboard", "hyprland", "waybar", "hyprlock", "hypridle", "wpaperd", "system", "presets", "static", "navigation"]
     for router in default_routers:
-        if "exclude:router:"+router in plugins:
+        if "exclude:"+router in plugins:
             continue
-        final_plugins["routers."+router] = router+"_router"
+        final_plugins["plugins."+router] = router+"_router"
     return final_plugins
 
 def get_routers() -> List[APIRouter]:

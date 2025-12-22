@@ -109,7 +109,7 @@ def test_env():
     os.environ["PATH"] = f"{bin_dir}:{os.environ['PATH']}"
 
     # Patch router config path
-    from routers import hyprland
+    from plugins import hyprland
     old_config_path = hyprland.CONFIG_PATH
     hyprland.CONFIG_PATH = str(config_path)
 
