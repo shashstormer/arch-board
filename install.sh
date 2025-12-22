@@ -122,6 +122,8 @@ if [ "$PYTHON_INSTALLED_BY_SCRIPT" = true ]; then
 #!/bin/bash
 DIR="\$(cd "\$(dirname "\${BASH_SOURCE[0]}")" && pwd)"
 cd "\$DIR"
+# Check for updates
+./update.sh "\$@"
 source venv/bin/activate
 exec python main.py
 EOF
@@ -137,6 +139,8 @@ else
 #!/bin/bash
 DIR="\$(cd "\$(dirname "\${BASH_SOURCE[0]}")" && pwd)"
 cd "\$DIR"
+# Check for updates
+./update.sh "\$@"
 exec $PYTHON_CMD main.py
 EOF
 

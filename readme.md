@@ -45,6 +45,20 @@ cd arch-board
 ./install.sh
 ```
 
+**Automatic Updates**:
+
+ArchBoard automatically checks for updates on startup. You can configure this behavior when prompted:
+- **Update now**: Updates the application immediately.
+- **Skip**: Skips update for this session.
+- **Disable**: Disables update checks (can be re-enabled by editing `.update_policy`).
+- **Remind me in 1 week**: Suppresses prompts for 7 days.
+- **Enable auto-updates**: Automatically updates without asking.
+
+To run the application without checking for updates (useful for startup scripts):
+```bash
+./start.sh --no-update
+```
+
 **Manual Installation**:
 
 1. Clone the repository:
