@@ -11,7 +11,7 @@ hyprlock_router = APIRouter(prefix="/hyprlock", tags=["hyprlock"])
 
 # Register navigation
 register_navigation(
-    items=[NavItem(id="hyprlock", title="Hyprlock", url="/hyprlock", icon="config", group="config", order=30)],
+    items=[NavItem(id="hyprlock", title="Hyprlock", url="/hyprlock", icon="hyprlock", group="config", order=30)],
     groups=[NavGroup(id="config", title="Config", icon="config", order=10)]
 )
 

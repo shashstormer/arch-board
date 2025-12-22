@@ -11,7 +11,7 @@ hypridle_router = APIRouter(prefix="/hypridle", tags=["hypridle"])
 
 # Register navigation
 register_navigation(
-    items=[NavItem(id="hypridle", title="Hypridle", url="/hypridle", icon="config", group="config", order=40)],
+    items=[NavItem(id="hypridle", title="Hypridle", url="/hypridle", icon="hypridle", group="config", order=40)],
     groups=[NavGroup(id="config", title="Config", icon="config", order=10)]
 )
 

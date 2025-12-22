@@ -19,7 +19,7 @@ hyprland_router = APIRouter(prefix="/hyprland", tags=["hyprland"])
 
 # Register navigation
 register_navigation(
-    items=[NavItem(id="hyprland", title="Hyprland", url="/hyprland", icon="config", group="config", order=10)],
+    items=[NavItem(id="hyprland", title="Hyprland", url="/hyprland", icon="hyprland", group="config", order=10)],
     groups=[NavGroup(id="config", title="Config", icon="config", order=10)]
 )
 

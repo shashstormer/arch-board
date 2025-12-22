@@ -11,7 +11,7 @@ waybar_router = APIRouter(prefix="/waybar", tags=["waybar"])
 
 # Register navigation
 register_navigation(
-    items=[NavItem(id="waybar", title="Waybar", url="/waybar", icon="config", group="config", order=20)],
+    items=[NavItem(id="waybar", title="Waybar", url="/waybar", icon="waybar", group="config", order=20)],
     groups=[NavGroup(id="config", title="Config", icon="config", order=10)]
 )
 

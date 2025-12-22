@@ -11,7 +11,7 @@ wpaperd_router = APIRouter(prefix="/wpaperd", tags=["wpaperd"])
 
 # Register navigation
 register_navigation(
-    items=[NavItem(id="wpaperd", title="Wpaperd", url="/wpaperd", icon="config", group="config", order=50)],
+    items=[NavItem(id="wpaperd", title="Wpaperd", url="/wpaperd", icon="wpaperd", group="config", order=50)],
     groups=[NavGroup(id="config", title="Config", icon="config", order=10)]
 )
 
