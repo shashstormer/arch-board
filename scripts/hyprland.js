@@ -12,8 +12,9 @@ let presets = [];
 let activePreset = null;
 let pendingChanges = {};
 let activeTab = localStorage.getItem('hyprland_active_tab') || 'general';
-let autosaveEnabled = localStorage.getItem('hyprland_autosave') === 'true';
-let toastsEnabled = localStorage.getItem('hyprland_toasts') !== 'false'; // Default to true
+
+// Use shared settings from ArchBoard (defined in utils.js)
+// autosaveEnabled and toastsEnabled come from ArchBoard.settings
 
 // Special tabs that don't come from schema
 const SPECIAL_TABS = [
@@ -30,12 +31,6 @@ const SPECIAL_TABS = [
 // =============================================================================
 
 document.addEventListener('DOMContentLoaded', async () => {
-    // Load autosave toggle state
-    const autosaveToggle = document.getElementById('autosave-toggle');
-    if (autosaveToggle) {
-        autosaveToggle.checked = autosaveEnabled;
-    }
-
     await Promise.all([
         loadSchema(),
         loadConfig(),
@@ -52,10 +47,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     renderPresetSelector();
 });
 
-function toggleAutosave(enabled) {
-    autosaveEnabled = enabled;
-    localStorage.setItem('hyprland_autosave', enabled ? 'true' : 'false');
-    showToast(enabled ? 'Autosave enabled' : 'Autosave disabled', 'info');
+// Getter for autosave status (uses shared ArchBoard settings)
+function isAutosaveEnabled() {
+    return typeof ArchBoard !== 'undefined' ? ArchBoard.settings.autosaveEnabled : false;
 }
 
 async function loadSchema() {
@@ -632,7 +626,7 @@ function updateValue(path, value) {
     updateSaveButton();
 
     // Autosave with debounce
-    if (autosaveEnabled) {
+    if (isAutosaveEnabled()) {
         debouncedSave();
     }
 }
@@ -825,25 +819,10 @@ function hexToHyprColor(hex) {
 // TOAST NOTIFICATIONS
 // =============================================================================
 
-function showToast(message, type = 'info') {
-    // Skip if toasts are disabled
-    if (!toastsEnabled) return;
-
-    const container = document.getElementById('toast-container');
-    const toast = document.createElement('div');
-    toast.className = `toast toast-${type}`;
-    toast.innerHTML = `
-        <span>${message}</span>
-        <button onclick="this.parentElement.remove()">×</button>
-    `;
-    container.appendChild(toast);
-
-    // Auto remove after 3 seconds
-    setTimeout(() => toast.remove(), 3000);
-}
+// Note: showToast is now provided by utils.js globally
 
 // =============================================================================
-// MODAL SYSTEM
+// MODAL SYSTEM (page-specific modals)
 // =============================================================================
 
 function openModal(content) {
@@ -855,58 +834,6 @@ function openModal(content) {
 
 function closeModal() {
     document.getElementById('modal-overlay').classList.remove('active');
-}
-
-// =============================================================================
-// SETTINGS
-// =============================================================================
-
-function toggleToasts(enabled) {
-    toastsEnabled = enabled;
-    localStorage.setItem('hyprland_toasts', enabled ? 'true' : 'false');
-    // Show one toast to confirm (even if disabling, show this one)
-    const container = document.getElementById('toast-container');
-    const toast = document.createElement('div');
-    toast.className = 'toast toast-info';
-    toast.innerHTML = `<span>Toasts ${enabled ? 'enabled' : 'disabled'}</span>`;
-    container.appendChild(toast);
-    setTimeout(() => toast.remove(), 2000);
-}
-
-function showSettingsModal() {
-    openModal(`
-        <div class="modal-header">
-            <h3>⚙️ Editor Settings</h3>
-            <button class="modal-close" onclick="closeModal()">×</button>
-        </div>
-        <div class="modal-body">
-            <div class="settings-list">
-                <div class="setting-item">
-                    <div class="setting-info">
-                        <div class="setting-label">Show Toast Notifications</div>
-                        <div class="setting-desc">Display popup messages for save, sync, and other actions</div>
-                    </div>
-                    <label class="toggle">
-                        <input type="checkbox" ${toastsEnabled ? 'checked' : ''} onchange="toggleToasts(this.checked)">
-                        <span class="toggle-slider"></span>
-                    </label>
-                </div>
-                <div class="setting-item">
-                    <div class="setting-info">
-                        <div class="setting-label">Autosave</div>
-                        <div class="setting-desc">Automatically save changes as you edit</div>
-                    </div>
-                    <label class="toggle">
-                        <input type="checkbox" ${autosaveEnabled ? 'checked' : ''} onchange="toggleAutosave(this.checked)">
-                        <span class="toggle-slider"></span>
-                    </label>
-                </div>
-            </div>
-        </div>
-        <div class="modal-footer">
-            <button class="btn-cancel" onclick="closeModal()">Close</button>
-        </div>
-    `);
 }
 
 function confirmDialog(title, message, onConfirm) {
