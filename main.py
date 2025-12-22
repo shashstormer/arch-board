@@ -3,11 +3,10 @@ from contextlib import asynccontextmanager
 from authtuna import init_app
 from fastapi import FastAPI
 from utils.config import RELOAD_SERVER, config
-from routers import static_router, pages_router, system_router, hyprland_router
+from routers import static_router, pages_router, system_router, hyprland_router, presets_router
 from utils.lib.background import bg_service, register_default_tasks
 from xtracto import Builder
 
-basicConfig(level=DEBUG)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -24,6 +23,7 @@ app.include_router(static_router)
 app.include_router(pages_router)
 app.include_router(system_router)
 app.include_router(hyprland_router)
+app.include_router(presets_router)
 
 
 if __name__ == "__main__":

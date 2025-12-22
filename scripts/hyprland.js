@@ -8,9 +8,12 @@ let windowrules = [];
 let execCommands = [];
 let envVars = [];
 let gestures = [];
+let presets = [];
+let activePreset = null;
 let pendingChanges = {};
 let activeTab = localStorage.getItem('hyprland_active_tab') || 'general';
 let autosaveEnabled = localStorage.getItem('hyprland_autosave') === 'true';
+let toastsEnabled = localStorage.getItem('hyprland_toasts') !== 'false'; // Default to true
 
 // Special tabs that don't come from schema
 const SPECIAL_TABS = [
@@ -41,10 +44,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         loadWindowRules(),
         loadExec(),
         loadEnv(),
-        loadGestures()
+        loadGestures(),
+        loadPresets()
     ]);
     renderTabs();
     renderTabContent(activeTab);
+    renderPresetSelector();
 });
 
 function toggleAutosave(enabled) {
@@ -636,8 +641,12 @@ function updateValue(path, value) {
 let saveTimeout = null;
 function debouncedSave() {
     if (saveTimeout) clearTimeout(saveTimeout);
-    saveTimeout = setTimeout(() => {
-        saveConfig();
+    saveTimeout = setTimeout(async () => {
+        await saveConfig();
+        // If there's an active preset, also sync to it
+        if (activePreset) {
+            await syncToActivePreset();
+        }
     }, 500);
 }
 
@@ -691,6 +700,9 @@ function updateSaveButton() {
             Save
         `;
     }
+
+    // Also update preset selector to show change count
+    renderPresetSelector();
 }
 
 // =============================================================================
@@ -814,6 +826,9 @@ function hexToHyprColor(hex) {
 // =============================================================================
 
 function showToast(message, type = 'info') {
+    // Skip if toasts are disabled
+    if (!toastsEnabled) return;
+
     const container = document.getElementById('toast-container');
     const toast = document.createElement('div');
     toast.className = `toast toast-${type}`;
@@ -840,6 +855,58 @@ function openModal(content) {
 
 function closeModal() {
     document.getElementById('modal-overlay').classList.remove('active');
+}
+
+// =============================================================================
+// SETTINGS
+// =============================================================================
+
+function toggleToasts(enabled) {
+    toastsEnabled = enabled;
+    localStorage.setItem('hyprland_toasts', enabled ? 'true' : 'false');
+    // Show one toast to confirm (even if disabling, show this one)
+    const container = document.getElementById('toast-container');
+    const toast = document.createElement('div');
+    toast.className = 'toast toast-info';
+    toast.innerHTML = `<span>Toasts ${enabled ? 'enabled' : 'disabled'}</span>`;
+    container.appendChild(toast);
+    setTimeout(() => toast.remove(), 2000);
+}
+
+function showSettingsModal() {
+    openModal(`
+        <div class="modal-header">
+            <h3>⚙️ Editor Settings</h3>
+            <button class="modal-close" onclick="closeModal()">×</button>
+        </div>
+        <div class="modal-body">
+            <div class="settings-list">
+                <div class="setting-item">
+                    <div class="setting-info">
+                        <div class="setting-label">Show Toast Notifications</div>
+                        <div class="setting-desc">Display popup messages for save, sync, and other actions</div>
+                    </div>
+                    <label class="toggle">
+                        <input type="checkbox" ${toastsEnabled ? 'checked' : ''} onchange="toggleToasts(this.checked)">
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+                <div class="setting-item">
+                    <div class="setting-info">
+                        <div class="setting-label">Autosave</div>
+                        <div class="setting-desc">Automatically save changes as you edit</div>
+                    </div>
+                    <label class="toggle">
+                        <input type="checkbox" ${autosaveEnabled ? 'checked' : ''} onchange="toggleAutosave(this.checked)">
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-cancel" onclick="closeModal()">Close</button>
+        </div>
+    `);
 }
 
 function confirmDialog(title, message, onConfirm) {
@@ -1895,4 +1962,383 @@ function confirmDeleteGesture(raw) {
     confirmDialog('Delete Gesture',
         `Are you sure you want to delete this gesture?`,
         `function() { deleteGesture('${escapedRaw}') }`);
+}
+
+// =============================================================================
+// PRESETS
+// =============================================================================
+
+async function loadPresets() {
+    try {
+        const response = await fetch('/presets/hyprland');
+        const data = await response.json();
+        presets = data.presets || [];
+        activePreset = data.active_preset;
+    } catch (error) {
+        console.error('Failed to load presets:', error);
+        presets = [];
+        activePreset = null;
+    }
+}
+
+function renderPresetSelector() {
+    // Find or create preset container in the page
+    let container = document.getElementById('preset-selector-container');
+
+    // If no container exists, try to add it to the header area
+    if (!container) {
+        const header = document.querySelector('.page-header') || document.querySelector('.config-header');
+        if (header) {
+            container = document.createElement('div');
+            container.id = 'preset-selector-container';
+            container.className = 'preset-selector-container';
+            header.appendChild(container);
+        } else {
+            // Create before tab navigation as fallback
+            const tabNav = document.getElementById('tab-nav');
+            if (tabNav) {
+                container = document.createElement('div');
+                container.id = 'preset-selector-container';
+                container.className = 'preset-selector-container';
+                tabNav.parentElement.insertBefore(container, tabNav);
+            } else {
+                return; // No suitable location found
+            }
+        }
+    }
+
+    const activePresetData = presets.find(p => p.id === activePreset);
+    const changeCount = Object.keys(pendingChanges).length;
+    const hasChanges = changeCount > 0;
+
+    container.innerHTML = `
+        <div class="preset-selector">
+            <div class="preset-current">
+                <span class="preset-label">Preset:</span>
+                <select id="preset-dropdown" onchange="handlePresetChange(this.value)">
+                    <option value="">-- No Preset --</option>
+                    ${presets.map(p => `
+                        <option value="${p.id}" ${p.id === activePreset ? 'selected' : ''}>
+                            ${p.name}
+                        </option>
+                    `).join('')}
+                </select>
+            </div>
+            <div class="preset-actions">
+                ${activePreset ? `
+                    <button class="btn-preset ${hasChanges ? 'has-changes' : ''}" onclick="saveAndSyncPreset()" title="Save and sync to preset">
+                        💾 Save${hasChanges ? ` (${changeCount})` : ''}
+                    </button>
+                ` : ''}
+                <button class="btn-preset" onclick="showSavePresetModal()" title="Save current config as new preset">
+                    � Save As
+                </button>
+                <button class="btn-preset" onclick="showManagePresetsModal()" title="Manage presets">
+                    ⚙️
+                </button>
+            </div>
+        </div>
+    `;
+}
+
+async function handlePresetChange(presetId) {
+    if (!presetId) {
+        // Deactivate current preset
+        try {
+            await fetch('/presets/hyprland/deactivate', { method: 'POST' });
+            activePreset = null;
+            showToast('Preset deactivated', 'info');
+        } catch (e) {
+            showToast('Failed to deactivate preset', 'error');
+        }
+        return;
+    }
+
+    // Check for unsaved changes
+    if (Object.keys(pendingChanges).length > 0) {
+        confirmDialog(
+            'Unsaved Changes',
+            'You have unsaved changes. Switching presets will discard them. Continue?',
+            `function() { activatePreset('${presetId}') }`
+        );
+        // Reset dropdown to current if user cancels
+        document.getElementById('preset-dropdown').value = activePreset || '';
+        return;
+    }
+
+    await activatePreset(presetId);
+}
+
+async function activatePreset(presetId) {
+    try {
+        const response = await fetch(`/presets/hyprland/${presetId}/activate`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ backup_current: true })
+        });
+
+        if (!response.ok) {
+            throw new Error('Activation failed');
+        }
+
+        const result = await response.json();
+        activePreset = presetId;
+
+        // Reload config to reflect changes
+        await loadConfig();
+        renderTabContent(activeTab);
+        renderPresetSelector();
+
+        const preset = presets.find(p => p.id === presetId);
+        showToast(`Preset "${preset?.name || presetId}" activated!`, 'success');
+
+        if (result.reload?.reloaded) {
+            showToast('Hyprland reloaded', 'success');
+        }
+    } catch (e) {
+        showToast('Failed to activate preset', 'error');
+        document.getElementById('preset-dropdown').value = activePreset || '';
+    }
+}
+
+function showSavePresetModal() {
+    openModal(`
+        <div class="modal-header">
+            <h3>💾 Save as Preset</h3>
+            <button class="modal-close" onclick="closeModal()">×</button>
+        </div>
+        <div class="modal-body">
+            <p class="modal-description">Save your current configuration as a reusable preset.</p>
+            <div class="form-group">
+                <label class="form-label">Preset Name</label>
+                <input type="text" id="preset-name" class="form-input" placeholder="e.g., Battery Save" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Description (optional)</label>
+                <textarea id="preset-description" class="form-input" placeholder="e.g., Low power mode with no animations"></textarea>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-cancel" onclick="closeModal()">Cancel</button>
+            <button class="btn-add" onclick="saveNewPreset()">Save Preset</button>
+        </div>
+    `);
+}
+
+// Save config and sync to active preset
+async function saveAndSyncPreset() {
+    // First save the config to file
+    if (Object.keys(pendingChanges).length > 0) {
+        await saveConfig();
+    }
+
+    // Then sync to the active preset
+    await syncToActivePreset();
+
+    // Refresh the UI
+    renderPresetSelector();
+}
+
+// Sync current config to the active preset
+async function syncToActivePreset() {
+    if (!activePreset) return;
+
+    try {
+        const response = await fetch(`/presets/hyprland/${activePreset}/update-content`, {
+            method: 'POST'
+        });
+
+        if (response.ok) {
+            const preset = presets.find(p => p.id === activePreset);
+            showToast(`Synced to "${preset?.name}"`, 'success');
+        }
+    } catch (e) {
+        console.error('Failed to sync preset:', e);
+    }
+}
+
+async function saveNewPreset() {
+    const name = document.getElementById('preset-name').value.trim();
+    const description = document.getElementById('preset-description').value.trim();
+
+    if (!name) {
+        showToast('Please enter a preset name', 'error');
+        return;
+    }
+
+    // First save any pending changes
+    if (Object.keys(pendingChanges).length > 0) {
+        await saveConfig();
+    }
+
+    try {
+        const response = await fetch('/presets/hyprland', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name, description })
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to create preset');
+        }
+
+        const preset = await response.json();
+        presets.push(preset);
+
+        closeModal();
+        renderPresetSelector();
+        showToast(`Preset "${name}" created!`, 'success');
+    } catch (e) {
+        showToast('Failed to create preset', 'error');
+    }
+}
+
+function showManagePresetsModal() {
+    openModal(`
+        <div class="modal-header">
+            <h3>⚙️ Manage Presets</h3>
+            <button class="modal-close" onclick="closeModal()">×</button>
+        </div>
+        <div class="modal-body">
+            ${presets.length === 0 ?
+            '<p class="empty-state">No presets saved yet. Click "Save As" to create your first preset.</p>' :
+            `<div class="presets-list">
+                ${presets.map(p => `
+                    <div class="preset-item ${p.id === activePreset ? 'active' : ''}">
+                        <div class="preset-info">
+                            <div class="preset-name">
+                                ${p.name}
+                                ${p.id === activePreset ? '<span class="preset-badge">Active</span>' : ''}
+                            </div>
+                            <div class="preset-desc">${p.description || 'No description'}</div>
+                            <div class="preset-meta">Created: ${new Date(p.created_at).toLocaleDateString()}</div>
+                        </div>
+                        <div class="preset-actions">
+                            ${p.id !== activePreset ? `
+                                <button class="action-btn" onclick="activatePresetFromModal('${p.id}')" title="Activate">▶️</button>
+                            ` : ''}
+                            <button class="action-btn" onclick="showEditPresetModal('${p.id}', '${p.name.replace(/'/g, "\\'")}', '${(p.description || '').replace(/'/g, "\\'")}')" title="Edit">✏️</button>
+                            <button class="action-btn" onclick="updatePresetContent('${p.id}')" title="Update with current config">🔄</button>
+                            <button class="action-btn delete" onclick="confirmDeletePreset('${p.id}', '${p.name.replace(/'/g, "\\'")}')" title="Delete">🗑️</button>
+                        </div>
+                    </div>
+                `).join('')}
+            </div>`
+        }
+        </div>
+        <div class="modal-footer">
+            <button class="btn-cancel" onclick="closeModal()">Close</button>
+        </div>
+    `);
+}
+
+async function activatePresetFromModal(presetId) {
+    await activatePreset(presetId);
+    showManagePresetsModal(); // Refresh modal
+}
+
+function showEditPresetModal(id, name, description) {
+    openModal(`
+        <div class="modal-header">
+            <h3>✏️ Edit Preset</h3>
+            <button class="modal-close" onclick="closeModal()">×</button>
+        </div>
+        <div class="modal-body">
+            <div class="form-group">
+                <label class="form-label">Preset Name</label>
+                <input type="text" id="edit-preset-name" class="form-input" value="${name}">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Description</label>
+                <textarea id="edit-preset-description" class="form-input">${description}</textarea>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-cancel" onclick="showManagePresetsModal()">Back</button>
+            <button class="btn-add" onclick="updatePreset('${id}')">Save Changes</button>
+        </div>
+    `);
+}
+
+async function updatePreset(presetId) {
+    const name = document.getElementById('edit-preset-name').value.trim();
+    const description = document.getElementById('edit-preset-description').value.trim();
+
+    if (!name) {
+        showToast('Preset name is required', 'error');
+        return;
+    }
+
+    try {
+        const response = await fetch(`/presets/hyprland/${presetId}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name, description })
+        });
+
+        if (!response.ok) throw new Error('Update failed');
+
+        // Update local state
+        const idx = presets.findIndex(p => p.id === presetId);
+        if (idx >= 0) {
+            presets[idx].name = name;
+            presets[idx].description = description;
+        }
+
+        showManagePresetsModal();
+        renderPresetSelector();
+        showToast('Preset updated', 'success');
+    } catch (e) {
+        showToast('Failed to update preset', 'error');
+    }
+}
+
+async function updatePresetContent(presetId) {
+    // First save pending changes
+    if (Object.keys(pendingChanges).length > 0) {
+        await saveConfig();
+    }
+
+    try {
+        const response = await fetch(`/presets/hyprland/${presetId}/update-content`, {
+            method: 'POST'
+        });
+
+        if (!response.ok) throw new Error('Update failed');
+
+        const preset = presets.find(p => p.id === presetId);
+        showToast(`Preset "${preset?.name}" updated with current config`, 'success');
+    } catch (e) {
+        showToast('Failed to update preset content', 'error');
+    }
+}
+
+function confirmDeletePreset(presetId, name) {
+    confirmDialog(
+        'Delete Preset',
+        `Are you sure you want to delete the preset "${name}"? This cannot be undone.`,
+        `function() { deletePreset('${presetId}') }`
+    );
+}
+
+async function deletePreset(presetId) {
+    try {
+        const response = await fetch(`/presets/hyprland/${presetId}`, {
+            method: 'DELETE'
+        });
+
+        if (!response.ok) throw new Error('Delete failed');
+
+        // Update local state
+        presets = presets.filter(p => p.id !== presetId);
+        if (activePreset === presetId) {
+            activePreset = null;
+        }
+
+        showManagePresetsModal();
+        renderPresetSelector();
+        showToast('Preset deleted', 'success');
+    } catch (e) {
+        showToast('Failed to delete preset', 'error');
+    }
 }
