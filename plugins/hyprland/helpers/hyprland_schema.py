@@ -78,7 +78,6 @@ class Tab:
 
 # =============================================================================
 # SCHEMA DEFINITION
-# Section names MUST match actual Hyprland category paths (e.g., "general", "misc")
 # =============================================================================
 
 HYPRLAND_SCHEMA = [
@@ -298,7 +297,7 @@ HYPRLAND_SCHEMA = [
                 title="Animation Settings",
                 options=[
                     Option("enabled", OptionType.BOOL, True, "Enable animations"),
-                    Option("first_launch_animation", OptionType.BOOL, True, "Initial launch animation"),
+                    # Option("first_launch_animation", OptionType.BOOL, True, "Initial launch animation"),  # This option is no longer there in hyprland
                 ]
             ),
         ]

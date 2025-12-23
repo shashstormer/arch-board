@@ -1,1 +1,3 @@
+link
+    ;;rel="stylesheet" href="/assets/css/waybar.css?k={{ cache_key }}";;
 [[waybar/config_editor.html]]

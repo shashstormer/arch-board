@@ -1,1 +1,3 @@
+link
+    ;;rel="stylesheet" href="/assets/css/hyprland.css?k={{ cache_key }}";;
 [[hyprland/config_editor.html]]

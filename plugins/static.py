@@ -26,7 +26,19 @@ async def get_scripts(filename: str):
         raise HTTPException(status_code=404, detail="File not found")
     if not os.path.exists(f"scripts/{filename}"):
         raise HTTPException(status_code=404, detail="File not found")
-    return FileResponse(f"scripts/{filename}")
+    if not os.path.abspath(f"scripts/{filename}").startswith(os.path.abspath("scripts")):
+        raise HTTPException(status_code=404, detail="File not found")
+    return FileResponse(os.path.abspath(f"scripts/{filename}"))
+
+@static_router.get("/assets/css/{filename}")
+async def get_assets(filename: str):
+    if not filename.endswith(".css"):
+        raise HTTPException(status_code=404, detail="File not found")
+    if not os.path.exists(f"assets/css/{filename}"):
+        raise HTTPException(status_code=404, detail="File not found")
+    if not os.path.abspath(f"assets/css/{filename}").startswith(os.path.abspath("assets/css")):
+        raise HTTPException(status_code=404, detail="File not found")
+    return FileResponse(os.path.abspath(f"assets/css/{filename}"))
 
 @static_router.get("/favicon.ico")
 async def get_favicon():
