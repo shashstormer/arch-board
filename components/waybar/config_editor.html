@@ -1,0 +1,161 @@
+<div class="waybar-container">
+
+    <!-- LEFT PANEL: MODULES & LAYOUT -->
+    <div class="waybar-panel left">
+
+        <div class="waybar-header">
+
+            <!-- General Settings -->
+            <div class="waybar-grid-2">
+                <select id="setting-layer" class="input-select">
+                    <option value="top">Top Layer</option>
+                    <option value="bottom">Bottom Layer</option>
+                </select>
+
+                <select id="setting-position" class="input-select">
+                    <option value="top">Top Bar</option>
+                    <option value="bottom">Bottom Bar</option>
+                    <option value="left">Left Bar</option>
+                    <option value="right">Right Bar</option>
+                </select>
+            </div>
+
+            <div class="waybar-search-container">
+                <input type="text" id="search-modules" placeholder="Search modules..." class="waybar-search-input">
+                <svg class="waybar-search-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+            </div>
+        </div>
+
+        <div id="modules-container" class="waybar-modules-container">
+
+            <!-- Left Modules -->
+            <div>
+                <h3 class="waybar-list-header">Modules Left</h3>
+                <div id="list-left" class="waybar-list"></div>
+            </div>
+
+            <!-- Center Modules -->
+            <div>
+                <h3 class="waybar-list-header">Modules Center</h3>
+                <div id="list-center" class="waybar-list"></div>
+            </div>
+
+            <!-- Right Modules -->
+            <div>
+                <h3 class="waybar-list-header">Modules Right</h3>
+                <div id="list-right" class="waybar-list"></div>
+            </div>
+
+            <!-- Available/Disabled Modules -->
+            <div>
+                <h3 class="waybar-list-header">Available / Disabled</h3>
+                <div id="list-available" class="waybar-list"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- RIGHT PANEL: EDITOR -->
+    <div class="waybar-panel right">
+
+        <div id="editor-container" class="waybar-editor-container">
+
+            <div class="waybar-editor-header">
+
+                <div class="flex items-center gap-3">
+                    <div class="waybar-module-icon">
+                        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                                d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                        </svg>
+                    </div>
+
+                    <div class="waybar-editor-title">
+                        <h2 id="module-title">Module</h2>
+                        <p>Configure layout & style</p>
+                    </div>
+                </div>
+
+                <div class="flex gap-2">
+                    <button id="save-btn" class="btn-primary">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
+                        </svg>
+                        Save
+                    </button>
+                </div>
+            </div>
+
+            <!-- TABS -->
+            <div class="tab-nav">
+                <button id="tab-config" class="tab-btn active">Config</button>
+                <button id="tab-style" class="tab-btn">Style (CSS)</button>
+            </div>
+
+            <!-- CONFIG EDITOR -->
+            <div id="view-config" class="waybar-input-group">
+                <label class="waybar-label">JSON Configuration</label>
+                <textarea id="module-config" class="waybar-textarea large" spellcheck="false"></textarea>
+            </div>
+
+            <!-- STYLE EDITOR -->
+            <div id="view-style" class="hidden">
+
+                <div class="waybar-grid-2" style="margin-bottom: 1rem;">
+                    <div>
+                        <label class="waybar-label">Text Color</label>
+                        <div class="color-control">
+                            <input type="color" id="style-color-picker">
+                            <input type="text" id="style-color" class="input-text" placeholder="#ffffff"
+                                style="width: 100%">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="waybar-label">Background</label>
+                        <div class="color-control">
+                            <input type="color" id="style-bg-picker">
+                            <input type="text" id="style-bg" class="input-text" placeholder="transparent"
+                                style="width: 100%">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="waybar-grid-2" style="margin-bottom: 1rem;">
+                    <div>
+                        <label class="waybar-label">Font Size</label>
+                        <input type="text" id="style-font-size" class="input-text" placeholder="13px"
+                            style="width: 100%">
+                    </div>
+
+                    <div>
+                        <label class="waybar-label">Padding</label>
+                        <input type="text" id="style-padding" class="input-text" placeholder="0 5px"
+                            style="width: 100%">
+                    </div>
+                </div>
+
+                <div class="waybar-input-group">
+                    <label class="waybar-label">Custom CSS for this module</label>
+                    <textarea id="module-custom-css" class="waybar-textarea medium"
+                        placeholder="border-radius: 5px; ..."></textarea>
+                </div>
+            </div>
+
+            <div id="status-msg" class="mt-4 text-sm text-center hidden"></div>
+        </div>
+
+        <div id="empty-state" class="waybar-empty-state">
+            <svg class="waybar-empty-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                    d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+            </svg>
+            <p>Select a module to edit settings or style</p>
+        </div>
+    </div>
+</div>
+
+<script src="/scripts/waybar.js?k={{ cache_key }}"></script>

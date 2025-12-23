@@ -38,7 +38,9 @@ function initAutoReload() {
     const autoReload = getLocalSettings('auto_reload', 'true') === 'true';
     if (autoReload) {
         setTimeout(() => {
-            location.reload();
+            if (autoReload) {
+                location.reload();
+            }
         }, 60000); // Reload every 60 seconds in dev mode
     }
 }

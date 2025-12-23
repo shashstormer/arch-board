@@ -9,16 +9,30 @@ from utils.plugins_frontend import register_navigation, NavItem, NavGroup, regis
 import os
 import json
 import re
-from utils.jsonc_parser import parse, to_string, set_value, DictNode, ListNode
+from utils.jsonc_parser import parse, to_string, set_value, DictNode, ListNode, to_python
 
 # constants
 WAYBAR_CONFIG_DIR = os.path.expanduser("~/.config/waybar")
 CONFIG_FILE = os.path.join(WAYBAR_CONFIG_DIR, "config")
 STYLE_FILE = os.path.join(WAYBAR_CONFIG_DIR, "style.css")
 
+import shutil
+
 # Fallback if config is named config.jsonc
 if not os.path.exists(CONFIG_FILE) and os.path.exists(CONFIG_FILE + ".jsonc"):
     CONFIG_FILE = CONFIG_FILE + ".jsonc"
+
+def create_backup():
+    """Creates a backup of config and style files if they don't exist."""
+    try:
+        if os.path.exists(CONFIG_FILE) and not os.path.exists(CONFIG_FILE + ".backup"):
+            shutil.copy2(CONFIG_FILE, CONFIG_FILE + ".backup")
+        if os.path.exists(STYLE_FILE) and not os.path.exists(STYLE_FILE + ".backup"):
+            shutil.copy2(STYLE_FILE, STYLE_FILE + ".backup")
+    except Exception as e:
+        print(f"Waybar Backup Failed: {e}")
+
+create_backup()
 
 waybar_router = APIRouter(prefix="/waybar", tags=["waybar"])
 
@@ -72,78 +86,25 @@ async def get_config():
         with open(CONFIG_FILE, "r") as f:
             content = f.read()
         
-        # We send clean JSON to frontend for easier consumption
-        json_content = strip_comments(content)
-        config_data = json.loads(json_content)
-        return config_data
+        # We use our custom parser which handles comments/trailing commas,
+        # then convert AST to python dict for JSON response.
+        try:
+            root = parse(content)
+            config_data = to_python(root)
+            return config_data
+        except Exception as e:
+            # Fallback for debugging if parse fails
+            return JSONResponse({"error": f"Parse error: {str(e)}"}, status_code=500)
     except Exception as e:
         return JSONResponse({"error": str(e)}, status_code=500)
 
-@waybar_router.post("/config")
-async def save_config(payload: list | dict = Body(...)):
-    """
-    Saves the Waybar configuration.
-    
-    The payload can be:
-    1. A full config object (or array) -> We might overwrite everything (Risk losing comments if we didn't track them)
-    2. A partial update?
-    
-    Actually, my frontend sends the FULL config right now in `saveModule`.
-    Wait, `saveModule` in frontend fetches full config, updates one key, and sends full config back.
-    
-    If frontend sends full config back as JSON, we LOST the comments from the parts we didn't touch?
-    YES. Because `fetch('/waybar/config')` returned clean JSON.
-    
-    We need to change the API Protocol.
-    Frontend should send: { "key": "clock", "value": {...new_settings...}, "path": [...] }
-    
-    Let's handle this by checking if payload has metadata or is raw config.
-    But to support the requirement "Search integration in ui checks for input etc", 
-    we really only edit one module at a time in the UI I built.
-    
-    Let's modify the frontend to send:
-    POST /waybar/module_update
-    {
-        "path": ["clock"] or ["modules-right", 0],
-        "value": { ... }
-    }
-    
-    However, I don't want to rewrite the frontend entirely yet. 
-    The existing frontend sends the WHOLE config array/dict.
-    
-    If I want to preserve comments, I MUST NOT accept the whole clean JSON back.
-    
-    Let's update the Frontend to send only the changed module.
-    
-    Revised Logic:
-    1. Frontend: `saveModule` sends: { "module": "name", "config": {...} } (Object)
-    2. Backend: 
-       - Reads file -> AST
-       - Finds "module" in AST (this is tricky if it's an array config)
-       - Updates it
-       - Writes file
-    
-    But what if the user edits the layout ("modules-left")?
-    
-    Simplified approach for now:
-    Assume config is a single Object (common). 
-    If Array, we search all objects.
-    
-    Let's change endpoint to `POST /config/update`.
-    """
-    pass # Replaced by specific implementation below
+
 
 @waybar_router.post("/config/update")
 async def update_module_config(data: dict = Body(...)):
     """
-    Update a specific module's config.
-    Expected payload: { "path": ["module_name"], "value": {...} }
-    OR
-    { "path": [0, "module_name"], "value": {...} } for array configs?
-    
-    Let's simpler:
-    { "module": "clock", "value": {...} }
-    I will search for 'clock' key in the root object (or objects in array) and update it.
+    Update a specific module's config while preserving comments.
+    by finding the module in the JSONC AST and replacing its value node.
     """
     module_name = data.get("module")
     new_value = data.get("value")
@@ -209,6 +170,39 @@ async def get_style():
         with open(STYLE_FILE, "r") as f:
             content = f.read()
         return {"content": content}
+    except Exception as e:
+        return JSONResponse({"error": str(e)}, status_code=500)
+
+from utils.css_parser import parse_css
+
+@waybar_router.post("/style/update")
+async def update_style_property(data: dict = Body(...)):
+    """
+    Updates a specific CSS selector's property.
+    Payload: { "selector": "#waybar", "property": "background", "value": "red" }
+    """
+    selector = data.get("selector")
+    prop = data.get("property")
+    value = data.get("value")
+    
+    if not selector or not prop or not value:
+        return JSONResponse({"error": "Missing selector, property or value"}, status_code=400)
+        
+    if not os.path.exists(STYLE_FILE):
+        return JSONResponse({"error": "Style file not found"}, status_code=404)
+        
+    try:
+        with open(STYLE_FILE, "r") as f:
+            content = f.read()
+            
+        parser = parse_css(content)
+        parser.set_property(selector, prop, value)
+        new_content = parser.to_string()
+        
+        with open(STYLE_FILE, "w") as f:
+            f.write(new_content)
+            
+        return {"status": "success", "message": f"Style updated for {selector}"}
     except Exception as e:
         return JSONResponse({"error": str(e)}, status_code=500)
 

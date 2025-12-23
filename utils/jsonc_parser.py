@@ -158,7 +158,7 @@ class Parser:
             node = self.parse_array()
         elif token.type == TokenType.STRING:
             self.consume()
-            node = ValueNode(json.loads(token.value), token.value)
+            node = ValueNode(json.loads(token.value, strict=False), token.value)
         elif token.type == TokenType.NUMBER:
             self.consume()
 
@@ -200,7 +200,7 @@ class Parser:
                 raise SyntaxError(f"Expected string key at line {self.peek().line}")
 
             key_token = self.consume()
-            key_node = KeyNode(json.loads(key_token.value), key_token.value)
+            key_node = KeyNode(json.loads(key_token.value, strict=False), key_token.value)
             key_node.leading_trivia = trivia
 
             middle_trivia = self.collect_trivia()
@@ -475,3 +475,24 @@ def set_value(root, path, value):
                     raise IndexError(f"List index {key} out of range")
             else:
                 raise TypeError(f"Cannot access list with non-integer key {key}")
+
+def to_python(node):
+    """
+    Converts an AST node back to a Python object (dict, list, str, int, etc.).
+    """
+    if isinstance(node, DictNode):
+        obj = {}
+        for k_node, v_node, _ in node.children:
+            obj[k_node.value] = to_python(v_node)
+        return obj
+    elif isinstance(node, ListNode):
+        arr = []
+        for v_node, _ in node.children:
+            arr.append(to_python(v_node))
+        return arr
+    elif isinstance(node, ValueNode):
+        return node.value
+    elif isinstance(node, KeyNode):
+        return node.value
+    else:
+        return None
