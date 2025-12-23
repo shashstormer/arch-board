@@ -282,10 +282,7 @@ class Printer:
                 self.write(":")
                 self.print_node(val)
                 if comma:
-                    self.print_trivia(val.trailing_trivia)
                     self.write(",")
-                else:
-                    self.print_trivia(val.trailing_trivia)
             self.write("}")
 
         elif isinstance(node, ListNode):
@@ -293,10 +290,7 @@ class Printer:
             for val, comma in node.children:
                 self.print_node(val)
                 if comma:
-                    self.print_trivia(val.trailing_trivia)
                     self.write(",")
-                else:
-                    self.print_trivia(val.trailing_trivia)
             self.write("]")
 
         elif isinstance(node, (ValueNode, KeyNode)):
