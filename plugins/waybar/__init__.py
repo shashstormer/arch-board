@@ -75,7 +75,7 @@ async def get_config():
         return JSONResponse({"error": "Config file not found"}, status_code=404)
 
     try:
-        with open(CONFIG_FILE, "r") as f:
+        with open(CONFIG_FILE, "r", encoding="utf-8") as f:
             content = f.read()
 
         try:
@@ -104,7 +104,7 @@ async def update_module_config(data: dict = Body(...)):
         return JSONResponse({"error": "Config file not found"}, status_code=404)
 
     try:
-        with open(CONFIG_FILE, "r") as f:
+        with open(CONFIG_FILE, "r", encoding="utf-8") as f:
             content = f.read()
 
         root = parse(content)
@@ -135,7 +135,7 @@ async def update_module_config(data: dict = Body(...)):
 
             # Write back
             new_content = to_string(root)
-            with open(CONFIG_FILE, "w") as f:
+            with open(CONFIG_FILE, "w", encoding="utf-8") as f:
                 f.write(new_content)
 
             return {"status": "success", "message": f"Module {module_name} updated"}
@@ -155,7 +155,7 @@ async def get_style():
         return JSONResponse({"error": "Style file not found"}, status_code=404)
 
     try:
-        with open(STYLE_FILE, "r") as f:
+        with open(STYLE_FILE, "r", encoding="utf-8") as f:
             content = f.read()
         return {"content": content}
     except Exception as e:
@@ -182,14 +182,14 @@ async def update_style_property(data: dict = Body(...)):
         return JSONResponse({"error": "Style file not found"}, status_code=404)
 
     try:
-        with open(STYLE_FILE, "r") as f:
+        with open(STYLE_FILE, "r", encoding="utf-8") as f:
             content = f.read()
 
         parser = parse_css(content)
         parser.set_property(selector, prop, value)
         new_content = parser.to_string()
 
-        with open(STYLE_FILE, "w") as f:
+        with open(STYLE_FILE, "w", encoding="utf-8") as f:
             f.write(new_content)
 
         return {"status": "success", "message": f"Style updated for {selector}"}
@@ -205,7 +205,7 @@ async def save_style(style: dict = Body(...)):
         return JSONResponse({"error": "Content required"}, status_code=400)
 
     try:
-        with open(STYLE_FILE, "w") as f:
+        with open(STYLE_FILE, "w", encoding="utf-8") as f:
             f.write(content)
         return {"status": "success", "message": "Style saved"}
     except Exception as e:

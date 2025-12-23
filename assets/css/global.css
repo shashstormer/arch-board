@@ -5,6 +5,20 @@
     --color-accent: #14b8a6;
     --color-accent-hover: #2dd4bf;
     --color-accent-glow: rgba(20, 184, 166, 0.3);
+
+    /* Font Stacks */
+    --font-main: 'Inter', 'JetBrainsMono Nerd Font', 'FiraCode Nerd Font', 'Symbols Nerd Font', 'Font Awesome 6 Free', sans-serif;
+    --font-mono: 'JetBrainsMono Nerd Font', 'FiraCode Nerd Font', 'Symbols Nerd Font', 'Font Awesome 6 Free', monospace;
+}
+
+body {
+    font-family: var(--font-main);
+}
+
+code,
+pre,
+.font-mono {
+    font-family: var(--font-mono) !important;
 }
 
 /* Base */
