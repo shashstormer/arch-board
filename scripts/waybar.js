@@ -231,7 +231,7 @@ function selectModule(name) {
     console.log("Waybar Editor: selectModule called for", name);
     currentModule = name;
 
-    if(!elements.moduleTitle) {
+    if (!elements.moduleTitle) {
         console.error("Waybar Editor: moduleTitle element missing");
         return;
     }
@@ -240,15 +240,15 @@ function selectModule(name) {
 
     // Toggle containers
     console.log("Waybar Editor: Showing editor container");
-    if(elements.emptyState) elements.emptyState.style.display = 'none';
+    if (elements.emptyState) elements.emptyState.style.display = 'none';
 
-    if(elements.editorContainer) {
+    if (elements.editorContainer) {
         elements.editorContainer.classList.remove('hidden');
         elements.editorContainer.classList.add('active'); // CSS requires .active to show
     }
 
     const modConfig = fullConfig[name] || {};
-    if(elements.moduleConfig) elements.moduleConfig.value = JSON.stringify(modConfig, null, 4);
+    if (elements.moduleConfig) elements.moduleConfig.value = JSON.stringify(modConfig, null, 4);
 
     // Determine typehidden
     let type = name;
@@ -264,17 +264,17 @@ function selectModule(name) {
     // Fallback for generic custom
     if (!schema && name.includes("/")) {
         // e.g. "custom/foo" -> try "custom"
-        if(name.startsWith("custom/")) schema = schemas["custom"];
+        if (name.startsWith("custom/")) schema = schemas["custom"];
     }
 
     if (schema) {
         console.log("Waybar Editor: Schema found", schema.title);
         elements.moduleTypeDisplay.textContent = `Type: ${schema.title}`;
         renderForm(schema, modConfig);
-        if(currentView === 'json' || currentView === 'style') {
-             // Keep current view
+        if (currentView === 'json' || currentView === 'style') {
+            // Keep current view
         } else {
-             switchTab('simple');
+            switchTab('simple');
         }
     } else {
         console.log("Waybar Editor: No schema found for", name);
@@ -310,30 +310,73 @@ function renderForm(schema, config) {
         const val = config[opt.name] !== undefined ? config[opt.name] : (opt.default !== undefined ? opt.default : "");
 
         if (opt.type === 'bool') {
-            input = document.createElement('div');
-            input.className = 'flex items-center mt-1';
+            input = document.createElement('label');
+            input.className = 'toggle';
+
             const toggle = document.createElement('input');
             toggle.type = 'checkbox';
             toggle.checked = val === true;
-            toggle.className = 'w-4 h-4 text-cyan-500 rounded border-zinc-600 focus:ring-cyan-500 bg-zinc-700';
             toggle.onchange = (e) => updateFormValue(opt.name, e.target.checked);
             input.appendChild(toggle);
-            const span = document.createElement('span');
-            span.className = 'ml-2 text-sm text-zinc-400';
-            span.textContent = opt.description; // or "Enabled"
-            input.appendChild(span);
+
+            const slider = document.createElement('span');
+            slider.className = 'toggle-slider';
+            input.appendChild(slider);
+
+            // Wrapper for label
+            const wrapper = document.createElement('div');
+            wrapper.className = 'flex items-center justify-between'; // Use flex for layout or custom class if needed
+            // Actually, form layout puts label above. Let's adjust.
+            // Global form style: label on top, input below.
+            // For toggle, it usually looks better side-by-side or label then toggle.
+            // Let's stick to the previous layout but with new components.
+
+            // Re-doing to match global config-option style roughly or just simple toggle
+            // The loop already added a label for the group. We just need the toggle control.
+
+            // Just return the toggle label directly, and let the group handle layout.
+            // But we need the description next to it? 
+            // The layout is: Group -> Level -> Input.
+
+            // Let's make a container for the toggle and its extra text if any.
+            input = document.createElement('div');
+            input.style.display = 'flex';
+            input.style.alignItems = 'center';
+            input.style.gap = '0.75rem';
+
+            const labelToggle = document.createElement('label');
+            labelToggle.className = 'toggle';
+            const chk = document.createElement('input');
+            chk.type = 'checkbox';
+            chk.checked = val === true;
+            chk.onchange = (e) => updateFormValue(opt.name, e.target.checked);
+            labelToggle.appendChild(chk);
+            labelToggle.appendChild(document.createElement('span')).className = 'toggle-slider';
+
+            input.appendChild(labelToggle);
+
+            if (opt.description) {
+                const desc = document.createElement('span');
+                desc.className = 'form-hint';
+                desc.style.marginTop = '0';
+                desc.textContent = opt.description;
+                input.appendChild(desc);
+            }
         }
         else if (opt.type === 'int' || opt.type === 'float') {
             input = document.createElement('input');
             input.type = 'number';
-            input.className = 'waybar-input w-full';
-            if(opt.type === 'float') input.step = opt.step || "0.1";
+            input = document.createElement('input');
+            input.type = 'number';
+            input.className = 'form-input';
+            if (opt.type === 'float') input.step = opt.step || "0.1";
             input.value = val;
             input.oninput = (e) => updateFormValue(opt.name, opt.type === 'int' ? parseInt(e.target.value) : parseFloat(e.target.value));
         }
         else if (opt.type === 'enum' && opt.choices) {
             input = document.createElement('select');
-            input.className = 'input-select w-full';
+            input = document.createElement('select');
+            input.className = 'form-select';
             opt.choices.forEach(c => {
                 const option = document.createElement('option');
                 option.value = c;
@@ -344,29 +387,29 @@ function renderForm(schema, config) {
             input.onchange = (e) => updateFormValue(opt.name, e.target.value);
         }
         else if (opt.type === 'json') {
-             input = document.createElement('textarea');
-             input.className = 'waybar-textarea small';
-             input.value = typeof val === 'object' ? JSON.stringify(val) : val;
-             input.onchange = (e) => {
-                 try {
-                     const j = JSON.parse(e.target.value);
-                     updateFormValue(opt.name, j);
-                     input.classList.remove('border-red-500');
-                 } catch(err) {
-                     input.classList.add('border-red-500');
-                 }
-             };
+            input = document.createElement('textarea');
+            input.className = 'waybar-textarea small';
+            input.value = typeof val === 'object' ? JSON.stringify(val) : val;
+            input.onchange = (e) => {
+                try {
+                    const j = JSON.parse(e.target.value);
+                    updateFormValue(opt.name, j);
+                    input.classList.remove('border-red-500');
+                } catch (err) {
+                    input.classList.add('border-red-500');
+                }
+            };
         }
         else {
             // String
             input = document.createElement('input');
             input.type = 'text';
-            input.className = 'waybar-input w-full';
+            input.className = 'form-input';
             input.value = val;
             input.oninput = (e) => updateFormValue(opt.name, e.target.value);
         }
 
-        if(opt.type !== 'bool') group.appendChild(input); // Bool appends its own container
+        if (opt.type !== 'bool') group.appendChild(input); // Bool appends its own container
         else group.appendChild(input);
 
         container.appendChild(group);
@@ -422,10 +465,10 @@ async function saveCurrentModule() {
         // If we are in Simple view, the fullConfig[currentModule] is already updated by event listeners
         // If in JSON view, we need to parse textarea
         if (currentView === 'json') {
-             newContent = JSON.parse(elements.moduleConfig.value);
-             fullConfig[currentModule] = newContent;
+            newContent = JSON.parse(elements.moduleConfig.value);
+            fullConfig[currentModule] = newContent;
         } else {
-             newContent = fullConfig[currentModule];
+            newContent = fullConfig[currentModule];
         }
 
         elements.saveBtn.textContent = 'Saving...';
@@ -461,8 +504,8 @@ async function updateStyle(prop, value) {
         else cssId = '#' + parts[1];
     }
     // Correction for specific hyprland modules if needed
-    if(currentModule == "hyprland/workspaces") cssId = "#workspaces";
-    if(currentModule == "hyprland/window") cssId = "#window";
+    if (currentModule == "hyprland/workspaces") cssId = "#workspaces";
+    if (currentModule == "hyprland/window") cssId = "#window";
 
     try {
         await fetch('/waybar/style/update', {
@@ -485,24 +528,21 @@ function switchTab(view) {
 
     // Reset classes
     [elements.tabSimple, elements.tabJson, elements.tabStyle].forEach(t => {
-        t.className = 'px-4 py-2 text-sm font-medium text-zinc-400 hover:text-white transition-colors';
+        t.classList.remove('active');
     });
 
     [elements.viewSimple, elements.viewJson, elements.viewStyle].forEach(v => v.classList.add('hidden'));
 
-    // Activate
-    const activeBtnClass = 'px-4 py-2 text-sm font-medium text-cyan-400 border-b-2 border-cyan-400 transition-colors';
-
     if (view === 'simple') {
-        elements.tabSimple.className = activeBtnClass;
+        elements.tabSimple.classList.add('active');
         elements.viewSimple.classList.remove('hidden');
     } else if (view === 'json') {
-        elements.tabJson.className = activeBtnClass;
+        elements.tabJson.classList.add('active');
         elements.viewJson.classList.remove('hidden');
         // Ensure JSON is up to date
-        if(currentModule) elements.moduleConfig.value = JSON.stringify(fullConfig[currentModule], null, 4);
+        if (currentModule) elements.moduleConfig.value = JSON.stringify(fullConfig[currentModule], null, 4);
     } else {
-        elements.tabStyle.className = activeBtnClass;
+        elements.tabStyle.classList.add('active');
         elements.viewStyle.classList.remove('hidden');
     }
 }
