@@ -60,7 +60,7 @@
     <!-- RIGHT PANEL: EDITOR -->
     <div class="waybar-panel right">
 
-        <div id="editor-container" class="waybar-editor-container">
+        <div id="editor-container" class="waybar-editor-container hidden">
 
             <div class="waybar-editor-header">
 
@@ -74,7 +74,7 @@
 
                     <div class="waybar-editor-title">
                         <h2 id="module-title">Module</h2>
-                        <p>Configure layout & style</p>
+                        <p id="module-type-display" class="text-xs text-zinc-500">Type: clock</p>
                     </div>
                 </div>
 
@@ -91,12 +91,18 @@
 
             <!-- TABS -->
             <div class="tab-nav">
-                <button id="tab-config" class="tab-btn active">Config</button>
+                <button id="tab-simple" class="tab-btn active">Settings</button>
+                <button id="tab-json" class="tab-btn">JSON</button>
                 <button id="tab-style" class="tab-btn">Style (CSS)</button>
             </div>
 
+            <!-- FORM EDITOR -->
+            <div id="view-simple" class="waybar-form-container">
+                <!-- Generated inputs go here -->
+            </div>
+
             <!-- CONFIG EDITOR -->
-            <div id="view-config" class="waybar-input-group">
+            <div id="view-json" class="waybar-input-group hidden">
                 <label class="waybar-label">JSON Configuration</label>
                 <textarea id="module-config" class="waybar-textarea large" spellcheck="false"></textarea>
             </div>
