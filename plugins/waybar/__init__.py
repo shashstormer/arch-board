@@ -1,14 +1,12 @@
 """
 Waybar configuration router.
 """
-from fastapi import APIRouter, Body, HTTPException
+from fastapi import APIRouter, Body
 from fastapi.responses import HTMLResponse, JSONResponse
 from xtracto import Parser
 from utils.config import get_context
 from utils.plugins_frontend import register_navigation, NavItem, NavGroup, register_search, SearchItem
 import os
-import json
-import re
 from utils.jsonc_parser import parse, to_string, set_value, DictNode, ListNode, to_python
 from plugins.waybar.helpers.waybar_schema import get_schema_dict, get_module_schema
 
