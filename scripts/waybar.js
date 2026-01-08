@@ -1056,11 +1056,12 @@ let isPreviewActive = false;
 let livePreviewTimeout = null;
 
 function startLivePreview() {
-    if (isPreviewActive) return;
-    isPreviewActive = true;
-
-    // Initial loop start
-    loopLivePreview();
+    // DISABLED: Live preview disabled due to font rendering issues
+    // The simulator doesn't accurately replicate Waybar's actual font/icon rendering
+    // if (isPreviewActive) return;
+    // isPreviewActive = true;
+    // loopLivePreview();
+    console.log("Waybar: Live preview is disabled. Showing static placeholders.");
 }
 
 async function loopLivePreview() {

@@ -346,3 +346,59 @@ const ColorUtils = {
 
 // Expose globally
 window.ColorUtils = ColorUtils;
+
+// =============================================================================
+// FONT UTILITIES
+// =============================================================================
+
+const FontUtils = {
+    /**
+     * Parse a font string like "Caveat Bold" into family, weight, and style.
+     * Applies the parsed values to an element.
+     */
+    applyFontStyle(el, fontString) {
+        if (!fontString) {
+            el.style.fontFamily = 'Sans';
+            return;
+        }
+
+        let family = fontString;
+        let weight = 'normal';
+        let style = 'normal';
+
+        const lower = fontString.toLowerCase();
+
+        // Weights
+        if (lower.includes('thin')) weight = '100';
+        else if (lower.includes('extralight')) weight = '200';
+        else if (lower.includes('light')) weight = '300';
+        else if (lower.includes('medium')) weight = '500';
+        else if (lower.includes('semibold')) weight = '600';
+        else if (lower.includes('extrabold') || lower.includes('heavy')) weight = '800';
+        else if (lower.includes('black')) weight = '900';
+        else if (lower.includes('bold')) weight = '700';
+
+        // Styles
+        if (lower.includes('italic')) style = 'italic';
+        else if (lower.includes('oblique')) style = 'oblique';
+
+        // Strip keywords to get family name
+        const remove = [
+            'extralight', 'light', 'thin', 'medium', 'semibold', 'extrabold', 'heavy', 'black', 'bold',
+            'italic', 'oblique', 'regular'
+        ];
+
+        const regex = new RegExp(`\\b(${remove.join('|')})\\b`, 'gi');
+        family = fontString.replace(regex, '').replace(/\s+/g, ' ').trim();
+
+        if (!family) family = 'Sans';
+
+        el.style.fontFamily = `"${family}", Sans`;
+        el.style.fontWeight = weight;
+        el.style.fontStyle = style;
+    }
+};
+
+// Expose globally
+window.FontUtils = FontUtils;
+

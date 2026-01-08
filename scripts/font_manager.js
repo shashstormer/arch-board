@@ -5,6 +5,7 @@
 class FontManager {
     constructor() {
         this.pinnedFonts = new Set();
+        this.fonts = []; // All available font family names
         this.init();
     }
 
@@ -27,6 +28,13 @@ class FontManager {
                 return;
             }
             console.log(`FontManager: Found ${fonts.length} font files.`);
+
+            // Store unique font families for reuse
+            const families = new Set();
+            fonts.forEach(f => f.families.forEach(fam => families.add(fam)));
+            this.fonts = Array.from(families).sort();
+            console.log(`FontManager: ${this.fonts.length} unique font families available.`);
+
             this.injectFonts(fonts);
 
             // Force load pinned fonts after we know they are available (or at least registered)

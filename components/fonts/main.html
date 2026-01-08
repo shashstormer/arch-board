@@ -45,6 +45,9 @@
             this.fonts = [];
             this.activeTab = 'available'; // 'available' | 'pinned'
             this.lastQuery = '';
+            this.displayCount = 50;
+            this.batchSize = 50;
+            this.isLoading = false;
 
             this.grid = document.getElementById('font-grid');
             this.countEl = document.getElementById('font-count');
@@ -53,19 +56,15 @@
 
         async init() {
             try {
-                // Ensure pinned fonts are loaded first so we can filter correctly if starting on pinned tab
-                // (though default is available)
+                // Ensure pinned fonts are loaded first
                 if (window.fontManager && !window.fontManager.pinnedFonts.size) {
                     await window.fontManager.loadPinnedFonts();
                 }
 
-                // We can reuse the same endpoint the manager uses
                 const res = await fetch('/fonts/list');
                 const data = await res.json();
 
                 if (Array.isArray(data)) {
-                    // Flatten: we want to show each FAMILY, not each FILE necessarily.
-                    // Actually, showing each unique family is better.
                     const uniqueFamilies = new Set();
                     data.forEach(item => {
                         item.families.forEach(f => uniqueFamilies.add(f));
@@ -73,6 +72,9 @@
 
                     this.fonts = Array.from(uniqueFamilies).sort();
                     this.render();
+                    
+                    // Setup scroll listener
+                    this.grid.addEventListener('scroll', () => this.handleScroll());
                 }
             } catch (e) {
                 console.error("Failed to load font list for preview", e);
@@ -82,6 +84,7 @@
 
         switchTab(tab) {
             this.activeTab = tab;
+            this.displayCount = 50; // Reset on tab switch
 
             // Update Tab UI
             const btnAvailable = document.getElementById('tab-available');
@@ -95,15 +98,18 @@
                 btnPinned.className = "px-4 py-1.5 text-sm rounded-md transition-colors bg-zinc-700 text-white font-medium shadow-sm";
             }
 
+            this.grid.scrollTop = 0;
             this.render();
         }
 
         handleSearch(query) {
             this.lastQuery = query.toLowerCase();
+            this.displayCount = 50; // Reset on search
+            this.grid.scrollTop = 0;
             this.render();
         }
 
-        render() {
+        getFilteredList() {
             let list = this.fonts;
 
             // 1. Filter by Tab
@@ -117,6 +123,35 @@
                 list = list.filter(f => f.toLowerCase().includes(this.lastQuery));
             }
 
+            return list;
+        }
+
+        handleScroll() {
+            if (this.isLoading) return;
+            
+            const list = this.getFilteredList();
+            if (this.displayCount >= list.length) return; // All loaded
+            
+            // Check if near bottom (within 150px)
+            const scrollBottom = this.grid.scrollTop + this.grid.clientHeight;
+            const threshold = this.grid.scrollHeight - 150;
+            
+            if (scrollBottom >= threshold) {
+                this.loadMore();
+            }
+        }
+
+        loadMore() {
+            this.isLoading = true;
+            this.displayCount += this.batchSize;
+            this.render();
+            this.isLoading = false;
+        }
+
+        render() {
+            const list = this.getFilteredList();
+            const shownList = list.slice(0, this.displayCount);
+
             this.countEl.textContent = `${list.length} fonts`;
 
             if (list.length === 0) {
@@ -126,9 +161,6 @@
                 this.grid.innerHTML = `<div class="col-span-full text-zinc-500 text-center py-10">${msg}</div>`;
                 return;
             }
-
-            const CAP = 50;
-            const shownList = list.slice(0, CAP);
 
             // Access global font manager
             const isPinned = (family) => {
@@ -167,10 +199,11 @@
                 </div>
             `}).join('');
 
-            if (list.length > CAP) {
+            // Show loader if more available
+            if (shownList.length < list.length) {
                 html += `
-                    <div class="col-span-full flex justify-center py-4">
-                        <span class="text-zinc-500 text-sm">Showing top ${CAP} results. Refine search to see more.</span>
+                    <div id="font-loader" class="col-span-full flex justify-center py-4">
+                        <span class="text-zinc-500 text-sm">Scroll for more... (${shownList.length}/${list.length})</span>
                     </div>
                 `;
             }
@@ -181,18 +214,14 @@
         async copyFont(family) {
             try {
                 await navigator.clipboard.writeText(family);
-                showToast(`Copied "${family}" to clipboard`, 'bg-teal-500 text-white');
+                showToast(`Copied "${family}" to clipboard`, 'success');
             } catch (err) {
                 console.error('Failed to copy', err);
-                showToast('Failed to copy', 'bg-red-500 text-white');
+                showToast('Failed to copy', 'error');
             }
         }
 
         togglePin(family, btn) {
-            // event.stopPropagation() is implicit because button is above overlay, but pure onclick attribute call doesn't pass event easily unless we modify signature.
-            // But since the button is z-10 and overlay is z-0, clicking button won't trigger overlay if we stop propagation?
-            // Actually, overlay is inset-0, so button is inside it visually? No, standard stacking context.
-            // Let's ensure no bubble
             if (window.event) window.event.stopPropagation();
 
             if (window.fontManager) {
@@ -203,9 +232,6 @@
                     btn.classList.add('text-yellow-400', 'fill-yellow-400');
                     btn.classList.remove('text-zinc-600', 'hover:text-zinc-400');
                     if (svg) svg.classList.add('fill-current');
-                    // SVG "fill" attribute is "none", class handles color. 
-                    // To fill star completely we need fill="currentColor".
-                    // The class fill-yellow-400 sets fill color.
                 } else {
                     btn.classList.remove('text-yellow-400', 'fill-yellow-400');
                     btn.classList.add('text-zinc-600', 'hover:text-zinc-400');
