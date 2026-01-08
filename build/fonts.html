@@ -202,60 +202,228 @@
             </svg>
         </button>
     </div>
-</header><div class="flex-1 overflow-y-auto overflow-x-hidden p-6 w-full scrollbar-thin scrollbar-thumb-zinc-700 scrollbar-track-transparent"><!-- Hyprland Config Editor -->
-<div id="hyprland-editor" class="container mx-auto p-6 max-w-7xl">
-    <!-- Header with Save/Reload buttons -->
-    <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
-        <div class="flex items-center gap-3">
-            <svg class="w-8 h-8 text-teal-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-            </svg>
-            <h1 class="text-2xl font-bold text-zinc-100">Hyprland Configuration</h1>
+</header><div class="flex-1 overflow-y-auto overflow-x-hidden p-6 w-full scrollbar-thin scrollbar-thumb-zinc-700 scrollbar-track-transparent"><div class="w-full h-full flex flex-col relative">
+    <!-- Header -->
+    <div class="flex items-center justify-between mb-6 gap-4">
+        <h1 class="text-2xl font-bold text-zinc-100 whitespace-nowrap">Browser Fonts</h1>
+
+        <!-- Tabs -->
+        <div class="flex bg-zinc-800 rounded-lg p-1 gap-1">
+            <button id="tab-available" onclick="window._fontPreview.switchTab('available')"
+                class="px-4 py-1.5 text-sm rounded-md transition-colors bg-zinc-700 text-white font-medium shadow-sm">
+                Available
+            </button>
+            <button id="tab-pinned" onclick="window._fontPreview.switchTab('pinned')"
+                class="px-4 py-1.5 text-sm rounded-md transition-colors text-zinc-400 hover:text-zinc-200">
+                Pinned
+            </button>
         </div>
-        <div class="flex items-center gap-3">
-            <div id="preset-container" class="mr-2"></div>
-            <button id="btn-reload"
-                class="flex items-center gap-2 px-4 py-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 rounded-lg transition-colors"
-                onclick="reloadHyprland()">
-                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                </svg>
-                Reload
-            </button>
-            <button id="btn-save"
-                class="flex items-center gap-2 px-4 py-2 bg-teal-600 hover:bg-teal-500 text-white font-medium rounded-lg transition-colors shadow-lg shadow-teal-900/20"
-                onclick="saveConfig()">
-                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
-                </svg>
-                Save
-            </button>
+
+        <div class="relative w-64">
+            <input type="text" id="font-search" placeholder="Search fonts..."
+                class="w-full bg-zinc-800 text-zinc-200 text-sm rounded-md px-3 py-2 border border-zinc-700 focus:outline-none focus:border-teal-500 transition-colors"
+                oninput="window._fontPreview.handleSearch(this.value)">
+            <div class="absolute right-3 top-2.5 text-zinc-500 text-xs">
+                🔍
+            </div>
         </div>
     </div>
 
-    <!-- Tab Navigation -->
-    <div id="tab-nav"
-        class="flex flex-wrap gap-2 mb-6 bg-zinc-900/50 p-1.5 rounded-xl border border-zinc-800/50 backdrop-blur-sm sticky top-0 z-10">
-        <!-- Tabs rendered by JS -->
+    <!-- Font Grid -->
+    <div id="font-grid"
+        class="flex-1 bg-zinc-900 border border-zinc-800 rounded-xl overflow-y-auto p-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 content-start">
+        <!-- populated by js -->
+        <div class="col-span-full text-center text-zinc-500 py-10">Loading fonts...</div>
     </div>
 
-    <!-- Tab Content -->
-    <div id="tab-content"
-        class="bg-zinc-900/50 min-h-[500px] rounded-xl border border-zinc-800/50 backdrop-blur-sm relative">
-        <!-- Loading state -->
-        <div class="flex flex-col items-center justify-center h-96 gap-4 text-zinc-500">
-            <div class="w-10 h-10 border-4 border-zinc-800 border-t-teal-500 rounded-full animate-spin"></div>
-            <span>Loading configuration...</span>
-        </div>
+    <!-- Status Bar -->
+    <div class="mt-4 flex items-center justify-between text-xs text-zinc-500">
+        <span id="font-count">0 fonts</span>
+        <span>Preview text: "The quick brown fox..." (Default)</span>
     </div>
 </div>
 
-<script src="/scripts/hyprland.js?v={{ cache_key }}"></script></div><footer
+<script>
+    class FontPreview {
+        constructor() {
+            this.fonts = [];
+            this.activeTab = 'available'; // 'available' | 'pinned'
+            this.lastQuery = '';
+
+            this.grid = document.getElementById('font-grid');
+            this.countEl = document.getElementById('font-count');
+            this.init();
+        }
+
+        async init() {
+            try {
+                // Ensure pinned fonts are loaded first so we can filter correctly if starting on pinned tab
+                // (though default is available)
+                if (window.fontManager && !window.fontManager.pinnedFonts.size) {
+                    await window.fontManager.loadPinnedFonts();
+                }
+
+                // We can reuse the same endpoint the manager uses
+                const res = await fetch('/fonts/list');
+                const data = await res.json();
+
+                if (Array.isArray(data)) {
+                    // Flatten: we want to show each FAMILY, not each FILE necessarily.
+                    // Actually, showing each unique family is better.
+                    const uniqueFamilies = new Set();
+                    data.forEach(item => {
+                        item.families.forEach(f => uniqueFamilies.add(f));
+                    });
+
+                    this.fonts = Array.from(uniqueFamilies).sort();
+                    this.render();
+                }
+            } catch (e) {
+                console.error("Failed to load font list for preview", e);
+                this.grid.innerHTML = `<div class="col-span-full text-red-500 text-center">Failed to load fonts</div>`;
+            }
+        }
+
+        switchTab(tab) {
+            this.activeTab = tab;
+
+            // Update Tab UI
+            const btnAvailable = document.getElementById('tab-available');
+            const btnPinned = document.getElementById('tab-pinned');
+
+            if (tab === 'available') {
+                btnAvailable.className = "px-4 py-1.5 text-sm rounded-md transition-colors bg-zinc-700 text-white font-medium shadow-sm";
+                btnPinned.className = "px-4 py-1.5 text-sm rounded-md transition-colors text-zinc-400 hover:text-zinc-200";
+            } else {
+                btnAvailable.className = "px-4 py-1.5 text-sm rounded-md transition-colors text-zinc-400 hover:text-zinc-200";
+                btnPinned.className = "px-4 py-1.5 text-sm rounded-md transition-colors bg-zinc-700 text-white font-medium shadow-sm";
+            }
+
+            this.render();
+        }
+
+        handleSearch(query) {
+            this.lastQuery = query.toLowerCase();
+            this.render();
+        }
+
+        render() {
+            let list = this.fonts;
+
+            // 1. Filter by Tab
+            if (this.activeTab === 'pinned') {
+                const pinnedSet = window.fontManager ? window.fontManager.pinnedFonts : new Set();
+                list = list.filter(f => pinnedSet.has(f));
+            }
+
+            // 2. Filter by Search
+            if (this.lastQuery) {
+                list = list.filter(f => f.toLowerCase().includes(this.lastQuery));
+            }
+
+            this.countEl.textContent = `${list.length} fonts`;
+
+            if (list.length === 0) {
+                const msg = this.activeTab === 'pinned'
+                    ? "No pinned fonts yet. Star some fonts in the 'Available' tab!"
+                    : "No fonts found";
+                this.grid.innerHTML = `<div class="col-span-full text-zinc-500 text-center py-10">${msg}</div>`;
+                return;
+            }
+
+            const CAP = 50;
+            const shownList = list.slice(0, CAP);
+
+            // Access global font manager
+            const isPinned = (family) => {
+                return window.fontManager && window.fontManager.isPinned(family);
+            };
+
+            let html = shownList.map(family => {
+                const pinned = isPinned(family);
+                const starColor = pinned ? 'text-yellow-400 fill-yellow-400' : 'text-zinc-600 hover:text-zinc-400';
+
+                return `
+                <div class="bg-zinc-800/50 border border-zinc-700/50 rounded-lg p-4 hover:border-teal-500/50 hover:bg-zinc-800 transition-all flex flex-col gap-2 group relative">
+                    
+                    <!-- Copy Overlay -->
+                    <div class="absolute inset-0 z-0 cursor-pointer" onclick="window._fontPreview.copyFont('${family.replace(/'/g, "\\'")}')"></div>
+
+                    <!-- Pin Button (z-10 to stay above copy overlay) -->
+                    <button onclick="window._fontPreview.togglePin('${family.replace(/'/g, "\\'")}', this)" 
+                            class="absolute top-2 right-2 z-10 p-1.5 rounded-md transition-colors ${starColor}">
+                        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                        </svg>
+                    </button>
+                    
+                    <div class="absolute top-2 right-10 opacity-0 group-hover:opacity-100 transition-opacity text-xs bg-teal-500 text-black px-2 py-0.5 rounded font-medium pointer-events-none">
+                        Click card to copy
+                    </div>
+
+                    <div class="text-xs text-zinc-500 font-mono truncate group-hover:text-teal-400 transition-colors pointer-events-none" title="${family}">${family}</div>
+                    <div class="text-xl text-zinc-200 truncate pointer-events-none" style="font-family: '${family}', sans-serif;">
+                        The quick brown fox
+                    </div>
+                    <div class="text-lg text-zinc-400 truncate pointer-events-none" style="font-family: '${family}', sans-serif;">
+                        1234567890
+                    </div>
+                </div>
+            `}).join('');
+
+            if (list.length > CAP) {
+                html += `
+                    <div class="col-span-full flex justify-center py-4">
+                        <span class="text-zinc-500 text-sm">Showing top ${CAP} results. Refine search to see more.</span>
+                    </div>
+                `;
+            }
+
+            this.grid.innerHTML = html;
+        }
+
+        async copyFont(family) {
+            try {
+                await navigator.clipboard.writeText(family);
+                showToast(`Copied "${family}" to clipboard`, 'bg-teal-500 text-white');
+            } catch (err) {
+                console.error('Failed to copy', err);
+                showToast('Failed to copy', 'bg-red-500 text-white');
+            }
+        }
+
+        togglePin(family, btn) {
+            // event.stopPropagation() is implicit because button is above overlay, but pure onclick attribute call doesn't pass event easily unless we modify signature.
+            // But since the button is z-10 and overlay is z-0, clicking button won't trigger overlay if we stop propagation?
+            // Actually, overlay is inset-0, so button is inside it visually? No, standard stacking context.
+            // Let's ensure no bubble
+            if (window.event) window.event.stopPropagation();
+
+            if (window.fontManager) {
+                const isNowPinned = window.fontManager.togglePin(family);
+                const svg = btn.querySelector('svg');
+
+                if (isNowPinned) {
+                    btn.classList.add('text-yellow-400', 'fill-yellow-400');
+                    btn.classList.remove('text-zinc-600', 'hover:text-zinc-400');
+                    if (svg) svg.classList.add('fill-current');
+                    // SVG "fill" attribute is "none", class handles color. 
+                    // To fill star completely we need fill="currentColor".
+                    // The class fill-yellow-400 sets fill color.
+                } else {
+                    btn.classList.remove('text-yellow-400', 'fill-yellow-400');
+                    btn.classList.add('text-zinc-600', 'hover:text-zinc-400');
+                    if (svg) svg.classList.remove('fill-current');
+                }
+            }
+        }
+    }
+
+    // Defer slightly to ensure DOM is ready inside the component container
+    setTimeout(() => {
+        window._fontPreview = new FontPreview();
+    }, 100);
+</script></div><footer
     class="flex items-center justify-between px-6 py-3 bg-zinc-950/90 border-t border-zinc-800/50 text-xs text-zinc-500">
     <div class="flex items-center gap-4">
         <div class="flex items-center gap-2">

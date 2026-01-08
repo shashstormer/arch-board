@@ -18,7 +18,7 @@ def list_plugins() -> Dict[str, str]:
                 line = line.split("=", 1)
                 if len(line) != 2: continue
                 final_plugins["plugins."+line[0].strip()] = line[1].strip()  # plugin_name, router name
-    default_routers = ["dashboard", "hyprland", "waybar", "hyprlock", "hypridle", "wpaperd", "system", "presets", "static", "navigation", "images"]
+    default_routers = ["dashboard", "hyprland", "waybar", "hyprlock", "hypridle", "wpaperd", "system", "presets", "static", "navigation", "images", "fonts"]
     for router in default_routers:
         if "exclude:"+router in plugins:
             continue

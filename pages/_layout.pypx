@@ -29,6 +29,8 @@ html
         script
             ;;src="/scripts/preset_manager.js?k={{ cache_key }}";;
         script
+            ;;src="/scripts/font_manager.js?k={{ cache_key }}";;
+        script
             const prod = {{ production }};
             const plugin_enabled = {{ plugin_enabled }};
     body

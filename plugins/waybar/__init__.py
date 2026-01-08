@@ -9,6 +9,11 @@ from utils.plugins_frontend import register_navigation, NavItem, NavGroup, regis
 import os
 from utils.jsonc_parser import parse, to_string, set_value, DictNode, ListNode, to_python
 from plugins.waybar.helpers.waybar_schema import get_schema_dict, get_module_schema
+import subprocess
+import psutil
+import time
+from typing import Optional
+from pydantic import BaseModel
 
 # constants
 WAYBAR_CONFIG_DIR = os.path.expanduser("~/.config/waybar")
@@ -211,3 +216,268 @@ async def save_style(style: dict = Body(...)):
         return {"status": "success", "message": "Style saved"}
     except Exception as e:
         return JSONResponse({"error": str(e)}, status_code=500)
+
+
+# --- Script Management API ---
+
+SCRIPTS_DIR = os.path.join(WAYBAR_CONFIG_DIR, "scripts")
+if not os.path.exists(SCRIPTS_DIR):
+    os.makedirs(SCRIPTS_DIR, exist_ok=True)
+
+class ScriptFile(BaseModel):
+    name: str
+    content: str
+
+@waybar_router.get("/scripts")
+async def list_scripts():
+    """List all scripts in the waybar scripts directory."""
+    try:
+        if not os.path.exists(SCRIPTS_DIR):
+            return []
+        
+        scripts = []
+        for f in os.listdir(SCRIPTS_DIR):
+            if os.path.isfile(os.path.join(SCRIPTS_DIR, f)):
+                scripts.append(f)
+        return sorted(scripts)
+    except Exception as e:
+        return JSONResponse({"error": str(e)}, status_code=500)
+
+@waybar_router.get("/scripts/{name}")
+async def get_script(name: str):
+    """Read content of a script."""
+    try:
+        path = os.path.join(SCRIPTS_DIR, name)
+        # Security check: ensure path is within SCRIPTS_DIR
+        if not os.path.abspath(path).startswith(os.path.abspath(SCRIPTS_DIR)):
+             return JSONResponse({"error": "Invalid path"}, status_code=403)
+             
+        if not os.path.exists(path):
+            return JSONResponse({"error": "Script not found"}, status_code=404)
+            
+        with open(path, "r", encoding="utf-8") as f:
+            content = f.read()
+            
+        return {"name": name, "content": content}
+    except Exception as e:
+        return JSONResponse({"error": str(e)}, status_code=500)
+
+@waybar_router.post("/scripts")
+async def save_script(script: ScriptFile):
+    """Create or update a script."""
+    try:
+        path = os.path.join(SCRIPTS_DIR, script.name)
+        if not os.path.abspath(path).startswith(os.path.abspath(SCRIPTS_DIR)):
+             return JSONResponse({"error": "Invalid path"}, status_code=403)
+        
+        with open(path, "w", encoding="utf-8") as f:
+            f.write(script.content)
+            
+        # Make executable
+        os.chmod(path, 0o755)
+        
+        return {"status": "success", "message": f"Script {script.name} saved"}
+    except Exception as e:
+        return JSONResponse({"error": str(e)}, status_code=500)
+
+@waybar_router.delete("/scripts/{name}")
+async def delete_script(name: str):
+    """Delete a script."""
+    try:
+        path = os.path.join(SCRIPTS_DIR, name)
+        if not os.path.abspath(path).startswith(os.path.abspath(SCRIPTS_DIR)):
+             return JSONResponse({"error": "Invalid path"}, status_code=403)
+             
+        if os.path.exists(path):
+            os.remove(path)
+            
+        return {"status": "success", "message": f"Script {name} deleted"}
+    except Exception as e:
+        return JSONResponse({"error": str(e)}, status_code=500)
+
+
+# --- Execution Engine ---
+
+class ExecRequest(BaseModel):
+    command: str
+    timeout: Optional[int] = 2
+
+@waybar_router.post("/exec")
+async def execute_command(req: ExecRequest):
+    """Execute a shell command and return output."""
+    try:
+        # Security Note: This allows arbitrary command execution. 
+        # Since this is a local tool for power users, it is acceptable but should be used with caution.
+        
+        result = subprocess.run(
+            req.command, 
+            shell=True, 
+            text=True, 
+            capture_output=True, 
+            timeout=req.timeout,
+            cwd=WAYBAR_CONFIG_DIR
+        )
+        
+        return {
+            "stdout": result.stdout.strip(),
+            "stderr": result.stderr.strip(),
+            "returncode": result.returncode
+        }
+    except subprocess.TimeoutExpired:
+        return JSONResponse({"error": "Command timed out", "timeout": True}, status_code=408)
+    except Exception as e:
+        return JSONResponse({"error": str(e)}, status_code=500)
+
+
+# --- System Stats ---
+
+@waybar_router.get("/stats")
+async def get_system_stats():
+    """Get system stats for live preview."""
+    try:
+        cpu = psutil.cpu_percent(interval=None)
+        memory = psutil.virtual_memory().percent
+        
+        battery_info = {"percent": 100, "state": "Unknown"}
+        if hasattr(psutil, "sensors_battery"):
+            batt = psutil.sensors_battery()
+            if batt:
+                battery_info = {
+                    "percent": round(batt.percent),
+                    "state": "Charging" if batt.power_plugged else "Discharging",
+                    "time_left": batt.secsleft if batt.secsleft != psutil.POWER_TIME_UNLIMITED else "Full"
+                }
+
+        # Disk usage /
+        disk = psutil.disk_usage('/').percent
+        
+        return {
+            "cpu": cpu,
+            "memory": memory,
+            "battery": battery_info,
+            "disk": disk,
+            "time": time.strftime("%H:%M:%S"),
+            "audio": get_audio_info(),
+            "network": get_network_info(),
+            "backlight": get_backlight_info(),
+            "bluetooth": get_bluetooth_info()
+        }
+    except Exception as e:
+        return JSONResponse({"error": str(e)}, status_code=500)
+
+def get_audio_info():
+    """Get volume and mute status using best available tool (pamixer > pactl)."""
+    try:
+        # Try pamixer first
+        vol = subprocess.run("pamixer --get-volume", shell=True, capture_output=True, text=True)
+        mute = subprocess.run("pamixer --get-mute", shell=True, capture_output=True, text=True)
+        if vol.returncode == 0:
+            return {"volume": int(vol.stdout.strip() or 0), "muted": mute.stdout.strip() == "true"}
+        
+        # Fallback to pactl (more complex parsing, skipping for MVP stability, assume 0)
+        return {"volume": 0, "muted": False}
+    except:
+        return {"volume": 0, "muted": False}
+
+def get_network_info():
+    """Get network info (SSID, strength)."""
+    try:
+        # Simple check for active connection
+        # returning a mock for now or simple nmcli
+        res = subprocess.run("nmcli -t -f active,ssid,signal dev wifi", shell=True, capture_output=True, text=True)
+        if res.returncode == 0:
+            for line in res.stdout.splitlines():
+                if line.startswith("yes"):
+                    _, ssid, signal = line.split(":")
+                    return {"ssid": ssid, "signal": int(signal), "connected": True}
+        return {"ssid": "Disconnected", "signal": 0, "connected": False}
+    except:
+        return {"ssid": "Disconnected", "signal": 0, "connected": False}
+
+def get_backlight_info():
+    try:
+        res = subprocess.run("brightnessctl -m", shell=True, capture_output=True, text=True)
+        if res.returncode == 0:
+            # output format: name,backlight,current,max,percent%,...
+            parts = res.stdout.strip().split(',')
+            if len(parts) >= 4:
+                return {"percent": int(parts[3].replace('%', ''))}
+        return {"percent": 100}
+    except:
+        return {"percent": 100}
+
+def get_bluetooth_info():
+    try:
+        # Check if bluetooth is on
+        res = subprocess.run("bluetoothctl show", shell=True, capture_output=True, text=True)
+        powered = "Powered: yes" in res.stdout
+        connected = False # Harder to parse, assume false for now unless we scan devices
+        return {"on": powered, "connected": connected}
+    except:
+        return {"on": False, "connected": False}
+
+
+class BatchExecRequest(BaseModel):
+    commands: dict[str, str]  # module_name -> command
+    timeout: Optional[int] = 2
+
+@waybar_router.post("/exec_batch")
+async def execute_batch(req: BatchExecRequest):
+    """Execute multiple commands in parallel (up to a limit)."""
+    import asyncio
+    
+    async def run_one(name, cmd):
+        return name, await asyncio.create_subprocess_shell(
+            cmd,
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.PIPE,
+            cwd=WAYBAR_CONFIG_DIR
+        )
+
+    results = {}
+    
+    # Process tasks
+    tasks = []
+    for name, cmd in req.commands.items():
+        tasks.append(run_one(name, cmd))
+        
+    if not tasks:
+        return {}
+
+    # Gather processes
+    procs = await asyncio.gather(*tasks)
+    
+    # Gather outputs with timeout
+    async def wait_proc(name, proc):
+        try:
+            stdout, stderr = await asyncio.wait_for(proc.communicate(), timeout=req.timeout)
+            return name, {
+                "text": stdout.decode().strip(),
+                "alt": "", # Could try to parse JSON if line is JSON
+                "tooltip": "",
+                "class": "",
+                "returncode": proc.returncode
+            }
+        except asyncio.TimeoutError:
+            proc.kill()
+            return name, {"error": "Timeout"}
+
+    output_tasks = [wait_proc(name, proc) for name, proc in procs]
+    outputs = await asyncio.gather(*output_tasks)
+    
+    for name, out in outputs:
+        # Try JSON parsing if output looks like JSON (Waybar custom module protocol)
+        if "text" in out and out["text"].startswith("{") and out["text"].endswith("}"):
+            try:
+                import json
+                json_val = json.loads(out["text"])
+                results[name] = json_val
+            except:
+                results[name] = out
+        else:
+             results[name] = out
+
+    return results
+
+# --- Font Bridging (Deprecated) ---
+# Use plugins/fonts instead

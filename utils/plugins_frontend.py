@@ -81,8 +81,17 @@ class FrontendRegistry:
         # Note: Routers self-register their navigation items
     
     def register_nav_group(self, group: NavGroup):
-        """Register a navigation group (skips if already exists)."""
-        if group.id not in self._groups:
+        """Register a navigation group (updates if already exists)."""
+        if group.id in self._groups:
+            # If exists (e.g. auto-created by an item), update properties but keep items
+            existing = self._groups[group.id]
+            existing.title = group.title
+            existing.icon = group.icon
+            existing.icon_svg = group.icon_svg
+            existing.order = group.order
+            # Add any new items from the defining group (though usually empty)
+            existing.items.extend(group.items)
+        else:
             self._groups[group.id] = group
     
     def register_nav_item(self, item: NavItem):

@@ -299,6 +299,52 @@ class HyprlockEditor {
         return el;
     }
 
+    applyFontStyle(el, fontString) {
+        if (!fontString) {
+            el.style.fontFamily = 'Sans';
+            return;
+        }
+
+        let family = fontString;
+        let weight = 'normal';
+        let style = 'normal';
+
+        const lower = fontString.toLowerCase();
+
+        // Weights
+        if (lower.includes('thin')) weight = '100';
+        else if (lower.includes('extralight')) weight = '200';
+        else if (lower.includes('light')) weight = '300';
+        else if (lower.includes('medium')) weight = '500';
+        else if (lower.includes('semibold')) weight = '600';
+        else if (lower.includes('extrabold') || lower.includes('heavy')) weight = '800';
+        else if (lower.includes('black')) weight = '900';
+        else if (lower.includes('bold')) weight = '700';
+
+        // Styles
+        if (lower.includes('italic')) style = 'italic';
+        else if (lower.includes('oblique')) style = 'oblique';
+
+        // Strip keywords to get family name
+        // We handle separated words (e.g. "Bold") and maybe merged (e.g. "ExtraBold" if implicit?)
+        // Usually Hyprlock config uses space separated: "JetBrainsMono Nerd Font Mono ExtraBold"
+        const remove = [
+            'extralight', 'light', 'thin', 'medium', 'semibold', 'extrabold', 'heavy', 'black', 'bold',
+            'italic', 'oblique', 'regular'
+        ];
+
+        // Case insensitive replacement of whole words
+        const regex = new RegExp(`\\b(${remove.join('|')})\\b`, 'gi');
+        family = fontString.replace(regex, '').replace(/\s+/g, ' ').trim();
+
+        // Handle edge case where name might be just "Bold" (invalid) or empty
+        if (!family) family = 'Sans';
+
+        el.style.fontFamily = `"${family}", Sans`;
+        el.style.fontWeight = weight;
+        el.style.fontStyle = style;
+    }
+
     renderWidgetContent(el, widget) {
         const d = widget.data;
 
@@ -355,7 +401,8 @@ class HyprlockEditor {
             // Color
             el.style.color = this.parseColor(d.color);
             el.style.fontSize = `${d.font_size || 16}pt`;
-            el.style.fontFamily = d.font_family || 'Sans';
+            // Font Style Parsing (handles "Caveat Bold" -> family="Caveat", weight="bold")
+            this.applyFontStyle(el, d.font_family);
             // Rotation - need to preserve existing transform
             const existingTransform = el.style.transform || '';
             if (d.rotate) el.style.transform = existingTransform + ` rotate(${-d.rotate}deg)`;
@@ -382,6 +429,7 @@ class HyprlockEditor {
                 el.innerText = 'Input Password...';
             }
             el.style.color = this.parseColor(d.font_color);
+            this.applyFontStyle(el, d.font_family);
 
         } else if (widget.type === 'shape') {
             const [w, h] = this.parseVec2(d.size || "100, 100");
