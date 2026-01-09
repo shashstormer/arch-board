@@ -1970,6 +1970,14 @@
 
                     <div class="h-6 w-px bg-zinc-800 mx-1"></div>
 
+                    <button id="reload-btn" onclick="restartWaybar()"
+                        class="flex items-center gap-2 px-4 py-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-xs font-bold uppercase tracking-wide rounded-lg transition-all border border-zinc-700 active:scale-95">
+                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                        </svg>
+                        Reload
+                    </button>
                     <button id="save-btn"
                         class="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-teal-600 to-teal-500 hover:from-teal-500 hover:to-teal-400 text-white text-xs font-bold uppercase tracking-wide rounded-lg transition-all shadow-lg shadow-teal-900/20 active:scale-95 group">
                         <svg class="w-3.5 h-3.5 group-hover:animate-pulse" fill="none" viewBox="0 0 24 24"
@@ -3437,6 +3445,13 @@
             <p class="text-sm text-zinc-500">Configure Hyprland's idle management daemon</p>
         </div>
         <div class="flex items-center gap-3">
+            <!-- Preset Manager Container -->
+            <div id="preset-container"></div>
+
+            <button onclick="hypridleEditor.reload()"
+                class="px-4 py-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 rounded-lg font-medium flex items-center gap-2 border border-zinc-700">
+                <span>🔄</span> Reload
+            </button>
             <button onclick="hypridleEditor.save()"
                 class="px-4 py-2 bg-teal-600 hover:bg-teal-500 text-white rounded-lg font-medium flex items-center gap-2">
                 <span>💾</span> Save
@@ -3520,9 +3535,13 @@
     </div>
 </div>
 
-<script src="/scripts/hypridle.js"></script>
+<script src="/scripts/hypridle.js?k= "></script>
 <script>
-    window.hypridleEditor = new HypridleEditor();
+    window.addEventListener('DOMContentLoaded', () => {
+        if (!window.hypridleEditor) {
+            window.hypridleEditor = new HypridleEditor();
+        }
+    });
 </script></main></div><footer
     class="flex items-center justify-between px-6 py-3 bg-zinc-950/90 border-t border-zinc-800/50 text-xs text-zinc-500">
     <div class="flex items-center gap-4">
@@ -8883,6 +8902,20 @@ if (document.readyState === 'loading') {
     init();
 }
 
+async function restartWaybar() {
+    try {
+        const res = await fetch('/waybar/restart', { method: 'POST' });
+        if (res.ok) {
+            showStatus('Waybar restarted', 'bg-teal-500/20 text-teal-400 border-teal-500/50');
+        } else {
+            showStatus('Failed to restart Waybar', 'bg-red-500/20 text-red-400 border-red-500/50');
+        }
+    } catch (e) {
+        console.error("Restart failed", e);
+        showStatus('Failed to restart Waybar', 'bg-red-500/20 text-red-400 border-red-500/50');
+    }
+}
+
 // Fetchers
 async function fetchConfig() {
     try {
@@ -12662,6 +12695,7 @@ class HypridleEditor {
             },
             listeners: []
         };
+        this.saveTimeout = null;
         this.init();
     }
 
@@ -12675,6 +12709,47 @@ class HypridleEditor {
             console.error("Failed to load hypridle config", e);
         }
         this.render();
+
+        setTimeout(() => {
+            if (window.PresetManagerUI) {
+                window._presetManagers = window._presetManagers || {};
+                window._presetManagers['hypridle'] = new PresetManagerUI('hypridle', {
+                    containerId: 'preset-container',
+                    onActivate: async () => {
+                        await this.loadConfig();
+                        this.render();
+                    },
+                    onSave: async () => await this.save()
+                });
+            } else {
+                console.warn("HypridleEditor: PresetManagerUI not available");
+            }
+        }, 50);
+    }
+
+    async loadConfig() {
+        try {
+            const res = await fetch('/hypridle/config');
+            if (res.ok) {
+                this.config = await res.json();
+            }
+        } catch (e) {
+            console.error("Failed to load hypridle config", e);
+        }
+    }
+
+    async reload() {
+        try {
+            const res = await fetch('/hypridle/restart', { method: 'POST' });
+            if (res.ok) {
+                showToast('Hypridle restarted', 'success');
+            } else {
+                showToast('Failed to restart hypridle', 'error');
+            }
+        } catch (e) {
+            console.error("Restart failed", e);
+            showToast('Failed to restart hypridle', 'error');
+        }
     }
 
     render() {
@@ -12776,6 +12851,7 @@ class HypridleEditor {
 
     updateGeneral(key, value) {
         this.config.general[key] = value;
+        this.triggerAutosave();
     }
 
     updateListener(idx, key, value) {
@@ -12785,6 +12861,7 @@ class HypridleEditor {
             if (key === 'timeout') {
                 this.renderListeners();
             }
+            this.triggerAutosave();
         }
     }
 
@@ -12798,15 +12875,35 @@ class HypridleEditor {
         this.config.listeners.push(newListener);
         this.renderListeners();
         showToast('Listener added');
+        this.triggerAutosave();
     }
 
     deleteListener(idx) {
         this.config.listeners.splice(idx, 1);
         this.renderListeners();
         showToast('Listener removed');
+        this.triggerAutosave();
     }
 
-    async save() {
+    // Debounced autosave (500ms delay)
+    triggerAutosave() {
+        if (this.isAutosaveEnabled()) {
+            if (this.saveTimeout) clearTimeout(this.saveTimeout);
+            this.saveTimeout = setTimeout(async () => {
+                await this.save(true); // Silent save
+                // Update preset manager
+                if (window._presetManagers && window._presetManagers['hypridle']) {
+                    window._presetManagers['hypridle'].updateActivePreset(true);
+                }
+            }, 500);
+        }
+    }
+
+    isAutosaveEnabled() {
+        return typeof ArchBoard !== 'undefined' ? ArchBoard.settings.autosaveEnabled : false;
+    }
+
+    async save(silent = false) {
         try {
             const res = await fetch('/hypridle/config', {
                 method: 'POST',
@@ -12815,7 +12912,7 @@ class HypridleEditor {
             });
 
             if (res.ok) {
-                showToast('Hypridle config saved!', 'success');
+                if (!silent) showToast('Hypridle config saved!', 'success');
             } else {
                 const data = await res.json();
                 showToast(`Save failed: ${data.detail || 'Unknown error'}`, 'error');
@@ -12826,4 +12923,5 @@ class HypridleEditor {
         }
     }
 }
+
 

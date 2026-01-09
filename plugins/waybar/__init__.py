@@ -479,5 +479,21 @@ async def execute_batch(req: BatchExecRequest):
 
     return results
 
-# --- Font Bridging (Deprecated) ---
-# Use plugins/fonts instead
+
+@waybar_router.post("/restart")
+def restart_waybar():
+    """Restart Waybar to apply config changes."""
+    import subprocess
+    import time
+    try:
+        subprocess.run(["pkill", "-x", "waybar"], capture_output=True)
+        time.sleep(0.3)
+        subprocess.Popen(
+            "nohup waybar > /dev/null 2>&1 &",
+            shell=True,
+            start_new_session=True
+        )
+        return {"status": "success", "message": "Waybar restarted"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+

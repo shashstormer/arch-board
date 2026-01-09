@@ -125,6 +125,20 @@ if (document.readyState === 'loading') {
     init();
 }
 
+async function restartWaybar() {
+    try {
+        const res = await fetch('/waybar/restart', { method: 'POST' });
+        if (res.ok) {
+            showStatus('Waybar restarted', 'bg-teal-500/20 text-teal-400 border-teal-500/50');
+        } else {
+            showStatus('Failed to restart Waybar', 'bg-red-500/20 text-red-400 border-red-500/50');
+        }
+    } catch (e) {
+        console.error("Restart failed", e);
+        showStatus('Failed to restart Waybar', 'bg-red-500/20 text-red-400 border-red-500/50');
+    }
+}
+
 // Fetchers
 async function fetchConfig() {
     try {

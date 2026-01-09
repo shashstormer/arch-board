@@ -138,3 +138,22 @@ def save_config(config: HypridleConfig):
         return {"status": "success"}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+
+@hypridle_router.post("/restart")
+def restart_hypridle():
+    """Restart the hypridle daemon to apply config changes."""
+    import subprocess
+    import time
+    try:
+        subprocess.run(["pkill", "-x", "hypridle"], capture_output=True)
+        time.sleep(0.3)
+        subprocess.Popen(
+            "nohup hypridle > /dev/null 2>&1 &",
+            shell=True,
+            start_new_session=True
+        )
+        return {"status": "success", "message": "Hypridle restarted"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+

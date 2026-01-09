@@ -6,6 +6,13 @@
             <p class="text-sm text-zinc-500">Configure Hyprland's idle management daemon</p>
         </div>
         <div class="flex items-center gap-3">
+            <!-- Preset Manager Container -->
+            <div id="preset-container"></div>
+
+            <button onclick="hypridleEditor.reload()"
+                class="px-4 py-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 rounded-lg font-medium flex items-center gap-2 border border-zinc-700">
+                <span>🔄</span> Reload
+            </button>
             <button onclick="hypridleEditor.save()"
                 class="px-4 py-2 bg-teal-600 hover:bg-teal-500 text-white rounded-lg font-medium flex items-center gap-2">
                 <span>💾</span> Save
@@ -89,7 +96,11 @@
     </div>
 </div>
 
-<script src="/scripts/hypridle.js"></script>
+<script src="/scripts/hypridle.js?k={{ cache_key }}"></script>
 <script>
-    window.hypridleEditor = new HypridleEditor();
+    window.addEventListener('DOMContentLoaded', () => {
+        if (!window.hypridleEditor) {
+            window.hypridleEditor = new HypridleEditor();
+        }
+    });
 </script>

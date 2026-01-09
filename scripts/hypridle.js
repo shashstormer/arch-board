@@ -13,6 +13,7 @@ class HypridleEditor {
             },
             listeners: []
         };
+        this.saveTimeout = null;
         this.init();
     }
 
@@ -26,6 +27,47 @@ class HypridleEditor {
             console.error("Failed to load hypridle config", e);
         }
         this.render();
+
+        setTimeout(() => {
+            if (window.PresetManagerUI) {
+                window._presetManagers = window._presetManagers || {};
+                window._presetManagers['hypridle'] = new PresetManagerUI('hypridle', {
+                    containerId: 'preset-container',
+                    onActivate: async () => {
+                        await this.loadConfig();
+                        this.render();
+                    },
+                    onSave: async () => await this.save()
+                });
+            } else {
+                console.warn("HypridleEditor: PresetManagerUI not available");
+            }
+        }, 50);
+    }
+
+    async loadConfig() {
+        try {
+            const res = await fetch('/hypridle/config');
+            if (res.ok) {
+                this.config = await res.json();
+            }
+        } catch (e) {
+            console.error("Failed to load hypridle config", e);
+        }
+    }
+
+    async reload() {
+        try {
+            const res = await fetch('/hypridle/restart', { method: 'POST' });
+            if (res.ok) {
+                showToast('Hypridle restarted', 'success');
+            } else {
+                showToast('Failed to restart hypridle', 'error');
+            }
+        } catch (e) {
+            console.error("Restart failed", e);
+            showToast('Failed to restart hypridle', 'error');
+        }
     }
 
     render() {
@@ -127,6 +169,7 @@ class HypridleEditor {
 
     updateGeneral(key, value) {
         this.config.general[key] = value;
+        this.triggerAutosave();
     }
 
     updateListener(idx, key, value) {
@@ -136,6 +179,7 @@ class HypridleEditor {
             if (key === 'timeout') {
                 this.renderListeners();
             }
+            this.triggerAutosave();
         }
     }
 
@@ -149,15 +193,35 @@ class HypridleEditor {
         this.config.listeners.push(newListener);
         this.renderListeners();
         showToast('Listener added');
+        this.triggerAutosave();
     }
 
     deleteListener(idx) {
         this.config.listeners.splice(idx, 1);
         this.renderListeners();
         showToast('Listener removed');
+        this.triggerAutosave();
     }
 
-    async save() {
+    // Debounced autosave (500ms delay)
+    triggerAutosave() {
+        if (this.isAutosaveEnabled()) {
+            if (this.saveTimeout) clearTimeout(this.saveTimeout);
+            this.saveTimeout = setTimeout(async () => {
+                await this.save(true); // Silent save
+                // Update preset manager
+                if (window._presetManagers && window._presetManagers['hypridle']) {
+                    window._presetManagers['hypridle'].updateActivePreset(true);
+                }
+            }, 500);
+        }
+    }
+
+    isAutosaveEnabled() {
+        return typeof ArchBoard !== 'undefined' ? ArchBoard.settings.autosaveEnabled : false;
+    }
+
+    async save(silent = false) {
         try {
             const res = await fetch('/hypridle/config', {
                 method: 'POST',
@@ -166,7 +230,7 @@ class HypridleEditor {
             });
 
             if (res.ok) {
-                showToast('Hypridle config saved!', 'success');
+                if (!silent) showToast('Hypridle config saved!', 'success');
             } else {
                 const data = await res.json();
                 showToast(`Save failed: ${data.detail || 'Unknown error'}`, 'error');
@@ -177,3 +241,4 @@ class HypridleEditor {
         }
     }
 }
+
