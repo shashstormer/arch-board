@@ -13027,6 +13027,13 @@ class WpaperdEditor {
                 });
             }
         }, 50);
+        const reload = async () => {
+            await this.loadCurrent();
+            await this.loadStatus();
+            this.renderCurrentPreview();
+            setTimeout(reload, 1000)
+        }
+        setTimeout(reload, 1000);
     }
 
     async loadConfig() {
@@ -13166,10 +13173,10 @@ class WpaperdEditor {
         for (const [display, path] of Object.entries(this.current)) {
             const filename = path.split('/').pop();
             const displayStatus = this.status[display] || 'unknown';
-            const statusColor = displayStatus === 'running' ? 'bg-green-500' :
-                displayStatus === 'paused' ? 'bg-yellow-500' : 'bg-zinc-500';
-            const statusText = displayStatus === 'running' ? '▶' :
-                displayStatus === 'paused' ? '⏸' : '?';
+            const statusColor = displayStatus.includes('running') ? 'bg-green-500' :
+                displayStatus.includes('paused') ? 'bg-yellow-500' : 'bg-zinc-500';
+            const statusText = displayStatus.includes('running') ? '▶' :
+                displayStatus.includes('paused') ? '⏸' : '?';
 
             html += `
                 <div class="bg-zinc-800/50 rounded-lg overflow-hidden">
@@ -13236,7 +13243,7 @@ class WpaperdEditor {
             <div class="space-y-4">
                 <!-- Path -->
                 <div class="space-y-2">
-                    <label class="text-sm text-zinc-400">Wallpaper Path</label>
+                    <label for="setting-path" class="text-sm text-zinc-400">Wallpaper Path</label>
                     <div class="flex gap-2">
                         <input type="text" id="setting-path" value="${settings.path || ''}" 
                             placeholder="/path/to/wallpaper.jpg or /path/to/folder"
@@ -13252,7 +13259,7 @@ class WpaperdEditor {
 
                 <!-- Duration (folder only) -->
                 <div class="space-y-2 ${!isFolder ? disabledClass : ''}">
-                    <label class="text-sm text-zinc-400">Duration ${!isFolder ? '<span class="text-xs">(folders only)</span>' : ''}</label>
+                    <label for="setting-duration" class="text-sm text-zinc-400">Duration ${!isFolder ? '<span class="text-xs">(folders only)</span>' : ''}</label>
                     <input type="text" id="setting-duration" value="${settings.duration || ''}" 
                         placeholder="30m, 1h, 10s"
                         ${!isFolder ? 'disabled' : ''}
@@ -13263,7 +13270,7 @@ class WpaperdEditor {
 
                 <!-- Sorting (folder only) -->
                 <div class="space-y-2 ${!isFolder ? disabledClass : ''}">
-                    <label class="text-sm text-zinc-400">Sorting ${!isFolder ? '<span class="text-xs">(folders only)</span>' : ''}</label>
+                    <label for="setting-sorting" class="text-sm text-zinc-400">Sorting ${!isFolder ? '<span class="text-xs">(folders only)</span>' : ''}</label>
                     <select id="setting-sorting"
                         ${!isFolder ? 'disabled' : ''}
                         class="w-full bg-zinc-950 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-white focus:border-teal-500 outline-none ${!isFolder ? 'text-zinc-600' : ''}"
@@ -13277,7 +13284,7 @@ class WpaperdEditor {
 
                 <!-- Mode -->
                 <div class="space-y-2">
-                    <label class="text-sm text-zinc-400">Display Mode</label>
+                    <label for="setting-mode" class="text-sm text-zinc-400">Display Mode</label>
                     <select id="setting-mode"
                         class="w-full bg-zinc-950 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-white focus:border-teal-500 outline-none"
                         onchange="wpaperdEditor.updateSetting('${name}', 'mode', this.value || null)">
@@ -13292,7 +13299,7 @@ class WpaperdEditor {
 
                 <!-- Transition Time -->
                 <div class="space-y-2">
-                    <label class="text-sm text-zinc-400">Transition Time (ms)</label>
+                    <label for="setting-transition_time" class="text-sm text-zinc-400">Transition Time (ms)</label>
                     <input type="number" id="setting-transition_time" value="${settings.transition_time || ''}" 
                         placeholder="300"
                         class="w-full bg-zinc-950 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-white focus:border-teal-500 outline-none"
@@ -13301,7 +13308,7 @@ class WpaperdEditor {
 
                 <!-- Offset -->
                 <div class="space-y-2">
-                    <label class="text-sm text-zinc-400">Offset</label>
+                    <label for="setting-offset" class="text-sm text-zinc-400">Offset</label>
                     <input type="number" id="setting-offset" value="${settings.offset ?? ''}" 
                         placeholder="0.5" step="0.1" min="0" max="1"
                         class="w-full bg-zinc-950 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-white focus:border-teal-500 outline-none"
@@ -13311,7 +13318,7 @@ class WpaperdEditor {
 
                 <!-- Group (for random sorting) -->
                 <div class="space-y-2 ${!isFolder ? disabledClass : ''}">
-                    <label class="text-sm text-zinc-400">Group ${!isFolder ? '<span class="text-xs">(folders only)</span>' : ''}</label>
+                    <label for="setting-group" class="text-sm text-zinc-400">Group ${!isFolder ? '<span class="text-xs">(folders only)</span>' : ''}</label>
                     <input type="number" id="setting-group" value="${settings.group ?? ''}" 
                         placeholder="1"
                         ${!isFolder ? 'disabled' : ''}
@@ -13322,7 +13329,7 @@ class WpaperdEditor {
 
                 <!-- Queue Size (for random sorting) -->
                 <div class="space-y-2 ${!isFolder ? disabledClass : ''}">
-                    <label class="text-sm text-zinc-400">Queue Size ${!isFolder ? '<span class="text-xs">(folders only)</span>' : ''}</label>
+                    <label for="setting-queue_size" class="text-sm text-zinc-400">Queue Size ${!isFolder ? '<span class="text-xs">(folders only)</span>' : ''}</label>
                     <input type="number" id="setting-queue_size" value="${settings.queue_size ?? ''}" 
                         placeholder="10"
                         ${!isFolder ? 'disabled' : ''}
@@ -13333,7 +13340,7 @@ class WpaperdEditor {
 
                 <!-- Exec Script -->
                 <div class="space-y-2">
-                    <label class="text-sm text-zinc-400">Exec Script</label>
+                    <label for="setting-exec" class="text-sm text-zinc-400">Exec Script</label>
                     <input type="text" id="setting-exec" value="${settings.exec || ''}" 
                         placeholder="/path/to/script.sh"
                         class="w-full bg-zinc-950 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-white focus:border-teal-500 outline-none font-mono"
@@ -13344,30 +13351,30 @@ class WpaperdEditor {
                 <!-- Toggles -->
                 <div class="space-y-3 pt-2">
                     <div class="flex items-center justify-between p-3 bg-zinc-800/50 rounded-lg ${!isFolder ? disabledClass : ''}">
-                        <div>
+                        <label for="setting-recursive" class="flex-1">
                             <div class="text-sm text-zinc-300">Recursive ${!isFolder ? '<span class="text-xs text-zinc-500">(folders only)</span>' : ''}</div>
                             <div class="text-xs text-zinc-600">Scan subdirectories</div>
-                        </div>
-                        <label class="relative inline-flex items-center ${!isFolder ? 'pointer-events-none' : 'cursor-pointer'}">
+                        </label>
+                        <div class="relative inline-flex items-center ${!isFolder ? 'pointer-events-none' : 'cursor-pointer'}">
                             <input type="checkbox" id="setting-recursive" class="sr-only peer" 
                                 ${settings.recursive !== false ? 'checked' : ''}
                                 ${!isFolder ? 'disabled' : ''}
                                 onchange="wpaperdEditor.updateSetting('${name}', 'recursive', this.checked)">
                             <div class="w-11 h-6 bg-zinc-700 peer-focus:ring-2 peer-focus:ring-teal-500/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-teal-500"></div>
-                        </label>
+                        </div>
                     </div>
 
                     <div class="flex items-center justify-between p-3 bg-zinc-800/50 rounded-lg">
-                        <div>
+                        <label for="setting-initial_transition" class="flex-1">
                             <div class="text-sm text-zinc-300">Initial Transition</div>
                             <div class="text-xs text-zinc-600">Animate on startup</div>
-                        </div>
-                        <label class="relative inline-flex items-center cursor-pointer">
+                        </label>
+                        <div class="relative inline-flex items-center cursor-pointer">
                             <input type="checkbox" id="setting-initial_transition" class="sr-only peer"
                                 ${settings.initial_transition !== false ? 'checked' : ''}
                                 onchange="wpaperdEditor.updateSetting('${name}', 'initial_transition', this.checked)">
                             <div class="w-11 h-6 bg-zinc-700 peer-focus:ring-2 peer-focus:ring-teal-500/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-teal-500"></div>
-                        </label>
+                        </div>
                     </div>
                 </div>
 
@@ -13472,7 +13479,7 @@ class WpaperdEditor {
                 showToast(`Wallpaper: ${action}`, 'success');
                 setTimeout(async () => {
                     await Promise.all([this.loadCurrent(), this.loadStatus()]);
-                    this.renderCurrentPreview();
+                    // this.renderCurrentPreview();
                 }, 500);
             } else {
                 showToast(`Control failed`, 'error');
