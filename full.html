@@ -3429,7 +3429,101 @@
             </svg>
         </button>
     </div>
-</header><div class="flex-1 overflow-y-auto overflow-x-hidden p-6 w-full scrollbar-thin scrollbar-thumb-zinc-700 scrollbar-track-transparent"><div class="flex flex-col items-center justify-center p-12 text-zinc-500"><svg class="w-16 h-16 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z">path</svg><h2 class="text-xl font-medium text-zinc-300">Hypridle Settings</h2><p class="mt-2 text-sm">This module is under construction.</p></div></div><footer
+</header><div class="flex-1 overflow-y-auto overflow-x-hidden p-6 w-full scrollbar-thin scrollbar-thumb-zinc-700 scrollbar-track-transparent">_layout<main class="h-full"><div class="w-full h-full flex flex-col">
+    <!-- Header -->
+    <div class="flex items-center justify-between mb-6">
+        <div>
+            <h1 class="text-2xl font-bold text-zinc-100">Hypridle</h1>
+            <p class="text-sm text-zinc-500">Configure Hyprland's idle management daemon</p>
+        </div>
+        <div class="flex items-center gap-3">
+            <button onclick="hypridleEditor.save()"
+                class="px-4 py-2 bg-teal-600 hover:bg-teal-500 text-white rounded-lg font-medium flex items-center gap-2">
+                <span>💾</span> Save
+            </button>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="flex-1 flex gap-6 overflow-hidden">
+        <!-- General Settings -->
+        <div class="w-1/2 flex flex-col bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden">
+            <div class="px-4 py-3 border-b border-zinc-800 bg-zinc-900/80">
+                <h2 class="text-lg font-semibold text-white">General Settings</h2>
+            </div>
+            <div class="flex-1 overflow-y-auto p-4">
+                <div class="space-y-4">
+                    <div class="space-y-2">
+                        <label class="text-sm text-zinc-400">Lock Command</label>
+                        <input type="text" id="gen-lock_cmd" placeholder="pidof hyprlock || hyprlock"
+                            class="w-full bg-zinc-950 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-white focus:border-teal-500 outline-none"
+                            onchange="hypridleEditor.updateGeneral('lock_cmd', this.value)">
+                        <p class="text-xs text-zinc-600">Command to run when receiving a dbus lock event</p>
+                    </div>
+
+                    <div class="space-y-2">
+                        <label class="text-sm text-zinc-400">Unlock Command</label>
+                        <input type="text" id="gen-unlock_cmd" placeholder=""
+                            class="w-full bg-zinc-950 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-white focus:border-teal-500 outline-none"
+                            onchange="hypridleEditor.updateGeneral('unlock_cmd', this.value)">
+                        <p class="text-xs text-zinc-600">Command to run when receiving a dbus unlock event</p>
+                    </div>
+
+                    <div class="space-y-2">
+                        <label class="text-sm text-zinc-400">Before Sleep Command</label>
+                        <input type="text" id="gen-before_sleep_cmd" placeholder="loginctl lock-session"
+                            class="w-full bg-zinc-950 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-white focus:border-teal-500 outline-none"
+                            onchange="hypridleEditor.updateGeneral('before_sleep_cmd', this.value)">
+                        <p class="text-xs text-zinc-600">Command to run before system sleeps</p>
+                    </div>
+
+                    <div class="space-y-2">
+                        <label class="text-sm text-zinc-400">After Sleep Command</label>
+                        <input type="text" id="gen-after_sleep_cmd" placeholder="hyprctl dispatch dpms on"
+                            class="w-full bg-zinc-950 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-white focus:border-teal-500 outline-none"
+                            onchange="hypridleEditor.updateGeneral('after_sleep_cmd', this.value)">
+                        <p class="text-xs text-zinc-600">Command to run after system wakes</p>
+                    </div>
+
+                    <div class="flex items-center justify-between p-3 bg-zinc-800/50 rounded-lg">
+                        <div>
+                            <div class="text-sm text-zinc-300">Ignore DBus Inhibit</div>
+                            <div class="text-xs text-zinc-600">Ignore idle inhibit events from apps (e.g. video players)
+                            </div>
+                        </div>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" id="gen-ignore_dbus_inhibit" class="sr-only peer"
+                                onchange="hypridleEditor.updateGeneral('ignore_dbus_inhibit', this.checked)">
+                            <div
+                                class="w-11 h-6 bg-zinc-700 peer-focus:ring-2 peer-focus:ring-teal-500/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-teal-500">
+                            </div>
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Listeners -->
+        <div class="w-1/2 flex flex-col bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden">
+            <div class="px-4 py-3 border-b border-zinc-800 bg-zinc-900/80 flex items-center justify-between">
+                <h2 class="text-lg font-semibold text-white">Listeners</h2>
+                <button onclick="hypridleEditor.addListener()"
+                    class="px-3 py-1.5 bg-teal-600 hover:bg-teal-500 text-white text-sm rounded-lg">
+                    + Add Listener
+                </button>
+            </div>
+            <div id="listeners-list" class="flex-1 overflow-y-auto p-4 space-y-3">
+                <!-- Populated by JS -->
+                <div class="text-zinc-500 text-center py-10">Loading...</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="/scripts/hypridle.js"></script>
+<script>
+    window.hypridleEditor = new HypridleEditor();
+</script></main></div><footer
     class="flex items-center justify-between px-6 py-3 bg-zinc-950/90 border-t border-zinc-800/50 text-xs text-zinc-500">
     <div class="flex items-center gap-4">
         <div class="flex items-center gap-2">
@@ -12552,4 +12646,184 @@ class FontPicker {
 // Expose globally
 window.FontPicker = FontPicker;
 
+
+/**
+ * HypridleEditor: Editor for Hypridle idle management configuration.
+ */
+class HypridleEditor {
+    constructor() {
+        this.config = {
+            general: {
+                lock_cmd: '',
+                unlock_cmd: '',
+                before_sleep_cmd: '',
+                after_sleep_cmd: '',
+                ignore_dbus_inhibit: false
+            },
+            listeners: []
+        };
+        this.init();
+    }
+
+    async init() {
+        try {
+            const res = await fetch('/hypridle/config');
+            if (res.ok) {
+                this.config = await res.json();
+            }
+        } catch (e) {
+            console.error("Failed to load hypridle config", e);
+        }
+        this.render();
+    }
+
+    render() {
+        this.renderGeneral();
+        this.renderListeners();
+    }
+
+    renderGeneral() {
+        const fields = ['lock_cmd', 'unlock_cmd', 'before_sleep_cmd', 'after_sleep_cmd'];
+        fields.forEach(field => {
+            const input = document.getElementById(`gen-${field}`);
+            if (input) {
+                input.value = this.config.general[field] || '';
+            }
+        });
+
+        const inhibitCheckbox = document.getElementById('gen-ignore_dbus_inhibit');
+        if (inhibitCheckbox) {
+            inhibitCheckbox.checked = this.config.general.ignore_dbus_inhibit || false;
+        }
+    }
+
+    renderListeners() {
+        const container = document.getElementById('listeners-list');
+        if (!container) return;
+
+        if (!this.config.listeners || this.config.listeners.length === 0) {
+            container.innerHTML = `
+                <div class="text-zinc-500 text-center py-10">
+                    <div class="text-4xl mb-2">⏰</div>
+                    <p>No listeners configured.</p>
+                    <p class="text-xs mt-1">Click "Add Listener" to create one.</p>
+                </div>
+            `;
+            return;
+        }
+
+        container.innerHTML = this.config.listeners.map((listener, idx) => this.renderListenerCard(listener, idx)).join('');
+    }
+
+    renderListenerCard(listener, idx) {
+        const timeoutReadable = this.formatTimeout(listener.timeout);
+
+        return `
+            <div class="bg-zinc-800/50 border border-zinc-700/50 rounded-lg p-4 space-y-3 group relative">
+                <!-- Delete Button -->
+                <button onclick="hypridleEditor.deleteListener(${idx})" 
+                    class="absolute top-2 right-2 p-1.5 text-zinc-500 hover:text-red-400 hover:bg-red-500/10 rounded transition-colors opacity-0 group-hover:opacity-100">
+                    🗑️
+                </button>
+                
+                <!-- Timeout -->
+                <div class="flex items-center gap-4">
+                    <div class="flex-1">
+                        <label class="text-xs text-zinc-500">Timeout (seconds)</label>
+                        <div class="flex items-center gap-2">
+                            <input type="number" value="${listener.timeout}" min="1" step="1"
+                                class="w-24 bg-zinc-950 border border-zinc-700 rounded px-2 py-1 text-sm text-white focus:border-teal-500 outline-none"
+                                onchange="hypridleEditor.updateListener(${idx}, 'timeout', parseInt(this.value) || 60)">
+                            <span class="text-sm text-zinc-400">${timeoutReadable}</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- On Timeout -->
+                <div>
+                    <label class="text-xs text-zinc-500">On Timeout</label>
+                    <input type="text" value="${this.escapeHtml(listener.on_timeout || '')}" placeholder="Command to run when idle..."
+                        class="w-full bg-zinc-950 border border-zinc-700 rounded px-2 py-1 text-sm text-white focus:border-teal-500 outline-none font-mono"
+                        onchange="hypridleEditor.updateListener(${idx}, 'on_timeout', this.value)">
+                </div>
+                
+                <!-- On Resume -->
+                <div>
+                    <label class="text-xs text-zinc-500">On Resume</label>
+                    <input type="text" value="${this.escapeHtml(listener.on_resume || '')}" placeholder="Command to run when activity resumes..."
+                        class="w-full bg-zinc-950 border border-zinc-700 rounded px-2 py-1 text-sm text-white focus:border-teal-500 outline-none font-mono"
+                        onchange="hypridleEditor.updateListener(${idx}, 'on_resume', this.value)">
+                </div>
+            </div>
+        `;
+    }
+
+    formatTimeout(seconds) {
+        if (seconds < 60) return `${seconds}s`;
+        if (seconds < 3600) {
+            const mins = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            return secs > 0 ? `${mins}m ${secs}s` : `${mins}m`;
+        }
+        const hours = Math.floor(seconds / 3600);
+        const mins = Math.floor((seconds % 3600) / 60);
+        return mins > 0 ? `${hours}h ${mins}m` : `${hours}h`;
+    }
+
+    escapeHtml(str) {
+        return str.replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
+    updateGeneral(key, value) {
+        this.config.general[key] = value;
+    }
+
+    updateListener(idx, key, value) {
+        if (this.config.listeners[idx]) {
+            this.config.listeners[idx][key] = value;
+            // Re-render to update timeout display
+            if (key === 'timeout') {
+                this.renderListeners();
+            }
+        }
+    }
+
+    addListener() {
+        const newListener = {
+            id: `listener_${Date.now()}`,
+            timeout: 300,
+            on_timeout: '',
+            on_resume: ''
+        };
+        this.config.listeners.push(newListener);
+        this.renderListeners();
+        showToast('Listener added');
+    }
+
+    deleteListener(idx) {
+        this.config.listeners.splice(idx, 1);
+        this.renderListeners();
+        showToast('Listener removed');
+    }
+
+    async save() {
+        try {
+            const res = await fetch('/hypridle/config', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(this.config)
+            });
+
+            if (res.ok) {
+                showToast('Hypridle config saved!', 'success');
+            } else {
+                const data = await res.json();
+                showToast(`Save failed: ${data.detail || 'Unknown error'}`, 'error');
+            }
+        } catch (e) {
+            console.error("Save failed", e);
+            showToast('Save failed', 'error');
+        }
+    }
+}
 

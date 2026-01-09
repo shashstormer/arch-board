@@ -1,18 +1,4 @@
-div
-    ;;class="flex flex-col items-center justify-center p-12 text-zinc-500";;
-    svg
-        ;;class="w-16 h-16 mb-4";;
-        ;;fill="none";;
-        ;;viewBox="0 0 24 24";;
-        ;;stroke="currentColor";;
-        path
-            ;;stroke-linecap="round";;
-            ;;stroke-linejoin="round";;
-            ;;stroke-width="1.5";;
-            ;;d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z";;
-    h2
-        ;;class="text-xl font-medium text-zinc-300";;
-        Hypridle Settings
-    p
-        ;;class="mt-2 text-sm";;
-        This module is under construction.
+_layout
+    main
+        ;;class="h-full";; 
+        [[hypridle/main.html]]

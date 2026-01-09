@@ -1,0 +1,95 @@
+<div class="w-full h-full flex flex-col">
+    <!-- Header -->
+    <div class="flex items-center justify-between mb-6">
+        <div>
+            <h1 class="text-2xl font-bold text-zinc-100">Hypridle</h1>
+            <p class="text-sm text-zinc-500">Configure Hyprland's idle management daemon</p>
+        </div>
+        <div class="flex items-center gap-3">
+            <button onclick="hypridleEditor.save()"
+                class="px-4 py-2 bg-teal-600 hover:bg-teal-500 text-white rounded-lg font-medium flex items-center gap-2">
+                <span>💾</span> Save
+            </button>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="flex-1 flex gap-6 overflow-hidden">
+        <!-- General Settings -->
+        <div class="w-1/2 flex flex-col bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden">
+            <div class="px-4 py-3 border-b border-zinc-800 bg-zinc-900/80">
+                <h2 class="text-lg font-semibold text-white">General Settings</h2>
+            </div>
+            <div class="flex-1 overflow-y-auto p-4">
+                <div class="space-y-4">
+                    <div class="space-y-2">
+                        <label class="text-sm text-zinc-400">Lock Command</label>
+                        <input type="text" id="gen-lock_cmd" placeholder="pidof hyprlock || hyprlock"
+                            class="w-full bg-zinc-950 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-white focus:border-teal-500 outline-none"
+                            onchange="hypridleEditor.updateGeneral('lock_cmd', this.value)">
+                        <p class="text-xs text-zinc-600">Command to run when receiving a dbus lock event</p>
+                    </div>
+
+                    <div class="space-y-2">
+                        <label class="text-sm text-zinc-400">Unlock Command</label>
+                        <input type="text" id="gen-unlock_cmd" placeholder=""
+                            class="w-full bg-zinc-950 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-white focus:border-teal-500 outline-none"
+                            onchange="hypridleEditor.updateGeneral('unlock_cmd', this.value)">
+                        <p class="text-xs text-zinc-600">Command to run when receiving a dbus unlock event</p>
+                    </div>
+
+                    <div class="space-y-2">
+                        <label class="text-sm text-zinc-400">Before Sleep Command</label>
+                        <input type="text" id="gen-before_sleep_cmd" placeholder="loginctl lock-session"
+                            class="w-full bg-zinc-950 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-white focus:border-teal-500 outline-none"
+                            onchange="hypridleEditor.updateGeneral('before_sleep_cmd', this.value)">
+                        <p class="text-xs text-zinc-600">Command to run before system sleeps</p>
+                    </div>
+
+                    <div class="space-y-2">
+                        <label class="text-sm text-zinc-400">After Sleep Command</label>
+                        <input type="text" id="gen-after_sleep_cmd" placeholder="hyprctl dispatch dpms on"
+                            class="w-full bg-zinc-950 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-white focus:border-teal-500 outline-none"
+                            onchange="hypridleEditor.updateGeneral('after_sleep_cmd', this.value)">
+                        <p class="text-xs text-zinc-600">Command to run after system wakes</p>
+                    </div>
+
+                    <div class="flex items-center justify-between p-3 bg-zinc-800/50 rounded-lg">
+                        <div>
+                            <div class="text-sm text-zinc-300">Ignore DBus Inhibit</div>
+                            <div class="text-xs text-zinc-600">Ignore idle inhibit events from apps (e.g. video players)
+                            </div>
+                        </div>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" id="gen-ignore_dbus_inhibit" class="sr-only peer"
+                                onchange="hypridleEditor.updateGeneral('ignore_dbus_inhibit', this.checked)">
+                            <div
+                                class="w-11 h-6 bg-zinc-700 peer-focus:ring-2 peer-focus:ring-teal-500/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-teal-500">
+                            </div>
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Listeners -->
+        <div class="w-1/2 flex flex-col bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden">
+            <div class="px-4 py-3 border-b border-zinc-800 bg-zinc-900/80 flex items-center justify-between">
+                <h2 class="text-lg font-semibold text-white">Listeners</h2>
+                <button onclick="hypridleEditor.addListener()"
+                    class="px-3 py-1.5 bg-teal-600 hover:bg-teal-500 text-white text-sm rounded-lg">
+                    + Add Listener
+                </button>
+            </div>
+            <div id="listeners-list" class="flex-1 overflow-y-auto p-4 space-y-3">
+                <!-- Populated by JS -->
+                <div class="text-zinc-500 text-center py-10">Loading...</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="/scripts/hypridle.js"></script>
+<script>
+    window.hypridleEditor = new HypridleEditor();
+</script>

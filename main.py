@@ -1,12 +1,9 @@
-import os.path
-import shutil
 from contextlib import asynccontextmanager
 
 from authtuna import init_app
 from fastapi import FastAPI
-from xtracto import Builder
 
-from utils.config import RELOAD_SERVER, config
+from utils.config import RELOAD_SERVER
 from utils.lib.background import bg_service, register_default_tasks
 from utils.plugins import get_routers
 
