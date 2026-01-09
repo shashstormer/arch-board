@@ -141,10 +141,11 @@ arch_board/
 
 ### Tailwind CSS
 
-Tailwind classes are automatically generated from:
-- `pages/*.pypx`
-- `components/**/*.html`
-- `scripts/*.js`
+If you want to implement your own plugins/update things.
+If you are not making any changes to files then you can skip this.
+
+got too lazy to for fixing pytailwind, just using official tailwind cli now
+You just need to install and add to path (accessible by `tailwindcss` cmd) it auto uses it.
 
 The generated CSS is saved to `assets/css/tailwind.css`.
 
