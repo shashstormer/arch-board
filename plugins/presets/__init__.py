@@ -50,6 +50,11 @@ def get_manager(tool: str) -> PresetManager:
                 "~/.config/hypr/hyprlock.conf",
                 "~/.config/hypr/presets/hyprlock",
                 "hyprlock"
+            ),
+            "wpaperd": (
+                "~/.config/wpaperd/config.toml",
+                "~/.config/wpaperd/presets",
+                "wpaperd"
             )
         }
         

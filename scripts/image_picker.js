@@ -7,14 +7,12 @@ class ImagePicker {
         };
         this.isOpen = false;
 
-        // State
         this.currentFolderId = null;
         this.items = [];
         this.breadcrumbs = [];
         this.selected = new Set();
-        this.clipboard = null; // for cut/paste if implemented, or we use drag/drop
+        this.clipboard = null;
 
-        // Bind methods
         this.close = this.close.bind(this);
         this.handleUpload = this.handleUpload.bind(this);
         this.handleDrop = this.handleDrop.bind(this);
@@ -32,7 +30,6 @@ class ImagePicker {
         };
         this.options = { ...this.options, ...options };
 
-        // Initial fetch
         this.fetchItems();
     }
 
@@ -49,9 +46,8 @@ class ImagePicker {
         this.options = { ...this.options, ...options };
         this.isOpen = true;
         this.selected.clear();
-        this.currentFolderId = null; // Start at root
+        this.currentFolderId = null;
 
-        // Adjust modal styling
         const modalContent = document.getElementById('modal-content');
         if (modalContent) {
             modalContent.classList.remove('max-w-md', 'p-6', 'w-full');
@@ -162,13 +158,21 @@ class ImagePicker {
         const container = document.getElementById(this.config?.breadcrumbsId || 'ip-breadcrumbs');
         if (!container) return;
 
-        let html = `<button class="hover:text-white hover:underline px-1" onclick="window._imagePicker.navigateTo(null)">Root</button>`;
+        const instanceName = this.isMounted ? 'window._library' : 'window._imagePicker';
+
+        let html = `<button class="hover:text-white hover:underline px-1 py-1 rounded transition-colors" 
+            onclick="${instanceName}.navigateTo(null)"
+            ondragover="event.preventDefault(); this.classList.add('bg-teal-500/30')"
+            ondragleave="this.classList.remove('bg-teal-500/30')"
+            ondrop="event.preventDefault(); this.classList.remove('bg-teal-500/30'); ${instanceName}.onBreadcrumbDrop(event, null)">Root</button>`;
 
         this.breadcrumbs.forEach(crumb => {
             html += `<span class="text-zinc-600">/</span>`;
-            // Check if instance is global _imagePicker or local _library
-            const instanceName = this.isMounted ? 'window._library' : 'window._imagePicker';
-            html += `<button class="hover:text-white hover:underline px-1 truncate max-w-[150px]" onclick="${instanceName}.navigateTo('${crumb.id}')">${crumb.name}</button>`;
+            html += `<button class="hover:text-white hover:underline px-1 py-1 rounded truncate max-w-[150px] transition-colors" 
+                onclick="${instanceName}.navigateTo('${crumb.id}')"
+                ondragover="event.preventDefault(); this.classList.add('bg-teal-500/30')"
+                ondragleave="this.classList.remove('bg-teal-500/30')"
+                ondrop="event.preventDefault(); this.classList.remove('bg-teal-500/30'); ${instanceName}.onBreadcrumbDrop(event, '${crumb.id}')">${crumb.name}</button>`;
         });
 
         container.innerHTML = html;
@@ -248,18 +252,12 @@ class ImagePicker {
         `;
     }
 
-    // --- Interaction ---
-
     navigateTo(folderId) {
         this.currentFolderId = folderId;
         this.fetchItems();
     }
 
     toggleSelect(id, isFolder) {
-        // If folder select is disabled and item is folder, navigate instead (single click behavior if needed)
-        // But usually we want standardized behavior.
-
-        // Multi-select logic
         if (this.options.multiselect) {
             if (this.selected.has(id)) {
                 this.selected.delete(id);
@@ -267,18 +265,15 @@ class ImagePicker {
                 this.selected.add(id);
             }
         } else {
-            // Single select
             this.selected.clear();
             this.selected.add(id);
         }
         this.renderContent();
 
-        // Update status
         const count = this.selected.size;
         const statusEl = document.getElementById(this.config?.statusId || 'ip-status');
         if (statusEl) statusEl.innerText = count > 0 ? `${count} selected` : 'Ready';
 
-        // Close context menu if open
         this.closeCtxMenu();
     }
 
@@ -287,7 +282,6 @@ class ImagePicker {
         if (forceId) targets = [this.items.find(i => i.id === forceId)];
         else targets = this.items.filter(i => this.selected.has(i.id));
 
-        // Filter based on allowed types
         let valid = targets;
         if (!this.options.allowFolderSelect) {
             valid = targets.filter(t => t.type === 'file');
@@ -300,8 +294,6 @@ class ImagePicker {
         }
         this.close();
     }
-
-    // --- File Operations ---
 
     async createFolderPrompt() {
         const name = prompt("Enter folder name:", "New Folder");
@@ -332,7 +324,6 @@ class ImagePicker {
             if (f.webkitRelativePath) {
                 formData.append('paths', f.webkitRelativePath);
             } else {
-                // Regular file upload fallback
                 formData.append('paths', f.name);
             }
         });
@@ -341,7 +332,6 @@ class ImagePicker {
             formData.append('parent_id', this.currentFolderId);
         }
 
-        // Optimistic loading UI?
         const statusEl = document.getElementById(this.config?.statusId || 'ip-status');
         if (statusEl) statusEl.innerText = "Uploading...";
 
@@ -362,8 +352,6 @@ class ImagePicker {
         }
     }
 
-    // --- Drag & Drop (Move) ---
-
     onItemDragStart(e, id) {
         e.dataTransfer.setData('curr_id', id);
         e.dataTransfer.effectAllowed = 'move';
@@ -371,12 +359,11 @@ class ImagePicker {
     }
 
     onItemDragOver(e) {
-        e.preventDefault(); // allow drop
+        e.preventDefault();
         e.dataTransfer.dropEffect = 'move';
         e.currentTarget.classList.add('bg-teal-500/20');
     }
 
-    // Drop ONTO a folder (move into folder)
     async onItemDrop(e, targetFolderId) {
         e.preventDefault();
         e.stopPropagation();
@@ -385,26 +372,28 @@ class ImagePicker {
         const sourceId = e.dataTransfer.getData('curr_id');
         if (!sourceId || sourceId === targetFolderId) return;
 
-        // Execute Move
         await this.moveItem(sourceId, targetFolderId);
     }
 
-    // Drop ONTO the background (upload) or move to parent?
-    // Let's handle File upload drop separately
     onDragOver(e) {
         e.preventDefault();
     }
 
     async handleDrop(e) {
         e.preventDefault();
-        // Check if files
         if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
             this.handleUpload(e.dataTransfer.files);
             return;
         }
 
-        // If internal move (dragged to empty space not allowed/configured yet? 
-        // maybe drag to breadcrumb for parent move in future)
+    }
+
+
+    async onBreadcrumbDrop(e, targetFolderId) {
+        const sourceId = e.dataTransfer.getData('curr_id');
+        if (!sourceId) return;
+        if (sourceId === targetFolderId) return;
+        await this.moveItem(sourceId, targetFolderId);
     }
 
     async moveItem(itemId, targetParentId) {
@@ -424,14 +413,11 @@ class ImagePicker {
         }
     }
 
-    // --- Context Menu ---
 
     showCtxMenu(e, id) {
         e.preventDefault();
         e.stopPropagation();
         this.ctxId = id;
-
-        // Select it
         this.selected.clear();
         this.selected.add(id);
         this.renderContent();
@@ -443,8 +429,6 @@ class ImagePicker {
         menu.classList.remove('hidden');
         menu.style.left = `${e.clientX}px`;
         menu.style.top = `${e.clientY}px`;
-
-        // Click away listener
         const close = () => {
             this.closeCtxMenu();
             document.removeEventListener('click', close);

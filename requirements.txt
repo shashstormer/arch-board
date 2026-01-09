@@ -4,3 +4,5 @@ requestez==0.1.13
 authtuna>=0.2.2
 psutil
 pillow
+tomli-w==1.2.0
+
