@@ -1,5 +1,3 @@
-
-
 let schema = [];
 let config = {};
 let monitors = [];
@@ -27,7 +25,7 @@ function checkHighlight() {
             try {
                 const el = document.querySelector(selector);
                 if (el) {
-                    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    el.scrollIntoView({behavior: 'smooth', block: 'center'});
 
                     const highlightClasses = ['ring-2', 'ring-teal-500', 'bg-teal-500/20', 'transition-all', 'duration-1000'];
                     el.classList.add(...highlightClasses);
@@ -42,21 +40,15 @@ function checkHighlight() {
 }
 
 
-
-
-
 const SPECIAL_TABS = [
-    { id: 'monitors', title: 'Monitors', icon: '🖥️' },
-    { id: 'binds', title: 'Keybinds', icon: '⌨️' },
-    { id: 'gestures', title: 'Gestures', icon: '👆' },
-    { id: 'windowrules', title: 'Window Rules', icon: '🪟' },
-    { id: 'layerrules', title: 'Layer Rules', icon: '📐' },
-    { id: 'exec', title: 'Startup', icon: '🚀' },
-    { id: 'env', title: 'Environment', icon: '🌍' }
+    {id: 'monitors', title: 'Monitors', icon: '🖥️'},
+    {id: 'binds', title: 'Keybinds', icon: '⌨️'},
+    {id: 'gestures', title: 'Gestures', icon: '👆'},
+    {id: 'windowrules', title: 'Window Rules', icon: '🪟'},
+    {id: 'layerrules', title: 'Layer Rules', icon: '📐'},
+    {id: 'exec', title: 'Startup', icon: '🚀'},
+    {id: 'env', title: 'Environment', icon: '🌍'}
 ];
-
-
-
 
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -70,12 +62,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         loadExec(),
         loadEnv(),
         loadGestures(),
-        // loadPresets(), // Removed legacy preset loader
+
         checkMigrationStatus()
     ]);
     renderTabs();
     renderTabContent(activeTab);
-    // Initialize Presets
+
     if (window.PresetManagerUI) {
         window._presetManagers['hyprland'] = new PresetManagerUI('hyprland', {
             containerId: 'preset-container',
@@ -105,7 +97,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         showMigrationModal();
     }
 });
-
 
 
 function isAutosaveEnabled() {
@@ -305,7 +296,7 @@ function showMigrationModal() {
 
 async function runMigration() {
     try {
-        const response = await fetch('/hyprland/migration/migrate', { method: 'POST' });
+        const response = await fetch('/hyprland/migration/migrate', {method: 'POST'});
         const result = await response.json();
 
         if (result.success && result.migrated) {
@@ -325,10 +316,6 @@ async function runMigration() {
         showToast('Migration failed', 'error');
     }
 }
-
-
-
-
 
 
 function renderTabs() {
@@ -412,18 +399,15 @@ function renderTabContent(tabId) {
 }
 
 
-
-
-
 function renderMonitorsTab() {
     return `
-        <div class="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden mb-4">
+        <div class="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden mb-4 search-container">
             <div class="px-5 py-3.5 bg-zinc-800/30 border-b border-zinc-800 flex justify-between items-center">
                 <h3 class="text-sm font-semibold text-zinc-200 uppercase tracking-wider m-0">Monitor Configuration</h3>
             </div>
             <div class="p-2">
                 ${monitors.length === 0 ? '<p class="text-center text-zinc-500 p-8">No monitors configured</p>' :
-            monitors.map((m, i) => `
+        monitors.map((m, i) => `
                     <div class="bg-zinc-800 border border-zinc-700 rounded-lg p-4 mb-3">
                         <div class="font-semibold text-teal-500 text-base mb-2">${m.name}</div>
                         <div class="flex gap-4 text-sm text-zinc-400 mb-2">
@@ -452,16 +436,16 @@ function renderBindsTab() {
             <td class="p-3 text-zinc-500 max-w-[200px] truncate">${b.params || '-'}</td>
             <td class="p-3 w-24 text-right">
                 <div class="flex justify-end gap-2">
-                    <button class="p-1 text-zinc-500 hover:text-teal-500 transition-colors" onclick="showEditBindModal('${b.type}', '${b.mods || ''}', '${b.key}', '${b.dispatcher}', '${(b.params || '').replace(/'/g, "\\'")}', '${b.raw.replace(/'/g, "\\'")}')">✏️</button>
-                    <button class="p-1 text-zinc-500 hover:text-red-500 transition-colors" onclick="confirmDeleteBind('${b.raw.replace(/'/g, "\\'")}')">🗑️</button>
+                    <button class="p-1 text-zinc-500 hover:text-teal-500 transition-colors" onclick="showEditBindModal('${b.type}', '${b.mods || ''}', '${b.key}', '${b.dispatcher}', '${UI.escapeParam(b.params || '')}', '${UI.escapeParam(b.raw)}')">✏️</button>
+                    <button class="p-1 text-zinc-500 hover:text-red-500 transition-colors" onclick="confirmDeleteBind('${UI.escapeParam(b.raw)}')">🗑️</button>
                 </div>
             </td>
         `
     });
 
     return `
-        <div class="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden mb-4">
-            ${UI.renderSectionHeader('Keybinds', { label: 'Add Keybind', onclick: 'showAddBindModal()' }, binds.length)}
+        <div class="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden mb-4 search-container">
+            ${UI.renderSectionHeader('Keybinds', {label: 'Add Keybind', onclick: 'showAddBindModal()'}, binds.length)}
             ${listHtml}
         </div>
     `;
@@ -469,7 +453,7 @@ function renderBindsTab() {
 
 function renderGesturesTab() {
     return `
-        <div class="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden mb-4">
+        <div class="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden mb-4 search-container">
             <div class="px-5 py-3.5 bg-zinc-800/30 border-b border-zinc-800 flex justify-between items-center">
                 <h3 class="text-sm font-semibold text-zinc-200 uppercase tracking-wider m-0">Gesture Bindings (${gestures.length})</h3>
                 <button class="flex items-center gap-2 px-3 py-1.5 bg-teal-500 hover:bg-teal-600 text-white rounded-md text-sm transition-colors" onclick="showAddGestureModal()">+ Add Gesture</button>
@@ -499,11 +483,12 @@ function renderGesturesTab() {
                                 <td class="p-3 text-zinc-200"><strong>${actionDisplay}</strong></td>
                                 <td class="p-3 text-zinc-500 max-w-[200px] truncate">${g.params || '-'}</td>
                                 <td class="p-3 flex gap-2">
-                                    <button class="p-1 text-zinc-500 hover:text-teal-500 transition-colors" onclick="showEditGestureModal('${g.fingers}', '${g.direction}', '${g.action}', '${(g.params || '').replace(/'/g, "\\'")}', '${g.raw.replace(/'/g, "\\'")}', '${(g.dispatcher || '').replace(/'/g, "\\'")}', '${(g.mod || '').replace(/'/g, "\\'")}', '${(g.scale || '').replace(/'/g, "\\'")}')">✏️</button>
-                                    <button class="p-1 text-zinc-500 hover:text-red-500 transition-colors" onclick="confirmDeleteGesture('${g.raw.replace(/'/g, "\\'")}')">🗑️</button>
+                                    <button class="p-1 text-zinc-500 hover:text-teal-500 transition-colors" onclick="showEditGestureModal('${g.fingers}', '${g.direction}', '${g.action}', '${UI.escapeParam(g.params || '')}', '${UI.escapeParam(g.raw)}', '${UI.escapeParam(g.dispatcher || '')}', '${UI.escapeParam(g.mod || '')}', '${UI.escapeParam(g.scale || '')}')">✏️</button>
+                                    <button class="p-1 text-zinc-500 hover:text-red-500 transition-colors" onclick="confirmDeleteGesture('${UI.escapeParam(g.raw)}')">🗑️</button>
                                 </td>
                             </tr>
-                        `}).join('')}
+                        `
+    }).join('')}
                     </tbody>
                 </table>`}
             </div>
@@ -528,16 +513,19 @@ function renderWindowRulesTab() {
             </td>
             <td class="p-3 w-24 text-right">
                 <div class="flex justify-end gap-2">
-                    <button class="p-1 text-zinc-500 hover:text-teal-500 transition-colors" onclick="showEditRuleModal('${r.type}', '${r.effect}', '${r.match.replace(/'/g, "\\'")}', '${r.raw.replace(/'/g, "\\'")}')">✏️</button>
-                    <button class="p-1 text-zinc-500 hover:text-red-500 transition-colors" onclick="confirmDeleteRule('${r.raw.replace(/'/g, "\\'")}')">🗑️</button>
+                    <button class="p-1 text-zinc-500 hover:text-teal-500 transition-colors" onclick="showEditRuleModal('${r.type}', '${r.effect}', '${UI.escapeParam(r.match)}', '${UI.escapeParam(r.raw)}')">✏️</button>
+                    <button class="p-1 text-zinc-500 hover:text-red-500 transition-colors" onclick="confirmDeleteRule('${UI.escapeParam(r.raw)}')">🗑️</button>
                 </div>
             </td>
         `
     });
 
     return `
-        <div class="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden mb-4">
-            ${UI.renderSectionHeader('Window Rules', { label: 'Add Rule', onclick: 'showAddRuleModal()' }, windowrules.length)}
+        <div class="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden mb-4 search-container">
+            ${UI.renderSectionHeader('Window Rules', {
+        label: 'Add Rule',
+        onclick: 'showAddRuleModal()'
+    }, windowrules.length)}
             ${listHtml}
         </div>
     `;
@@ -560,16 +548,19 @@ function renderLayerRulesTab() {
             </td>
             <td class="p-3 w-24 text-right">
                 <div class="flex justify-end gap-2">
-                    <button class="p-1 text-zinc-500 hover:text-teal-500 transition-colors" onclick="showEditLayerRuleModal('${r.effect.replace(/'/g, "\\'")}', '${r.namespace.replace(/'/g, "\\'")}', '${r.raw.replace(/'/g, "\\'")}')">✏️</button>
-                    <button class="p-1 text-zinc-500 hover:text-red-500 transition-colors" onclick="confirmDeleteLayerRule('${r.raw.replace(/'/g, "\\'")}')">🗑️</button>
+                    <button class="p-1 text-zinc-500 hover:text-teal-500 transition-colors" onclick="showEditLayerRuleModal('${UI.escapeParam(r.effect)}', '${UI.escapeParam(r.namespace)}', '${UI.escapeParam(r.raw)}')">✏️</button>
+                    <button class="p-1 text-zinc-500 hover:text-red-500 transition-colors" onclick="confirmDeleteLayerRule('${UI.escapeParam(r.raw)}')">🗑️</button>
                 </div>
             </td>
         `
     });
 
     return `
-        <div class="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden mb-4">
-            ${UI.renderSectionHeader('Layer Rules', { label: 'Add Layer Rule', onclick: 'showAddLayerRuleModal()' }, layerrules.length)}
+        <div class="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden mb-4 search-container">
+            ${UI.renderSectionHeader('Layer Rules', {
+        label: 'Add Layer Rule',
+        onclick: 'showAddLayerRuleModal()'
+    }, layerrules.length)}
             ${listHtml}
         </div>
         <div class="bg-zinc-800/30 rounded-lg p-4 text-sm text-zinc-500">
@@ -600,16 +591,19 @@ function renderExecTab() {
             </td>
             <td class="p-3 w-24 text-right">
                 <div class="flex justify-end gap-2">
-                    <button class="p-1 text-zinc-500 hover:text-teal-500 transition-colors" onclick="showEditExecModal('${c.type}', '${c.command.replace(/'/g, "\\'")}')">✏️</button>
-                    <button class="p-1 text-zinc-500 hover:text-red-500 transition-colors" onclick="confirmDeleteExec('${c.type}', '${c.command.replace(/'/g, "\\'")}')">🗑️</button>
+                    <button class="p-1 text-zinc-500 hover:text-teal-500 transition-colors" onclick="showEditExecModal('${c.type}', '${UI.escapeParam(c.command)}')">✏️</button>
+                    <button class="p-1 text-zinc-500 hover:text-red-500 transition-colors" onclick="confirmDeleteExec('${c.type}', '${UI.escapeParam(c.command)}')">🗑️</button>
                 </div>
             </td>
         `
     });
 
     return `
-        <div class="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden mb-4">
-            ${UI.renderSectionHeader('Startup Commands', { label: 'Add Command', onclick: 'showAddExecModal()' }, execCommands.length)}
+        <div class="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden mb-4 search-container">
+            ${UI.renderSectionHeader('Startup Commands', {
+        label: 'Add Command',
+        onclick: 'showAddExecModal()'
+    }, execCommands.length)}
             ${listHtml}
         </div>
     `;
@@ -647,7 +641,7 @@ function renderEnvTab() {
             </td>
             <td class="p-3 w-24 text-right">
                 <div class="flex justify-end gap-2">
-                    <button class="p-1 text-zinc-500 hover:text-teal-500 transition-colors" onclick="showEditEnvModal('${env.name}', '${env.value.replace(/'/g, "\\'")}')">✏️</button>
+                    <button class="p-1 text-zinc-500 hover:text-teal-500 transition-colors" onclick="showEditEnvModal('${env.name}', '${UI.escapeParam(env.value)}')">✏️</button>
                     <button class="p-1 text-zinc-500 hover:text-red-500 transition-colors" onclick="confirmDeleteEnv('${env.name}')">🗑️</button>
                 </div>
             </td>
@@ -656,22 +650,20 @@ function renderEnvTab() {
     });
 
     return `
-        <div class="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden mb-4">
-            ${UI.renderSectionHeader('Environment Variables', { label: 'Add Variable', onclick: 'showAddEnvModal()' }, envVars.length)}
+        <div class="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden mb-4 search-container">
+            ${UI.renderSectionHeader('Environment Variables', {
+        label: 'Add Variable',
+        onclick: 'showAddEnvModal()'
+    }, envVars.length)}
             ${listHtml}
         </div>
     `;
 }
 
 
-
-// =============================================================================
-// SECTION RENDERING
-// =============================================================================
-
 function renderSection(section) {
     return `
-        <div class="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden mb-4">
+        <div class="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden mb-4 search-container">
             ${UI.renderSectionHeader(section.title, null)}
             <div class="p-2">
                 ${section.options.map(opt => renderOption(section.name, opt)).join('')}
@@ -706,9 +698,6 @@ function formatLabel(name) {
         .replace(/\b\w/g, c => c.toUpperCase());
 }
 
-// =============================================================================
-// CONTROL RENDERING
-// =============================================================================
 
 function renderControl(path, option, value) {
     switch (option.type) {
@@ -814,9 +803,6 @@ function renderTextInput(path, value) {
                             `;
 }
 
-// =============================================================================
-// VALUE UPDATES
-// =============================================================================
 
 function updateValue(path, value) {
     pendingChanges[path] = value;
@@ -824,19 +810,20 @@ function updateValue(path, value) {
     markChanged(path);
     updateSaveButton();
 
-    // Autosave with debounce
+
     if (isAutosaveEnabled()) {
         debouncedSave();
     }
 }
 
-// Debounced save for autosave (500ms delay)
+
 let saveTimeout = null;
+
 function debouncedSave() {
     if (saveTimeout) clearTimeout(saveTimeout);
     saveTimeout = setTimeout(async () => {
         await saveConfig();
-        // If there's an active preset, also sync to it
+
         if (activePreset) {
             await syncToActivePreset();
         }
@@ -850,15 +837,15 @@ function updateSlider(path, value, container) {
 }
 
 function updateColor(path, hexValue) {
-    // Get current value to preserve format
+
     const currentValue = config[path];
 
-    // Update using global util to preserve format
+
     const newColorValue = ColorUtils.formatUpdate(currentValue, hexValue);
 
     updateValue(path, newColorValue);
 
-    // Update text input
+
     const option = document.querySelector(`[data-path="${path}"] .color-text`);
     if (option) option.value = newColorValue;
 }
@@ -900,13 +887,10 @@ function updateSaveButton() {
                             `;
     }
 
-    // Also update preset selector to show change count
+
     renderPresetSelector();
 }
 
-// =============================================================================
-// SAVE & RELOAD
-// =============================================================================
 
 async function saveConfig() {
     if (Object.keys(pendingChanges).length === 0) {
@@ -917,13 +901,13 @@ async function saveConfig() {
     try {
         const response = await fetch('/hyprland/config/bulk', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ updates: pendingChanges })
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({updates: pendingChanges})
         });
 
         if (!response.ok) throw new Error('Failed to save');
 
-        // Clear pending changes
+
         pendingChanges = {};
         document.querySelectorAll('[data-path]').forEach(el => {
             el.classList.remove('bg-teal-500/5', 'border-l-2', 'border-teal-500');
@@ -939,7 +923,7 @@ async function saveConfig() {
 
 async function reloadHyprland() {
     try {
-        const response = await fetch('/hyprland/reload', { method: 'POST' });
+        const response = await fetch('/hyprland/reload', {method: 'POST'});
         const data = await response.json();
 
         if (data.success) {
@@ -953,31 +937,12 @@ async function reloadHyprland() {
     }
 }
 
-// =============================================================================
-// COLOR UTILITIES
-// =============================================================================
 
 function hyprColorToHex(color) {
     return ColorUtils.toHex(color);
 }
-// hexToHyprColor removed - use ColorUtils.formatUpdate instead
 
-// =============================================================================
-// TOAST NOTIFICATIONS
-// =============================================================================
 
-// Note: showToast is now provided by utils.js globally
-
-// =============================================================================
-// MODAL SYSTEM 
-// Note: openModal(), closeModal(), and confirmDialog() are now provided by 
-// utils.js globally. The functions below delegate to them for backwards 
-// compatibility, or can be removed if the page-specific modal overlay is
-// no longer used.
-// =============================================================================
-
-// Legacy compatibility - if page has a #modal-overlay element, use it
-// Otherwise, fall back to global modal system
 function openModal(content) {
     const pageOverlay = document.getElementById('modal-overlay');
     if (pageOverlay) {
@@ -998,9 +963,6 @@ function closeModal() {
     }
 }
 
-// =============================================================================
-// ENV VAR CRUD
-// =============================================================================
 
 function showAddEnvModal() {
     openModal(`
@@ -1033,8 +995,8 @@ async function addEnvVar() {
     try {
         await fetch('/hyprland/env', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ action: 'add', name, value })
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({action: 'add', name, value})
         });
         closeModal();
         await loadEnv();
@@ -1046,6 +1008,8 @@ async function addEnvVar() {
 }
 
 function showEditEnvModal(name, value) {
+    const escapedValue = UI.escapeParam(value);
+
     openModal(`
         <div class="flex items-center justify-between mb-6">
             <h3 class="text-xl font-bold text-white">Edit Environment Variable</h3>
@@ -1075,8 +1039,8 @@ async function updateEnvVar(oldName) {
     try {
         await fetch('/hyprland/env', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ action: 'update', name, value, old_name: oldName })
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({action: 'update', name, value, old_name: oldName})
         });
         closeModal();
         await loadEnv();
@@ -1091,8 +1055,8 @@ async function deleteEnvVar(name) {
     try {
         await fetch('/hyprland/env', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ action: 'delete', name, value: '' })
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({action: 'delete', name, value: ''})
         });
         await loadEnv();
         renderTabContent('env');
@@ -1105,12 +1069,9 @@ async function deleteEnvVar(name) {
 function confirmDeleteEnv(name) {
     confirmDialog('Delete Environment Variable',
         `Are you sure you want to delete "${name}"?`,
-        `function() { deleteEnvVar('${name}') }`);
+        `function() { deleteEnvVar('${UI.escapeParam(name)}') }`);
 }
 
-// =============================================================================
-// EXEC COMMANDS CRUD
-// =============================================================================
 
 function showAddExecModal() {
     openModal(`
@@ -1146,8 +1107,8 @@ async function addExecCommand() {
     try {
         await fetch('/hyprland/exec', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ action: 'add', type, command })
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({action: 'add', type, command})
         });
         closeModal();
         await loadExec();
@@ -1162,8 +1123,8 @@ async function deleteExecCommand(type, command) {
     try {
         await fetch('/hyprland/exec', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ action: 'delete', type, command })
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({action: 'delete', type, command})
         });
         await loadExec();
         renderTabContent('exec');
@@ -1174,14 +1135,14 @@ async function deleteExecCommand(type, command) {
 }
 
 function confirmDeleteExec(type, command) {
-    const escapedCmd = command.replace(/'/g, "\\'");
+    const escapedCmd = UI.escapeParam(command);
     confirmDialog('Delete Command',
         `Are you sure you want to delete this command?`,
         `function() {deleteExecCommand('${type}', '${escapedCmd}')}`);
 }
 
 function showEditExecModal(type, command) {
-    const escapedCmd = command.replace(/"/g, '&quot;');
+    const escapedCmd = UI.escapeParam(command);
     openModal(`
                             <div class="flex items-center justify-between mb-6">
                                 <h3 class="text-xl font-bold text-white">Edit Startup Command</h3>
@@ -1215,8 +1176,8 @@ async function updateExecCommand(oldType, oldCommand) {
     try {
         await fetch('/hyprland/exec', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ action: 'update', type, command, old_command: oldCommand })
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({action: 'update', type, command, old_command: oldCommand})
         });
         closeModal();
         await loadExec();
@@ -1226,11 +1187,6 @@ async function updateExecCommand(oldType, oldCommand) {
         showToast('Failed to update', 'error');
     }
 }
-
-// =============================================================================
-// WINDOW RULES CRUD
-// =============================================================================
-
 
 
 async function loadOpenWindows() {
@@ -1388,8 +1344,8 @@ async function addWindowRule() {
     try {
         await fetch('/hyprland/windowrules', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ action: 'add', type, effect, match })
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({action: 'add', type, effect, match})
         });
         closeModal();
         await loadWindowRules();
@@ -1404,8 +1360,8 @@ async function deleteWindowRule(raw) {
     try {
         await fetch('/hyprland/windowrules', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ action: 'delete', type: '', effect: '', match: '', old_raw: raw })
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({action: 'delete', type: '', effect: '', match: '', old_raw: raw})
         });
         await loadWindowRules();
         renderTabContent('windowrules');
@@ -1416,15 +1372,15 @@ async function deleteWindowRule(raw) {
 }
 
 function confirmDeleteRule(raw) {
-    const escapedRaw = raw.replace(/'/g, "\\'");
+    const escapedRaw = UI.escapeParam(raw);
     confirmDialog('Delete Window Rule',
         `Are you sure you want to delete this rule?`,
         `function() {deleteWindowRule('${escapedRaw}')}`);
 }
 
 function showEditRuleModal(type, effect, match, raw) {
-    const escapedMatch = match.replace(/"/g, '&quot;');
-    const escapedRaw = raw.replace(/'/g, "\\'");
+    const escapedMatch = UI.escapeParam(match);
+    const escapedRaw = UI.escapeParam(raw);
 
     openModal(`
                         <div class="flex items-center justify-between mb-6">
@@ -1458,8 +1414,8 @@ async function updateWindowRule(oldRaw) {
     try {
         await fetch('/hyprland/windowrules', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ action: 'update', type, effect, match, old_raw: oldRaw })
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({action: 'update', type, effect, match, old_raw: oldRaw})
         });
         closeModal();
         await loadWindowRules();
@@ -1470,9 +1426,6 @@ async function updateWindowRule(oldRaw) {
     }
 }
 
-// =============================================================================
-// LAYER RULES CRUD
-// =============================================================================
 
 function showAddLayerRuleModal() {
     openModal(`
@@ -1523,7 +1476,7 @@ async function addLayerRule() {
     try {
         await fetch('/hyprland/layerrules', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({
                 action: 'add',
                 effect,
@@ -1540,9 +1493,9 @@ async function addLayerRule() {
 }
 
 function showEditLayerRuleModal(effect, namespace, raw) {
-    const escapedEffect = effect.replace(/"/g, '&quot;');
-    const escapedNamespace = namespace.replace(/"/g, '&quot;');
-    const escapedRaw = raw.replace(/'/g, "\\'");
+    const escapedEffect = UI.escapeParam(effect);
+    const escapedNamespace = UI.escapeParam(namespace);
+    const escapedRaw = UI.escapeParam(raw);
 
     openModal(`
         <div class="flex items-center justify-between mb-6">
@@ -1583,7 +1536,7 @@ async function updateLayerRule(oldRaw) {
     try {
         await fetch('/hyprland/layerrules', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({
                 action: 'update',
                 effect,
@@ -1604,7 +1557,7 @@ async function deleteLayerRule(raw) {
     try {
         await fetch('/hyprland/layerrules', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({
                 action: 'delete',
                 effect: '',
@@ -1621,91 +1574,92 @@ async function deleteLayerRule(raw) {
 }
 
 function confirmDeleteLayerRule(raw) {
-    const escapedRaw = raw.replace(/'/g, "\\'");
+    const escapedRaw = UI.escapeParam(raw);
     confirmDialog('Delete Layer Rule',
         'Are you sure you want to delete this layer rule?',
         `function() {deleteLayerRule('${escapedRaw}')}`);
 }
 
-// =============================================================================
-// KEYBINDS CRUD
-// =============================================================================
 
 let capturedMods = [];
 let capturedKey = '';
 
-// Dispatcher definitions with descriptions and param hints
+
 const DISPATCHERS = {
-    // Commands
-    exec: { desc: "Execute shell command", param: "command (e.g., kitty, firefox)", category: "Commands" },
-    execr: { desc: "Execute raw shell command", param: "command", category: "Commands" },
-    pass: { desc: "Pass key to window", param: "window", category: "Commands" },
-    sendshortcut: { desc: "Send keys to window", param: "mod, key[, window]", category: "Commands" },
-    global: { desc: "Execute Global Shortcut", param: "name", category: "Commands" },
 
-    // Window Actions
-    killactive: { desc: "Close active window", param: "none", category: "Window Actions" },
-    forcekillactive: { desc: "Force kill active window", param: "none", category: "Window Actions" },
-    closewindow: { desc: "Close specified window", param: "window", category: "Window Actions" },
-    togglefloating: { desc: "Toggle floating state", param: "empty/window", category: "Window Actions" },
-    setfloating: { desc: "Set floating", param: "empty/window", category: "Window Actions" },
-    settiled: { desc: "Set tiled", param: "empty/window", category: "Window Actions" },
-    fullscreen: { desc: "Toggle fullscreen", param: "0=full, 1=maximize", category: "Window Actions" },
-    pin: { desc: "Pin window to all workspaces", param: "empty/window", category: "Window Actions" },
-    centerwindow: { desc: "Center floating window", param: "none/1", category: "Window Actions" },
+    exec: {desc: "Execute shell command", param: "command (e.g., kitty, firefox)", category: "Commands"},
+    execr: {desc: "Execute raw shell command", param: "command", category: "Commands"},
+    pass: {desc: "Pass key to window", param: "window", category: "Commands"},
+    sendshortcut: {desc: "Send keys to window", param: "mod, key[, window]", category: "Commands"},
+    global: {desc: "Execute Global Shortcut", param: "name", category: "Commands"},
 
-    // Focus & Movement
-    movefocus: { desc: "Move focus direction", param: "l/r/u/d", category: "Focus & Movement" },
-    movewindow: { desc: "Move window direction/monitor", param: "l/r/u/d or mon:NAME", category: "Focus & Movement" },
-    swapwindow: { desc: "Swap with window in direction", param: "l/r/u/d or window", category: "Focus & Movement" },
-    focuswindow: { desc: "Focus specific window", param: "window (class:, title:, etc)", category: "Focus & Movement" },
-    focusmonitor: { desc: "Focus a monitor", param: "monitor (l/r/+1/-1/name)", category: "Focus & Movement" },
-    cyclenext: { desc: "Focus next/prev window", param: "none/prev/tiled/floating", category: "Focus & Movement" },
-    swapnext: { desc: "Swap with next window", param: "none/prev", category: "Focus & Movement" },
-    bringactivetotop: { desc: "Bring window to top", param: "none", category: "Focus & Movement" },
-    alterzorder: { desc: "Change window stack order", param: "top/bottom[,window]", category: "Focus & Movement" },
 
-    // Workspaces
-    workspace: { desc: "Switch workspace", param: "ID/+1/-1/name:X/special", category: "Workspaces" },
-    movetoworkspace: { desc: "Move window to workspace", param: "workspace[,window]", category: "Workspaces" },
-    movetoworkspacesilent: { desc: "Move without switching", param: "workspace[,window]", category: "Workspaces" },
-    togglespecialworkspace: { desc: "Toggle scratchpad", param: "none/name", category: "Workspaces" },
-    focusworkspaceoncurrentmonitor: { desc: "Focus workspace on current", param: "workspace", category: "Workspaces" },
-    movecurrentworkspacetomonitor: { desc: "Move workspace to monitor", param: "monitor", category: "Workspaces" },
-    swapactiveworkspaces: { desc: "Swap workspaces between monitors", param: "monitor1 monitor2", category: "Workspaces" },
+    killactive: {desc: "Close active window", param: "none", category: "Window Actions"},
+    forcekillactive: {desc: "Force kill active window", param: "none", category: "Window Actions"},
+    closewindow: {desc: "Close specified window", param: "window", category: "Window Actions"},
+    togglefloating: {desc: "Toggle floating state", param: "empty/window", category: "Window Actions"},
+    setfloating: {desc: "Set floating", param: "empty/window", category: "Window Actions"},
+    settiled: {desc: "Set tiled", param: "empty/window", category: "Window Actions"},
+    fullscreen: {desc: "Toggle fullscreen", param: "0=full, 1=maximize", category: "Window Actions"},
+    pin: {desc: "Pin window to all workspaces", param: "empty/window", category: "Window Actions"},
+    centerwindow: {desc: "Center floating window", param: "none/1", category: "Window Actions"},
 
-    // Resize & Position
-    resizeactive: { desc: "Resize active window", param: "X Y (e.g., 10 -10, 20%)", category: "Resize" },
-    moveactive: { desc: "Move active window", param: "X Y", category: "Resize" },
-    resizewindowpixel: { desc: "Resize specific window", param: "X Y,window", category: "Resize" },
-    movewindowpixel: { desc: "Move specific window", param: "X Y,window", category: "Resize" },
-    splitratio: { desc: "Change split ratio", param: "+0.1/-0.1/exact 0.5", category: "Resize" },
 
-    // Groups
-    togglegroup: { desc: "Toggle window group", param: "none", category: "Groups" },
-    changegroupactive: { desc: "Switch in group", param: "b/f or index", category: "Groups" },
-    lockgroups: { desc: "Lock all groups", param: "lock/unlock/toggle", category: "Groups" },
-    lockactivegroup: { desc: "Lock current group", param: "lock/unlock/toggle", category: "Groups" },
-    moveintogroup: { desc: "Move into group", param: "l/r/u/d", category: "Groups" },
-    moveoutofgroup: { desc: "Move out of group", param: "empty/window", category: "Groups" },
+    movefocus: {desc: "Move focus direction", param: "l/r/u/d", category: "Focus & Movement"},
+    movewindow: {desc: "Move window direction/monitor", param: "l/r/u/d or mon:NAME", category: "Focus & Movement"},
+    swapwindow: {desc: "Swap with window in direction", param: "l/r/u/d or window", category: "Focus & Movement"},
+    focuswindow: {desc: "Focus specific window", param: "window (class:, title:, etc)", category: "Focus & Movement"},
+    focusmonitor: {desc: "Focus a monitor", param: "monitor (l/r/+1/-1/name)", category: "Focus & Movement"},
+    cyclenext: {desc: "Focus next/prev window", param: "none/prev/tiled/floating", category: "Focus & Movement"},
+    swapnext: {desc: "Swap with next window", param: "none/prev", category: "Focus & Movement"},
+    bringactivetotop: {desc: "Bring window to top", param: "none", category: "Focus & Movement"},
+    alterzorder: {desc: "Change window stack order", param: "top/bottom[,window]", category: "Focus & Movement"},
 
-    // System
-    exit: { desc: "Exit Hyprland", param: "none", category: "System" },
-    dpms: { desc: "Toggle DPMS", param: "on/off/toggle", category: "System" },
-    forcerendererreload: { desc: "Reload renderer", param: "none", category: "System" },
-    submap: { desc: "Switch submap", param: "reset/name", category: "System" },
 
-    // Layout (Dwindle/Master)
-    togglesplit: { desc: "Toggle split orientation", param: "none", category: "Layout" },
-    pseudo: { desc: "Toggle pseudo-tiling", param: "none", category: "Layout" },
-    layoutmsg: { desc: "Send layout message", param: "message", category: "Layout" },
+    workspace: {desc: "Switch workspace", param: "ID/+1/-1/name:X/special", category: "Workspaces"},
+    movetoworkspace: {desc: "Move window to workspace", param: "workspace[,window]", category: "Workspaces"},
+    movetoworkspacesilent: {desc: "Move without switching", param: "workspace[,window]", category: "Workspaces"},
+    togglespecialworkspace: {desc: "Toggle scratchpad", param: "none/name", category: "Workspaces"},
+    focusworkspaceoncurrentmonitor: {desc: "Focus workspace on current", param: "workspace", category: "Workspaces"},
+    movecurrentworkspacetomonitor: {desc: "Move workspace to monitor", param: "monitor", category: "Workspaces"},
+    swapactiveworkspaces: {
+        desc: "Swap workspaces between monitors",
+        param: "monitor1 monitor2",
+        category: "Workspaces"
+    },
+
+
+    resizeactive: {desc: "Resize active window", param: "X Y (e.g., 10 -10, 20%)", category: "Resize"},
+    moveactive: {desc: "Move active window", param: "X Y", category: "Resize"},
+    resizewindowpixel: {desc: "Resize specific window", param: "X Y,window", category: "Resize"},
+    movewindowpixel: {desc: "Move specific window", param: "X Y,window", category: "Resize"},
+    splitratio: {desc: "Change split ratio", param: "+0.1/-0.1/exact 0.5", category: "Resize"},
+
+
+    togglegroup: {desc: "Toggle window group", param: "none", category: "Groups"},
+    changegroupactive: {desc: "Switch in group", param: "b/f or index", category: "Groups"},
+    lockgroups: {desc: "Lock all groups", param: "lock/unlock/toggle", category: "Groups"},
+    lockactivegroup: {desc: "Lock current group", param: "lock/unlock/toggle", category: "Groups"},
+    moveintogroup: {desc: "Move into group", param: "l/r/u/d", category: "Groups"},
+    moveoutofgroup: {desc: "Move out of group", param: "empty/window", category: "Groups"},
+
+
+    exit: {desc: "Exit Hyprland", param: "none", category: "System"},
+    dpms: {desc: "Toggle DPMS", param: "on/off/toggle", category: "System"},
+    forcerendererreload: {desc: "Reload renderer", param: "none", category: "System"},
+    submap: {desc: "Switch submap", param: "reset/name", category: "System"},
+
+
+    togglesplit: {desc: "Toggle split orientation", param: "none", category: "Layout"},
+    pseudo: {desc: "Toggle pseudo-tiling", param: "none", category: "Layout"},
+    layoutmsg: {desc: "Send layout message", param: "message", category: "Layout"},
 };
 
 function getDispatcherOptions() {
     const categories = {};
     for (const [name, info] of Object.entries(DISPATCHERS)) {
         if (!categories[info.category]) categories[info.category] = [];
-        categories[info.category].push({ name, desc: info.desc });
+        categories[info.category].push({name, desc: info.desc});
     }
 
     let html = '';
@@ -1786,14 +1740,14 @@ function captureKey(event) {
 
     let key = event.key.toUpperCase();
 
-    // Filter out modifier keys themselves
+
     if (['CONTROL', 'ALT', 'SHIFT', 'META', 'SUPER'].includes(key)) {
         capturedMods = mods;
         document.getElementById('key-display').textContent = mods.join(' + ') + ' + ...';
         return;
     }
 
-    // Map special keys
+
     const keyMap = {
         ' ': 'SPACE',
         'ARROWUP': 'UP',
@@ -1824,7 +1778,7 @@ async function addBind() {
     try {
         await fetch('/hyprland/binds', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({
                 action: 'add',
                 type,
@@ -1847,8 +1801,8 @@ async function deleteBind(raw) {
     try {
         await fetch('/hyprland/binds', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ action: 'delete', type: '', mods: '', key: '', dispatcher: '', old_raw: raw })
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({action: 'delete', type: '', mods: '', key: '', dispatcher: '', old_raw: raw})
         });
         await loadBinds();
         renderTabContent('binds');
@@ -1859,7 +1813,7 @@ async function deleteBind(raw) {
 }
 
 function confirmDeleteBind(raw) {
-    const escapedRaw = raw.replace(/'/g, "\\'");
+    const escapedRaw = UI.escapeParam(raw);
     confirmDialog('Delete Keybind',
         `Are you sure you want to delete this keybind?`,
         `function() {deleteBind('${escapedRaw}')}`);
@@ -1869,7 +1823,7 @@ function getDispatcherOptionsWithSelected(selected) {
     const categories = {};
     for (const [name, info] of Object.entries(DISPATCHERS)) {
         if (!categories[info.category]) categories[info.category] = [];
-        categories[info.category].push({ name, desc: info.desc });
+        categories[info.category].push({name, desc: info.desc});
     }
 
     let html = '';
@@ -1882,10 +1836,10 @@ function getDispatcherOptionsWithSelected(selected) {
 }
 
 function showEditBindModal(type, mods, key, dispatcher, params, raw) {
-    const escapedRaw = raw.replace(/'/g, "\\'");
-    const escapedParams = (params || '').replace(/"/g, '&quot;');
+    const escapedRaw = UI.escapeParam(raw);
+    const escapedParams = UI.escapeParam(params || '');
 
-    // Pre-set captured values for display
+
     capturedMods = mods ? mods.match(/(SUPER|ALT|CTRL|SHIFT)/g) || [] : [];
     capturedKey = key;
 
@@ -1948,7 +1902,7 @@ async function updateBind(oldRaw) {
     try {
         await fetch('/hyprland/binds', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({
                 action: 'update',
                 type,
@@ -1968,22 +1922,18 @@ async function updateBind(oldRaw) {
     }
 }
 
-// =============================================================================
-// GESTURE CRUD
-// =============================================================================
 
-// Get gesture action options for select dropdown
 function getGestureActionOptions(selected = '') {
     const actions = [
-        { value: 'workspace', desc: 'Workspace swipe gesture' },
-        { value: 'move', desc: 'Move active window' },
-        { value: 'resize', desc: 'Resize active window' },
-        { value: 'special', desc: 'Toggle special workspace' },
-        { value: 'close', desc: 'Close active window' },
-        { value: 'fullscreen', desc: 'Fullscreen (none or maximize)' },
-        { value: 'float', desc: 'Float window (toggle/float/tile)' },
-        { value: 'dispatcher', desc: 'Run a dispatcher' },
-        { value: 'unset', desc: 'Unset a gesture' }
+        {value: 'workspace', desc: 'Workspace swipe gesture'},
+        {value: 'move', desc: 'Move active window'},
+        {value: 'resize', desc: 'Resize active window'},
+        {value: 'special', desc: 'Toggle special workspace'},
+        {value: 'close', desc: 'Close active window'},
+        {value: 'fullscreen', desc: 'Fullscreen (none or maximize)'},
+        {value: 'float', desc: 'Float window (toggle/float/tile)'},
+        {value: 'dispatcher', desc: 'Run a dispatcher'},
+        {value: 'unset', desc: 'Unset a gesture'}
     ];
     return actions.map(a =>
         `<option value="${a.value}" ${a.value === selected ? 'selected' : ''}>${a.value} - ${a.desc}</option>`
@@ -2002,7 +1952,7 @@ function toggleGestureDispatcher() {
         updateGestureParamHint();
     } else {
         dispatcherGroup.style.display = 'none';
-        // Update params label based on action
+
         const hints = {
             'workspace': 'Parameters (none needed)',
             'move': 'Parameters (none needed)',
@@ -2119,7 +2069,7 @@ async function addGesture() {
     try {
         await fetch('/hyprland/gestures', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({
                 action: 'add',
                 fingers: parseInt(fingers),
@@ -2141,8 +2091,8 @@ async function addGesture() {
 }
 
 function showEditGestureModal(fingers, direction, gestureAction, params, raw, dispatcher = '', mod = '', scale = '') {
-    const escapedRaw = raw.replace(/'/g, "\\'");
-    const escapedParams = (params || '').replace(/"/g, '&quot;');
+    const escapedRaw = UI.escapeParam(raw);
+    const escapedParams = UI.escapeParam(params || '');
     const isDispatcher = gestureAction === 'dispatcher';
 
     openModal(`
@@ -2231,7 +2181,7 @@ async function updateGesture(oldRaw) {
     try {
         await fetch('/hyprland/gestures', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({
                 action: 'update',
                 fingers: parseInt(fingers),
@@ -2257,8 +2207,8 @@ async function deleteGesture(raw) {
     try {
         await fetch('/hyprland/gestures', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ action: 'delete', fingers: 0, direction: '', gesture_action: '', old_raw: raw })
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({action: 'delete', fingers: 0, direction: '', gesture_action: '', old_raw: raw})
         });
         await loadGestures();
         renderTabContent('gestures');
@@ -2269,15 +2219,12 @@ async function deleteGesture(raw) {
 }
 
 function confirmDeleteGesture(raw) {
-    const escapedRaw = raw.replace(/'/g, "\\'");
+    const escapedRaw = UI.escapeParam(raw);
     confirmDialog('Delete Gesture',
         `Are you sure you want to delete this gesture?`,
         `function() {deleteGesture('${escapedRaw}')}`);
 }
 
-// =============================================================================
-// PRESETS
-// =============================================================================
 
 async function loadPresets() {
     try {
@@ -2293,10 +2240,10 @@ async function loadPresets() {
 }
 
 function renderPresetSelector() {
-    // Find or create preset container in the page
+
     let container = document.getElementById('preset-selector-container');
 
-    // If no container exists, try to add it to the header area
+
     if (!container) {
         const header = document.querySelector('.page-header') || document.querySelector('.config-header');
         if (header) {
@@ -2305,7 +2252,7 @@ function renderPresetSelector() {
             container.className = 'flex justify-between items-center mb-4';
             header.appendChild(container);
         } else {
-            // Create before tab navigation as fallback
+
             const tabNav = document.getElementById('tab-nav');
             if (tabNav) {
                 container = document.createElement('div');
@@ -2313,7 +2260,7 @@ function renderPresetSelector() {
                 container.className = 'flex justify-between items-center mb-4';
                 tabNav.parentElement.insertBefore(container, tabNav);
             } else {
-                return; // No suitable location found
+                return;
             }
         }
     }
@@ -2354,9 +2301,9 @@ function renderPresetSelector() {
 
 async function handlePresetChange(presetId) {
     if (!presetId) {
-        // Deactivate current preset
+
         try {
-            await fetch('/presets/hyprland/deactivate', { method: 'POST' });
+            await fetch('/presets/hyprland/deactivate', {method: 'POST'});
             activePreset = null;
             showToast('Preset deactivated', 'info');
         } catch (e) {
@@ -2365,14 +2312,14 @@ async function handlePresetChange(presetId) {
         return;
     }
 
-    // Check for unsaved changes
+
     if (Object.keys(pendingChanges).length > 0) {
         confirmDialog(
             'Unsaved Changes',
             'You have unsaved changes. Switching presets will discard them. Continue?',
             `function() { activatePreset('${presetId}') }`
         );
-        // Reset dropdown to current if user cancels
+
         document.getElementById('preset-dropdown').value = activePreset || '';
         return;
     }
@@ -2384,8 +2331,8 @@ async function activatePreset(presetId) {
     try {
         const response = await fetch(`/presets/hyprland/${presetId}/activate`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ backup_current: true })
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({backup_current: true})
         });
 
         if (!response.ok) {
@@ -2395,7 +2342,7 @@ async function activatePreset(presetId) {
         const result = await response.json();
         activePreset = presetId;
 
-        // Reload config to reflect changes
+
         await loadConfig();
         renderTabContent(activeTab);
         renderPresetSelector();
@@ -2436,21 +2383,21 @@ function showSavePresetModal() {
     `);
 }
 
-// Save config and sync to active preset
+
 async function saveAndSyncPreset() {
-    // First save the config to file
+
     if (Object.keys(pendingChanges).length > 0) {
         await saveConfig();
     }
 
-    // Then sync to the active preset
+
     await syncToActivePreset();
 
-    // Refresh the UI
+
     renderPresetSelector();
 }
 
-// Sync current config to the active preset
+
 async function syncToActivePreset() {
     if (!activePreset) return;
 
@@ -2477,7 +2424,7 @@ async function saveNewPreset() {
         return;
     }
 
-    // First save any pending changes
+
     if (Object.keys(pendingChanges).length > 0) {
         await saveConfig();
     }
@@ -2485,8 +2432,8 @@ async function saveNewPreset() {
     try {
         const response = await fetch('/presets/hyprland', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ name, description })
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({name, description})
         });
 
         if (!response.ok) {
@@ -2512,8 +2459,8 @@ function showManagePresetsModal() {
         </div>
         <div class="mb-6">
             ${presets.length === 0 ?
-            '<p class="text-center py-8 text-zinc-500 italic">No presets saved yet. Click "Save As" to create your first preset.</p>' :
-            `<div class="space-y-2">
+        '<p class="text-center py-8 text-zinc-500 italic">No presets saved yet. Click "Save As" to create your first preset.</p>' :
+        `<div class="space-y-2">
                 ${presets.map(p => `
                     <div class="flex items-center justify-between p-3 bg-zinc-900 border ${p.id === activePreset ? 'border-teal-500 bg-teal-500/5' : 'border-zinc-800 hover:border-zinc-700'} rounded-lg group transition-all">
                         <div class="flex-1 min-w-0 pr-4">
@@ -2535,7 +2482,7 @@ function showManagePresetsModal() {
                     </div>
                 `).join('')}
             </div>`
-        }
+    }
         </div>
         <div class="flex justify-end gap-3 pt-4 border-t border-zinc-800/50">
             <button class="px-4 py-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 rounded-lg transition-colors" onclick="closeModal()">Close</button>
@@ -2545,7 +2492,7 @@ function showManagePresetsModal() {
 
 async function activatePresetFromModal(presetId) {
     await activatePreset(presetId);
-    showManagePresetsModal(); // Refresh modal
+    showManagePresetsModal();
 }
 
 function showEditPresetModal(id, name, description) {
@@ -2583,13 +2530,13 @@ async function updatePreset(presetId) {
     try {
         const response = await fetch(`/presets/hyprland/${presetId}`, {
             method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ name, description })
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({name, description})
         });
 
         if (!response.ok) throw new Error('Update failed');
 
-        // Update local state
+
         const idx = presets.findIndex(p => p.id === presetId);
         if (idx >= 0) {
             presets[idx].name = name;
@@ -2605,7 +2552,7 @@ async function updatePreset(presetId) {
 }
 
 async function updatePresetContent(presetId) {
-    // First save pending changes
+
     if (Object.keys(pendingChanges).length > 0) {
         await saveConfig();
     }

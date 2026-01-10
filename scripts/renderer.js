@@ -14,7 +14,7 @@ class UI {
      * @param {string} options.emptyMessage - Message to show if data is empty
      * @returns {string} HTML string
      */
-    static renderTable({ headers, data, rowRenderer, emptyMessage = 'No items found' }) {
+    static renderTable({headers, data, rowRenderer, emptyMessage = 'No items found'}) {
         if (!data || data.length === 0) {
             return `<div class="bg-zinc-900 border border-zinc-800 rounded-xl p-8 text-center text-zinc-500">${emptyMessage}</div>`;
         }
@@ -80,7 +80,7 @@ class UI {
     static filterSection(input) {
         const query = input.value.toLowerCase();
         // Find the parent container (the section)
-        const container = input.closest('.bg-zinc-900');
+        const container = input.closest('.search-container');
         if (!container) return;
 
         // Try to filter table rows
@@ -127,7 +127,15 @@ class UI {
             </div>
         `;
     }
+
+    static escapeParam(str) {
+        if (str === null || str === undefined) return '';
+        return String(str)
+            .replace(/\\/g, '\\\\')
+            .replace(/'/g, "\\'")
+            .replace(/"/g, '&quot;')
+            .replace(/\n/g, '\\n');
+    }
 }
 
-// Expose UI globally
 window.UI = UI;
