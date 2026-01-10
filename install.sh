@@ -103,48 +103,40 @@ fi
 # Requirements & Start Script
 echo "Installing requirements..."
 
-# Note: We are currently inside TARGET_DIR (via cd above if cloning, or implicit cwd)
-# But wait, in the clone block above, I did 'cd "$INSTALL_DIR"'.
-# In "Repo Mode", we are in CWD.
-# So we are effectively always inside TARGET_DIR at this point.
-
 cd "$TARGET_DIR"
 
-if [ "$PYTHON_INSTALLED_BY_SCRIPT" = true ]; then
-    echo "Creating virtual environment (since Python was just installed)..."
-    $PYTHON_CMD -m venv venv
-
-    echo "Installing dependencies into venv..."
-    ./venv/bin/pip install -r requirements.txt
-
-    echo "Generating start.sh..."
-    cat > start.sh <<EOF
-#!/bin/bash
-DIR="\$(cd "\$(dirname "\${BASH_SOURCE[0]}")" && pwd)"
-cd "\$DIR"
-# Check for updates
-./update.sh "\$@"
-source venv/bin/activate
-exec python main.py
-EOF
-
-else
-    echo "Python found on system. Installing requirements directly..."
-    # Attempt install.
-    $PIP_CMD install -r requirements.txt
-
-    echo "Generating start.sh..."
-    # Use the detected python command
-    cat > start.sh <<EOF
-#!/bin/bash
-DIR="\$(cd "\$(dirname "\${BASH_SOURCE[0]}")" && pwd)"
-cd "\$DIR"
-# Check for updates
-./update.sh "\$@"
-exec $PYTHON_CMD main.py
-EOF
-
+echo "Creating virtual environment..."
+# Resolve absolute path of python command to ensure stability
+ABS_PYTHON_CMD=$(which $PYTHON_CMD)
+if command -v readlink &>/dev/null; then
+    ABS_PYTHON_CMD=$(readlink -f "$ABS_PYTHON_CMD")
 fi
+
+$ABS_PYTHON_CMD -m venv venv
+
+echo "Installing dependencies into venv..."
+./venv/bin/pip install -r requirements.txt
+
+# Resolve absolute path for the venv python
+VENV_PYTHON="$TARGET_DIR/venv/bin/python"
+
+echo "Generating start.sh..."
+cat > start.sh <<EOF
+#!/bin/bash
+DIR="\$(cd "\$(dirname "\${BASH_SOURCE[0]}")" && pwd)"
+cd "\$DIR"
+
+# Check for updates
+if [ -f "update.sh" ]; then
+    ./update.sh "\$@"
+fi
+
+# Store PID
+echo \$\$ > archboard.pid
+
+source venv/bin/activate
+exec "$VENV_PYTHON" main.py
+EOF
 
 chmod +x start.sh
 
