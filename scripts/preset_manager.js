@@ -282,6 +282,6 @@ class PresetManagerUI {
     }
 }
 
-// Global registry for instances (so HTML onclicks can find them)
+
 window._presetManagers = window._presetManagers || {};
 window.PresetManagerUI = PresetManagerUI;

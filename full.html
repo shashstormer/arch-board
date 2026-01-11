@@ -5745,28 +5745,50 @@
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div class="space-y-6">
-                <div>
-                    <label class="block text-sm font-medium text-zinc-400 mb-2">Day Temperature (K)</label>
-                    <div class="flex items-center gap-4">
-                        <input type="range" min="1000" max="6500" step="100" id="temp-day-slider"
-                            class="flex-1 accent-teal-500"
-                            oninput="document.getElementById('temp-day').value = this.value">
-                        <input type="number" id="temp-day"
-                            class="w-20 px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-zinc-200 text-sm focus:outline-none focus:border-teal-500"
-                            oninput="document.getElementById('temp-day-slider').value = this.value">
-                    </div>
-                    <p class="text-xs text-zinc-500 mt-1">Neutral is around 6500K. Lower is warmer.</p>
+                <div class="flex items-center gap-3 pb-2 border-b border-zinc-800">
+                    <input type="checkbox" id="unified-mode" onchange="toggleUnified()"
+                        class="w-5 h-5 rounded border-zinc-700 bg-zinc-800 text-teal-600 focus:ring-teal-500/20">
+                    <label for="unified-mode" class="text-sm font-medium text-zinc-300">Unified Day & Night
+                        Temperature</label>
                 </div>
 
-                <div>
-                    <label class="block text-sm font-medium text-zinc-400 mb-2">Night Temperature (K)</label>
+                <div id="unified-controls" class="hidden">
+                    <label class="block text-sm font-medium text-zinc-400 mb-2">Screen Temperature (K)</label>
                     <div class="flex items-center gap-4">
-                        <input type="range" min="1000" max="6500" step="100" id="temp-night-slider"
-                            class="flex-1 accent-orange-500"
-                            oninput="document.getElementById('temp-night').value = this.value">
-                        <input type="number" id="temp-night"
+                        <input type="range" min="1000" max="6500" step="100" id="temp-unified-slider"
+                            class="flex-1 accent-teal-500"
+                            oninput="document.getElementById('temp-unified').value = this.value">
+                        <input type="number" id="temp-unified"
                             class="w-20 px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-zinc-200 text-sm focus:outline-none focus:border-teal-500"
-                            oninput="document.getElementById('temp-night-slider').value = this.value">
+                            oninput="document.getElementById('temp-unified-slider').value = this.value">
+                    </div>
+                    <p class="text-xs text-zinc-500 mt-1">Sets both day and night temperature.</p>
+                </div>
+
+                <div id="split-controls" class="space-y-6">
+                    <div>
+                        <label class="block text-sm font-medium text-zinc-400 mb-2">Day Temperature (K)</label>
+                        <div class="flex items-center gap-4">
+                            <input type="range" min="1000" max="6500" step="100" id="temp-day-slider"
+                                class="flex-1 accent-teal-500"
+                                oninput="document.getElementById('temp-day').value = this.value">
+                            <input type="number" id="temp-day"
+                                class="w-20 px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-zinc-200 text-sm focus:outline-none focus:border-teal-500"
+                                oninput="document.getElementById('temp-day-slider').value = this.value">
+                        </div>
+                        <p class="text-xs text-zinc-500 mt-1">Neutral is around 6500K. Lower is warmer.</p>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-zinc-400 mb-2">Night Temperature (K)</label>
+                        <div class="flex items-center gap-4">
+                            <input type="range" min="1000" max="6500" step="100" id="temp-night-slider"
+                                class="flex-1 accent-orange-500"
+                                oninput="document.getElementById('temp-night').value = this.value">
+                            <input type="number" id="temp-night"
+                                class="w-20 px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-zinc-200 text-sm focus:outline-none focus:border-teal-500"
+                                oninput="document.getElementById('temp-night-slider').value = this.value">
+                        </div>
                     </div>
                 </div>
 
@@ -12737,7 +12759,7 @@ class PresetManagerUI {
     }
 }
 
-// Global registry for instances (so HTML onclicks can find them)
+
 window._presetManagers = window._presetManagers || {};
 window.PresetManagerUI = PresetManagerUI;
 
@@ -13869,6 +13891,7 @@ class WpaperdEditor {
 
 let config = {};
 let isRunning = false;
+let isUnified = false;
 
 document.addEventListener('DOMContentLoaded', async () => {
     await loadConfig();
@@ -13877,7 +13900,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     setInterval(loadStatus, 5000);
 
     if (window.PresetManagerUI) {
-        new PresetManagerUI('gammastep', {
+        window._presetManagers['gammastep'] =new PresetManagerUI('gammastep', {
             containerId: 'preset-container',
             onActivate: async () => {
                 await loadConfig();
@@ -13895,6 +13918,7 @@ async function loadConfig() {
     try {
         const response = await fetch('/gammastep/config');
         config = await response.json();
+        isUnified = (config.temp_day === config.temp_night);
         renderConfig();
     } catch (e) {
         showToast('Failed to load config', 'error');
@@ -13923,7 +13947,24 @@ function renderConfig() {
     setValue('lat', config.lat);
     setValue('lon', config.lon);
 
-    toggleLocationInputs(config.location_provider === 'manual');
+    const unifiedToggle = document.getElementById('unified-mode');
+    if (unifiedToggle) unifiedToggle.checked = isUnified;
+
+    if (isUnified) {
+        document.getElementById('unified-controls').classList.remove('hidden');
+        document.getElementById('split-controls').classList.add('hidden');
+
+        setValue('temp-unified', config.temp_day);
+        setValue('temp-unified-slider', config.temp_day);
+
+        disableLocationSection(true);
+    } else {
+        document.getElementById('unified-controls').classList.add('hidden');
+        document.getElementById('split-controls').classList.remove('hidden');
+
+        disableLocationSection(false);
+        toggleLocationInputs(config.location_provider === 'manual');
+    }
 }
 
 function updateStatusUI() {
@@ -13950,9 +13991,20 @@ function updateStatusUI() {
 }
 
 async function saveConfig(silent = false) {
+    let dayTemp, nightTemp;
+
+    if (isUnified) {
+        const val = parseInt(getValue('temp-unified'));
+        dayTemp = val;
+        nightTemp = val;
+    } else {
+        dayTemp = parseInt(getValue('temp-day'));
+        nightTemp = parseInt(getValue('temp-night'));
+    }
+
     const newConfig = {
-        temp_day: parseInt(getValue('temp-day')),
-        temp_night: parseInt(getValue('temp-night')),
+        temp_day: dayTemp,
+        temp_night: nightTemp,
         fade: document.getElementById('fade').checked ? '1' : '0',
         location_provider: getValue('provider'),
         lat: parseFloat(getValue('lat')),
@@ -13978,6 +14030,15 @@ async function saveConfig(silent = false) {
     }
 }
 
+function toggleUnified() {
+    isUnified = !isUnified;
+    if (isUnified) {
+        config.temp_night = config.temp_day;
+    }
+    renderConfig();
+    debouncedSave();
+}
+
 async function toggleGammastep() {
     try {
         const response = await fetch('/gammastep/toggle', { method: 'POST' });
@@ -13996,6 +14057,7 @@ function getValue(id) {
 
 function setValue(id, value) {
     const el = document.getElementById(id);
+    if (!el) return;
     if (el.type === 'checkbox') {
         el.checked = value;
     } else {
@@ -14013,6 +14075,20 @@ function toggleLocationInputs(show) {
         container.classList.remove('opacity-50', 'pointer-events-none');
     } else {
         container.classList.add('opacity-50', 'pointer-events-none');
+    }
+}
+
+function disableLocationSection(disable) {
+    const provider = document.getElementById('provider');
+    const container = document.getElementById('manual-location-group');
+
+    if (disable) {
+        provider.disabled = true;
+        provider.classList.add('opacity-50', 'cursor-not-allowed');
+        container.classList.add('opacity-50', 'pointer-events-none');
+    } else {
+        provider.disabled = false;
+        provider.classList.remove('opacity-50', 'cursor-not-allowed');
     }
 }
 

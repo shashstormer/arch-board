@@ -1,5 +1,6 @@
 let config = {};
 let isRunning = false;
+let isUnified = false;
 
 document.addEventListener('DOMContentLoaded', async () => {
     await loadConfig();
@@ -8,7 +9,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     setInterval(loadStatus, 5000);
 
     if (window.PresetManagerUI) {
-        new PresetManagerUI('gammastep', {
+        window._presetManagers['gammastep'] =new PresetManagerUI('gammastep', {
             containerId: 'preset-container',
             onActivate: async () => {
                 await loadConfig();
@@ -26,6 +27,7 @@ async function loadConfig() {
     try {
         const response = await fetch('/gammastep/config');
         config = await response.json();
+        isUnified = (config.temp_day === config.temp_night);
         renderConfig();
     } catch (e) {
         showToast('Failed to load config', 'error');
@@ -54,7 +56,24 @@ function renderConfig() {
     setValue('lat', config.lat);
     setValue('lon', config.lon);
 
-    toggleLocationInputs(config.location_provider === 'manual');
+    const unifiedToggle = document.getElementById('unified-mode');
+    if (unifiedToggle) unifiedToggle.checked = isUnified;
+
+    if (isUnified) {
+        document.getElementById('unified-controls').classList.remove('hidden');
+        document.getElementById('split-controls').classList.add('hidden');
+
+        setValue('temp-unified', config.temp_day);
+        setValue('temp-unified-slider', config.temp_day);
+
+        disableLocationSection(true);
+    } else {
+        document.getElementById('unified-controls').classList.add('hidden');
+        document.getElementById('split-controls').classList.remove('hidden');
+
+        disableLocationSection(false);
+        toggleLocationInputs(config.location_provider === 'manual');
+    }
 }
 
 function updateStatusUI() {
@@ -81,9 +100,20 @@ function updateStatusUI() {
 }
 
 async function saveConfig(silent = false) {
+    let dayTemp, nightTemp;
+
+    if (isUnified) {
+        const val = parseInt(getValue('temp-unified'));
+        dayTemp = val;
+        nightTemp = val;
+    } else {
+        dayTemp = parseInt(getValue('temp-day'));
+        nightTemp = parseInt(getValue('temp-night'));
+    }
+
     const newConfig = {
-        temp_day: parseInt(getValue('temp-day')),
-        temp_night: parseInt(getValue('temp-night')),
+        temp_day: dayTemp,
+        temp_night: nightTemp,
         fade: document.getElementById('fade').checked ? '1' : '0',
         location_provider: getValue('provider'),
         lat: parseFloat(getValue('lat')),
@@ -109,6 +139,15 @@ async function saveConfig(silent = false) {
     }
 }
 
+function toggleUnified() {
+    isUnified = !isUnified;
+    if (isUnified) {
+        config.temp_night = config.temp_day;
+    }
+    renderConfig();
+    debouncedSave();
+}
+
 async function toggleGammastep() {
     try {
         const response = await fetch('/gammastep/toggle', { method: 'POST' });
@@ -127,6 +166,7 @@ function getValue(id) {
 
 function setValue(id, value) {
     const el = document.getElementById(id);
+    if (!el) return;
     if (el.type === 'checkbox') {
         el.checked = value;
     } else {
@@ -144,6 +184,20 @@ function toggleLocationInputs(show) {
         container.classList.remove('opacity-50', 'pointer-events-none');
     } else {
         container.classList.add('opacity-50', 'pointer-events-none');
+    }
+}
+
+function disableLocationSection(disable) {
+    const provider = document.getElementById('provider');
+    const container = document.getElementById('manual-location-group');
+
+    if (disable) {
+        provider.disabled = true;
+        provider.classList.add('opacity-50', 'cursor-not-allowed');
+        container.classList.add('opacity-50', 'pointer-events-none');
+    } else {
+        provider.disabled = false;
+        provider.classList.remove('opacity-50', 'cursor-not-allowed');
     }
 }
 
