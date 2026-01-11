@@ -73,7 +73,6 @@ def get_manager(tool: str) -> PresetManager:
                 tool_name=tool_id
             )
             
-            # Attempt migration
             manager.migrate_from(old_dir)
             
             _managers[tool] = manager

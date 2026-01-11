@@ -83,6 +83,42 @@ To run the application without checking for updates (useful for startup scripts)
 
 ## Configuration
 
+## Enabling And Disabling Plugins
+
+I plan on implementing a plugin installer in the future, which will copy pages, scripts etc.
+
+Comments are supported using # at the start of the line.
+
+To disable a default plugin you need to add a line
+
+exclude:plugin_name
+
+Default included plugins are
+- dashboard (do not disable this, / will return 404 if disabled)
+- hyprland
+- waybar
+- hyprlock
+- hypridle
+- wpaperd
+- system (the system stats on dashboard page need this router)
+- presets (presets on all pages need this)
+- static (needed for serving the js files etc)
+- navigation (needed for sidebar links)
+- images (The Image picker which is used on hyprlock, wpaperd need this)
+- fonts (for the font picker on hyprlock need this)
+- gammastep (i use gammastep so i enabled by default, feel free to disable it)
+
+to disable gammastep you need to create a `plugins.txt` file and add the exclude line
+```text
+# Exclude gammastep
+exclude:gammastep
+# Include some other plugin, plugin_name=APIRouter name 
+# plugin name can be plugin_name.py or plugin_name/__init__.py coz its the same to python
+# If you have a router for niri you can do this.
+niri=niri_router 
+# Niri planned for soon
+```
+
 ### Production Mode
 
 The application runs in **development mode** by default, which enables:

@@ -1,3 +1,5 @@
+import json
+import os
 import time
 
 from fastapi import APIRouter, HTTPException
@@ -13,6 +15,8 @@ from utils.plugins_frontend import register_navigation, NavItem
 from plugins.gammastep.config import gammastep_config
 
 gammastep_router = APIRouter(prefix="/gammastep", tags=["gammastep"])
+
+STATE_FILE = os.path.expanduser("~/.config/gammastep/state.json")
 
 register_navigation([
     NavItem(
@@ -89,9 +93,11 @@ def get_status():
 def toggle_status():
     if is_running():
         stop_process()
+        save_state(False)
         return {"running": False, "message": "Gammastep stopped"}
     else:
         start_process()
+        save_state(True)
         return {"running": True, "message": "Gammastep started"}
 
 
@@ -117,3 +123,34 @@ def stop_process():
 
 def start_process():
     subprocess.Popen(["gammastep"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+
+def save_state(running: bool):
+    """Save the running state to a JSON file."""
+    try:
+        if not os.path.exists(os.path.dirname(STATE_FILE)):
+            os.makedirs(os.path.dirname(STATE_FILE), exist_ok=True)
+        with open(STATE_FILE, "w") as f:
+            json.dump({"running": running}, f)
+    except Exception as e:
+        print(f"Failed to save gammastep state: {e}")
+
+def restore_state():
+    """Restore the running state from a JSON file on startup."""
+    if not os.path.exists(STATE_FILE):
+        return
+
+    try:
+        with open(STATE_FILE, "r") as f:
+            state = json.load(f)
+            
+        should_be_running = state.get("running", False)
+        is_currently_running = is_running()
+        
+        if should_be_running and not is_currently_running:
+            start_process()
+            
+    except Exception as e:
+        print(f"Failed to restore gammastep state: {e}")
+
+
+restore_state()
