@@ -17,7 +17,7 @@ gammastep_router = APIRouter(prefix="/gammastep", tags=["gammastep"])
 register_navigation([
     NavItem(
         id="gammastep",
-        title="Night Light",
+        title="Gammastep",
         url="/gammastep",
         icon="moon",
         group="config",
