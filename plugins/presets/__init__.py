@@ -55,6 +55,11 @@ def get_manager(tool: str) -> PresetManager:
                 "~/.config/wpaperd/config.toml",
                 "~/.config/wpaperd/presets",
                 "wpaperd"
+            ),
+            "gammastep": (
+                 "~/.config/gammastep/config.ini",
+                 "~/.archboard/presets/gammastep", 
+                 "gammastep"
             )
         }
         

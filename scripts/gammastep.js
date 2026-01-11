@@ -4,7 +4,22 @@ let isRunning = false;
 document.addEventListener('DOMContentLoaded', async () => {
     await loadConfig();
     await loadStatus();
+
     setInterval(loadStatus, 5000);
+
+    if (window.PresetManagerUI) {
+        new PresetManagerUI('gammastep', {
+            containerId: 'preset-container',
+            onActivate: async () => {
+                await loadConfig();
+                showToast('Preset activated', 'success');
+            },
+            onSave: async () => {
+                await saveConfig(true);
+            }
+        });
+    }
+    attachAutosaveListeners();
 });
 
 async function loadConfig() {
@@ -65,7 +80,7 @@ function updateStatusUI() {
     }
 }
 
-async function saveConfig() {
+async function saveConfig(silent = false) {
     const newConfig = {
         temp_day: parseInt(getValue('temp-day')),
         temp_night: parseInt(getValue('temp-night')),
@@ -83,7 +98,7 @@ async function saveConfig() {
         });
 
         if (response.ok) {
-            showToast('Configuration saved', 'success');
+            if (!silent) showToast('Configuration saved', 'success');
             config = newConfig;
             loadStatus();
         } else {
@@ -130,4 +145,33 @@ function toggleLocationInputs(show) {
     } else {
         container.classList.add('opacity-50', 'pointer-events-none');
     }
+}
+
+let saveTimeout = null;
+function debouncedSave() {
+    if (saveTimeout) clearTimeout(saveTimeout);
+    saveTimeout = setTimeout(async () => {
+        await saveConfig(true);
+    }, 500);
+}
+
+function attachAutosaveListeners() {
+    const inputs = document.querySelectorAll('input, select');
+    inputs.forEach(input => {
+        input.addEventListener('input', () => {
+            if (input.type === 'range') {
+                const targetId = input.id.replace('-slider', '');
+                const target = document.getElementById(targetId);
+                if (target) target.value = input.value;
+            }
+            if (input.type === 'number') {
+                const targetId = input.id + '-slider';
+                const target = document.getElementById(targetId);
+                if (target) target.value = input.value;
+            }
+            debouncedSave();
+        });
+
+        input.addEventListener('change', debouncedSave);
+    });
 }

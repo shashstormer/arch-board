@@ -28,6 +28,7 @@ class GammastepConfig:
 
     def get_all(self) -> Dict[str, Any]:
         """Return config as a dictionary for the frontend."""
+        self.load()
         return {
             "temp_day": self.config['general'].getint('temp-day', fallback=5700),
             "temp_night": self.config['general'].getint('temp-night', fallback=3500),

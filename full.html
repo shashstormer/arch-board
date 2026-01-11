@@ -204,7 +204,7 @@
             </svg>
             Welcome,  
         </h1>
-        <p class="text-sm text-zinc-500 mt-1">Your Arch Linux configuration manager</p>
+        <p class="text-sm text-zinc-500 mt-1">Manage your config</p>
     </div>
     <button
         class="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-br from-teal-500 to-teal-600 text-white border-none rounded-lg text-sm font-medium cursor-pointer transition-all duration-150 hover:from-teal-400 hover:to-teal-500 hover:-translate-y-px hover:shadow-lg hover:shadow-teal-500/20">
@@ -5724,10 +5724,14 @@
             </div>
         </div>
 
-        <button id="btn-toggle" onclick="toggleGammastep()"
-            class="px-6 py-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-400 rounded-lg transition-all">
-            <span id="toggle-text">Turn On</span>
-        </button>
+        <div class="flex items-center gap-4">
+            <div id="preset-container" class="flex items-center"></div>
+            <button id="btn-toggle" onclick="toggleGammastep()"
+                class="px-6 py-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-400 rounded-lg transition-all whitespace-nowrap">
+                <span id="toggle-text">Turn On</span>
+            </button>
+        </div>
+
     </div>
 
     <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-8 mb-6">
@@ -13869,7 +13873,22 @@ let isRunning = false;
 document.addEventListener('DOMContentLoaded', async () => {
     await loadConfig();
     await loadStatus();
+
     setInterval(loadStatus, 5000);
+
+    if (window.PresetManagerUI) {
+        new PresetManagerUI('gammastep', {
+            containerId: 'preset-container',
+            onActivate: async () => {
+                await loadConfig();
+                showToast('Preset activated', 'success');
+            },
+            onSave: async () => {
+                await saveConfig(true);
+            }
+        });
+    }
+    attachAutosaveListeners();
 });
 
 async function loadConfig() {
@@ -13930,7 +13949,7 @@ function updateStatusUI() {
     }
 }
 
-async function saveConfig() {
+async function saveConfig(silent = false) {
     const newConfig = {
         temp_day: parseInt(getValue('temp-day')),
         temp_night: parseInt(getValue('temp-night')),
@@ -13948,7 +13967,7 @@ async function saveConfig() {
         });
 
         if (response.ok) {
-            showToast('Configuration saved', 'success');
+            if (!silent) showToast('Configuration saved', 'success');
             config = newConfig;
             loadStatus();
         } else {
@@ -13995,5 +14014,34 @@ function toggleLocationInputs(show) {
     } else {
         container.classList.add('opacity-50', 'pointer-events-none');
     }
+}
+
+let saveTimeout = null;
+function debouncedSave() {
+    if (saveTimeout) clearTimeout(saveTimeout);
+    saveTimeout = setTimeout(async () => {
+        await saveConfig(true);
+    }, 500);
+}
+
+function attachAutosaveListeners() {
+    const inputs = document.querySelectorAll('input, select');
+    inputs.forEach(input => {
+        input.addEventListener('input', () => {
+            if (input.type === 'range') {
+                const targetId = input.id.replace('-slider', '');
+                const target = document.getElementById(targetId);
+                if (target) target.value = input.value;
+            }
+            if (input.type === 'number') {
+                const targetId = input.id + '-slider';
+                const target = document.getElementById(targetId);
+                if (target) target.value = input.value;
+            }
+            debouncedSave();
+        });
+
+        input.addEventListener('change', debouncedSave);
+    });
 }
 
