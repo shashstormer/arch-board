@@ -28,7 +28,7 @@ class ImagePicker {
             statusId: config.statusId || 'ip-status',
             ctxMenuId: config.ctxMenuId || 'ip-context-menu'
         };
-        this.options = { ...this.options, ...options };
+        this.options = {...this.options, ...options};
 
         this.fetchItems();
     }
@@ -43,7 +43,7 @@ class ImagePicker {
     show(options) {
         if (this.isMounted) return;
 
-        this.options = { ...this.options, ...options };
+        this.options = {...this.options, ...options};
         this.isOpen = true;
         this.selected.clear();
         this.currentFolderId = null;
@@ -93,16 +93,10 @@ class ImagePicker {
     getModalContent() {
         return `
             <div id="ip-modal-container" class="w-full h-[650px] flex flex-col animate-in fade-in zoom-in duration-200 select-none">
-                <!-- Header / Toolbar -->
                 <div class="px-4 py-3 border-b border-zinc-800 bg-zinc-900 flex justify-between items-center gap-4">
                     <h3 class="text-lg font-semibold text-white shrink-0">Files</h3>
-                    
-                    <!-- Breadcrumbs -->
-                    <div id="ip-breadcrumbs" class="flex-1 flex items-center overflow-hidden text-sm text-zinc-400 gap-1 px-2">
-                        <!-- Populated via JS -->
+                    <div id="ip-breadcrumbs" class="flex-1 flex items-center overflow-hidden text-sm text-zinc-400 gap-1 px-2">    
                     </div>
-
-                    <!-- Actions -->
                     <div class="flex items-center gap-2">
                         <button onclick="window._imagePicker.createFolderPrompt()" class="p-2 hover:bg-zinc-800 rounded text-zinc-400 hover:text-white" title="New Folder">
                             📁+
@@ -120,19 +114,13 @@ class ImagePicker {
                         <button class="p-2 hover:bg-zinc-800 rounded text-zinc-400 hover:text-white ml-2" onclick="window._imagePicker.close()">✕</button>
                     </div>
                 </div>
-
-                <!-- Main Content Area -->
-                <div class="flex-1 flex overflow-hidden">
-                    <!-- File Grid -->
+                <div class="flex-1 flex overflow-hidden">  
                     <div id="ip-content" 
                          class="flex-1 overflow-y-auto p-4 bg-zinc-950/50"
                          ondragover="window._imagePicker.onDragOver(event)"
                          ondrop="window._imagePicker.handleDrop(event)">
-                         <!-- Content -->
                     </div>
                 </div>
-
-                <!-- Footer -->
                 <div class="px-6 py-4 border-t border-zinc-800 bg-zinc-900 flex justify-between items-center">
                     <div class="text-sm text-zinc-500">
                         <span id="ip-status">Ready</span>
@@ -145,7 +133,7 @@ class ImagePicker {
                     </div>
                 </div>
                 
-                <!-- Context Menu (Hidden) -->
+                
                 <div id="ip-context-menu" class="fixed hidden bg-zinc-900 border border-zinc-700 rounded-lg shadow-xl z-50 w-48 py-1">
                     <button class="w-full text-left px-4 py-2 text-sm text-zinc-300 hover:bg-zinc-800 hover:text-white" onclick="window._imagePicker.ctxRename()">Rename</button>
                     <button class="w-full text-left px-4 py-2 text-sm text-red-400 hover:bg-zinc-800 hover:text-red-300" onclick="window._imagePicker.ctxDelete()">Delete</button>
@@ -302,8 +290,8 @@ class ImagePicker {
         try {
             const res = await fetch('/images/fs/folder', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name, parent_id: this.currentFolderId })
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({name, parent_id: this.currentFolderId})
             });
             if (res.ok) {
                 this.fetchItems();
@@ -400,8 +388,8 @@ class ImagePicker {
         try {
             const res = await fetch(`/images/fs/${itemId}/move`, {
                 method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ target_parent_id: targetParentId })
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({target_parent_id: targetParentId})
             });
             if (res.ok) {
                 this.fetchItems();
@@ -452,11 +440,13 @@ class ImagePicker {
         try {
             const res = await fetch(`/images/fs/${this.ctxId}/rename`, {
                 method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name: newName })
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({name: newName})
             });
             if (res.ok) this.fetchItems();
-        } catch (e) { console.error(e); }
+        } catch (e) {
+            console.error(e);
+        }
     }
 
     async ctxDelete() {
@@ -468,6 +458,8 @@ class ImagePicker {
                 method: 'DELETE'
             });
             if (res.ok) this.fetchItems();
-        } catch (e) { console.error(e); }
+        } catch (e) {
+            console.error(e);
+        }
     }
 }

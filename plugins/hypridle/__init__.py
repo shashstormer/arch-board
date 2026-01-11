@@ -53,7 +53,7 @@ async def hypridle_page():
         "current_page": "hypridle",
         "page_title": "ArchBoard - Hypridle Settings",
         "page_header": "Hypridle Settings",
-        "page_description": "Configure Hypridle idle management",
+        "page_description": "Configure Hypridle management",
     }))
     return HTMLResponse(parser.html_content)
 

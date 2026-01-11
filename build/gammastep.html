@@ -192,60 +192,117 @@
             </svg>
         </button>
     </div>
-</header><div class="flex-1 overflow-y-auto overflow-x-hidden p-6 w-full scrollbar-thin scrollbar-thumb-zinc-700 scrollbar-track-transparent"><!-- Hyprland Config Editor -->
-<div id="hyprland-editor" class="container mx-auto p-6 max-w-7xl">
-    <!-- Header with Save/Reload buttons -->
-    <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
-        <div class="flex items-center gap-3">
-            <svg class="w-8 h-8 text-teal-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+</header><div class="flex-1 overflow-y-auto overflow-x-hidden p-6 w-full scrollbar-thin scrollbar-thumb-zinc-700 scrollbar-track-transparent"><div class="container mx-auto p-8 max-w-4xl">
+
+    <div class="flex items-center justify-between mb-8">
+        <div class="flex items-center gap-4">
+            <div class="p-3 bg-orange-500/10 rounded-2xl border border-orange-500/20">
+                <svg class="w-8 h-8 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                        d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                </svg>
+            </div>
+            <div>
+                <h1 class="text-3xl font-bold text-zinc-100">Night Light</h1>
+                <div class="flex items-center gap-2 mt-1">
+                    <div id="status-icon" class="w-2 h-2 rounded-full bg-zinc-700"></div>
+                    <span id="status-text" class="text-sm font-medium text-zinc-500">Inactive</span>
+                </div>
+            </div>
+        </div>
+
+        <button id="btn-toggle" onclick="toggleGammastep()"
+            class="px-6 py-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-400 rounded-lg transition-all">
+            <span id="toggle-text">Turn On</span>
+        </button>
+    </div>
+
+    <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-8 mb-6">
+        <h2 class="text-lg font-semibold text-zinc-100 mb-6 flex items-center gap-2">
+            <svg class="w-5 h-5 text-zinc-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
             </svg>
-            <h1 class="text-2xl font-bold text-zinc-100">Hyprland Configuration</h1>
-        </div>
-        <div class="flex items-center gap-3">
-            <div id="preset-container" class="mr-2"></div>
-            <button id="btn-reload"
-                class="flex items-center gap-2 px-4 py-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 rounded-lg transition-colors"
-                onclick="reloadHyprland()">
-                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                </svg>
-                Reload
-            </button>
-            <button id="btn-save"
-                class="flex items-center gap-2 px-4 py-2 bg-teal-600 hover:bg-teal-500 text-white font-medium rounded-lg transition-colors shadow-lg shadow-teal-900/20"
-                onclick="saveConfig()">
-                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
-                </svg>
-                Save
-            </button>
-        </div>
-    </div>
+            Settings
+        </h2>
 
-    <!-- Tab Navigation -->
-    <div id="tab-nav"
-        class="flex flex-wrap gap-2 mb-6 bg-zinc-900/50 p-1.5 rounded-xl border border-zinc-800/50 backdrop-blur-sm sticky top-0 z-10">
-        <!-- Tabs rendered by JS -->
-    </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div class="space-y-6">
+                <div>
+                    <label class="block text-sm font-medium text-zinc-400 mb-2">Day Temperature (K)</label>
+                    <div class="flex items-center gap-4">
+                        <input type="range" min="1000" max="6500" step="100" id="temp-day-slider"
+                            class="flex-1 accent-teal-500"
+                            oninput="document.getElementById('temp-day').value = this.value">
+                        <input type="number" id="temp-day"
+                            class="w-20 px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-zinc-200 text-sm focus:outline-none focus:border-teal-500"
+                            oninput="document.getElementById('temp-day-slider').value = this.value">
+                    </div>
+                    <p class="text-xs text-zinc-500 mt-1">Neutral is around 6500K. Lower is warmer.</p>
+                </div>
 
-    <!-- Tab Content -->
-    <div id="tab-content"
-        class="bg-zinc-900/50 min-h-[500px] rounded-xl border border-zinc-800/50 backdrop-blur-sm relative">
-        <!-- Loading state -->
-        <div class="flex flex-col items-center justify-center h-96 gap-4 text-zinc-500">
-            <div class="w-10 h-10 border-4 border-zinc-800 border-t-teal-500 rounded-full animate-spin"></div>
-            <span>Loading configuration...</span>
+                <div>
+                    <label class="block text-sm font-medium text-zinc-400 mb-2">Night Temperature (K)</label>
+                    <div class="flex items-center gap-4">
+                        <input type="range" min="1000" max="6500" step="100" id="temp-night-slider"
+                            class="flex-1 accent-orange-500"
+                            oninput="document.getElementById('temp-night').value = this.value">
+                        <input type="number" id="temp-night"
+                            class="w-20 px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-zinc-200 text-sm focus:outline-none focus:border-teal-500"
+                            oninput="document.getElementById('temp-night-slider').value = this.value">
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-3 pt-2">
+                    <input type="checkbox" id="fade"
+                        class="w-5 h-5 rounded border-zinc-700 bg-zinc-800 text-teal-600 focus:ring-teal-500/20">
+                    <label for="fade" class="text-sm text-zinc-300">Smooth Transition (Fade)</label>
+                </div>
+            </div>
+
+            <div class="space-y-6">
+                <div>
+                    <label class="block text-sm font-medium text-zinc-400 mb-2">Location Provider</label>
+                    <select id="provider" onchange="handleProviderChange(this)"
+                        class="w-full px-4 py-2.5 bg-zinc-800 border border-zinc-700 rounded-lg text-zinc-200 text-sm focus:outline-none focus:border-teal-500 appearance-none">
+                        <option value="manual">Manual Coordinates</option>
+                        <option value="geoclue2">Automatic (GeoClue2)</option>
+                    </select>
+                </div>
+
+                <div id="manual-location-group" class="grid grid-cols-2 gap-4 transition-opacity duration-200">
+                    <div>
+                        <label class="block text-sm font-medium text-zinc-400 mb-2">Latitude</label>
+                        <input type="number" id="lat" step="0.1"
+                            class="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-zinc-200 text-sm focus:outline-none focus:border-teal-500"
+                            placeholder="e.g. 48.1">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-zinc-400 mb-2">Longitude</label>
+                        <input type="number" id="lon" step="0.1"
+                            class="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-zinc-200 text-sm focus:outline-none focus:border-teal-500"
+                            placeholder="e.g. 11.6">
+                    </div>
+                    <div class="col-span-2 text-xs text-zinc-500">
+                        Positive for North/East, Negative for South/West.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="flex justify-end pt-8 mt-8 border-t border-zinc-800">
+            <button onclick="saveConfig()"
+                class="flex items-center gap-2 px-6 py-2.5 bg-zinc-100 hover:bg-white text-zinc-900 font-semibold rounded-lg transition-colors">
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                </svg>
+                Save Changes
+            </button>
         </div>
     </div>
 </div>
 
-<script src="/scripts/hyprland.js?v={{ cache_key }}"></script></div><footer
+<script src="/scripts/gammastep.js"></script></div><footer
     class="flex items-center justify-between px-6 py-3 bg-zinc-950/90 border-t border-zinc-800/50 text-xs text-zinc-500">
     <div class="flex items-center gap-4">
         <div class="flex items-center gap-2">

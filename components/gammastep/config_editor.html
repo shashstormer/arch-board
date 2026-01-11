@@ -1,0 +1,111 @@
+<div class="container mx-auto p-8 max-w-4xl">
+
+    <div class="flex items-center justify-between mb-8">
+        <div class="flex items-center gap-4">
+            <div class="p-3 bg-orange-500/10 rounded-2xl border border-orange-500/20">
+                <svg class="w-8 h-8 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                        d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                </svg>
+            </div>
+            <div>
+                <h1 class="text-3xl font-bold text-zinc-100">Night Light</h1>
+                <div class="flex items-center gap-2 mt-1">
+                    <div id="status-icon" class="w-2 h-2 rounded-full bg-zinc-700"></div>
+                    <span id="status-text" class="text-sm font-medium text-zinc-500">Inactive</span>
+                </div>
+            </div>
+        </div>
+
+        <button id="btn-toggle" onclick="toggleGammastep()"
+            class="px-6 py-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-400 rounded-lg transition-all">
+            <span id="toggle-text">Turn On</span>
+        </button>
+    </div>
+
+    <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-8 mb-6">
+        <h2 class="text-lg font-semibold text-zinc-100 mb-6 flex items-center gap-2">
+            <svg class="w-5 h-5 text-zinc-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
+            </svg>
+            Settings
+        </h2>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div class="space-y-6">
+                <div>
+                    <label class="block text-sm font-medium text-zinc-400 mb-2">Day Temperature (K)</label>
+                    <div class="flex items-center gap-4">
+                        <input type="range" min="1000" max="6500" step="100" id="temp-day-slider"
+                            class="flex-1 accent-teal-500"
+                            oninput="document.getElementById('temp-day').value = this.value">
+                        <input type="number" id="temp-day"
+                            class="w-20 px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-zinc-200 text-sm focus:outline-none focus:border-teal-500"
+                            oninput="document.getElementById('temp-day-slider').value = this.value">
+                    </div>
+                    <p class="text-xs text-zinc-500 mt-1">Neutral is around 6500K. Lower is warmer.</p>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-zinc-400 mb-2">Night Temperature (K)</label>
+                    <div class="flex items-center gap-4">
+                        <input type="range" min="1000" max="6500" step="100" id="temp-night-slider"
+                            class="flex-1 accent-orange-500"
+                            oninput="document.getElementById('temp-night').value = this.value">
+                        <input type="number" id="temp-night"
+                            class="w-20 px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-zinc-200 text-sm focus:outline-none focus:border-teal-500"
+                            oninput="document.getElementById('temp-night-slider').value = this.value">
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-3 pt-2">
+                    <input type="checkbox" id="fade"
+                        class="w-5 h-5 rounded border-zinc-700 bg-zinc-800 text-teal-600 focus:ring-teal-500/20">
+                    <label for="fade" class="text-sm text-zinc-300">Smooth Transition (Fade)</label>
+                </div>
+            </div>
+
+            <div class="space-y-6">
+                <div>
+                    <label class="block text-sm font-medium text-zinc-400 mb-2">Location Provider</label>
+                    <select id="provider" onchange="handleProviderChange(this)"
+                        class="w-full px-4 py-2.5 bg-zinc-800 border border-zinc-700 rounded-lg text-zinc-200 text-sm focus:outline-none focus:border-teal-500 appearance-none">
+                        <option value="manual">Manual Coordinates</option>
+                        <option value="geoclue2">Automatic (GeoClue2)</option>
+                    </select>
+                </div>
+
+                <div id="manual-location-group" class="grid grid-cols-2 gap-4 transition-opacity duration-200">
+                    <div>
+                        <label class="block text-sm font-medium text-zinc-400 mb-2">Latitude</label>
+                        <input type="number" id="lat" step="0.1"
+                            class="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-zinc-200 text-sm focus:outline-none focus:border-teal-500"
+                            placeholder="e.g. 48.1">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-zinc-400 mb-2">Longitude</label>
+                        <input type="number" id="lon" step="0.1"
+                            class="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-zinc-200 text-sm focus:outline-none focus:border-teal-500"
+                            placeholder="e.g. 11.6">
+                    </div>
+                    <div class="col-span-2 text-xs text-zinc-500">
+                        Positive for North/East, Negative for South/West.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="flex justify-end pt-8 mt-8 border-t border-zinc-800">
+            <button onclick="saveConfig()"
+                class="flex items-center gap-2 px-6 py-2.5 bg-zinc-100 hover:bg-white text-zinc-900 font-semibold rounded-lg transition-colors">
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                </svg>
+                Save Changes
+            </button>
+        </div>
+    </div>
+</div>
+
+<script src="/scripts/gammastep.js"></script>

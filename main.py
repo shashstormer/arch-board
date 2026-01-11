@@ -10,11 +10,9 @@ from utils.plugins import get_routers
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Register and start background services
     register_default_tasks()
     bg_service.start()
     yield
-    # Cleanup on shutdown
     bg_service.stop()
 
 app = FastAPI(docs_url=None, redoc_url=None, lifespan=lifespan)
