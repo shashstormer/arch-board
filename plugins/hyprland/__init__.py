@@ -19,7 +19,6 @@ from plugins.hyprland.helpers.migration import HyprlandVersion, ConfigMigrator
 
 hyprland_router = APIRouter(prefix="/hyprland", tags=["hyprland"])
 
-                     
 register_navigation(
     items=[NavItem(id="hyprland", title="Hyprland", url="/hyprland", icon="hyprland", group="config", order=10)],
     groups=[NavGroup(id="config", title="Config", icon="config", order=10)]
@@ -27,12 +26,10 @@ register_navigation(
 
 from plugins.hyprland.helpers.hyprland_schema import HYPRLAND_SCHEMA
 
-                                   
 search_items = []
 
-                                    
 for tab in HYPRLAND_SCHEMA:
-                        
+
     search_items.append(SearchItem(
         id=f"hyprland-tab-{tab.id}",
         title=f"{tab.title} Settings",
@@ -42,16 +39,10 @@ for tab in HYPRLAND_SCHEMA:
         keywords=[tab.title.lower(), "settings", "config"]
     ))
 
-                 
     for section in tab.sections:
         for option in section.options:
-                                                                  
-            base_title = option.name.replace("_", " ").title()
 
-                                                                                                             
-                                                                           
-                                                                                                                             
-                                                                                                      
+            base_title = option.name.replace("_", " ").title()
 
             start_context = ""
             if section.title and "General" not in section.title and "Miscellaneous" not in section.title:
@@ -62,14 +53,13 @@ for tab in HYPRLAND_SCHEMA:
             search_items.append(SearchItem(
                 id=f"hyprland-opt-{section.name}-{option.name}",
                 title=formatted_title,
-                url=f"/hyprland?tab={tab.id}",                                                 
-                category=f"Hyprland: {tab.title}",                      
-                description=option.description,                           
+                url=f"/hyprland?tab={tab.id}",
+                category=f"Hyprland: {tab.title}",
+                description=option.description,
                 keywords=option.name.split("_") + [tab.title.lower(), section.title.lower()],
-                selector=f'[data-path="{section.name}:{option.name}"]'                      
+                selector=f'[data-path="{section.name}:{option.name}"]'
             ))
 
-                          
 special_tabs = [
     ("monitors", "Monitors", "Configure displays, resolution, positioning"),
     ("binds", "Keybinds", "Manage keyboard shortcuts and hotkeys"),
@@ -89,14 +79,11 @@ for tab_id, title, desc in special_tabs:
         keywords=[title.lower(), "settings", "config"]
     ))
 
-                    
 register_search(search_items)
 
-                     
 CONFIG_PATH = os.path.expanduser("~/.config/hypr/hyprland.conf")
 
 
-            
 @hyprland_router.get("", response_class=HTMLResponse)
 async def hyprland_page():
     parser = Parser(path="hyprland.pypx")
@@ -118,13 +105,13 @@ def to_hypr_value(value: Any) -> str:
 
 class ConfigUpdate(BaseModel):
     """Request model for config updates."""
-    path: str                                                        
+    path: str
     value: Any
 
 
 class BulkConfigUpdate(BaseModel):
     """Request model for bulk config updates."""
-    updates: Dict[str, Any]                 
+    updates: Dict[str, Any]
 
 
 @hyprland_router.get("/schema")
@@ -143,10 +130,8 @@ async def get_config():
         hl = HyprLang(CONFIG_PATH)
         conf = hl.load()
 
-                                                   
         config_values = {}
 
-                                               
         schema = get_schema()
         for tab in schema:
             for section in tab["sections"]:
@@ -154,14 +139,13 @@ async def get_config():
                 for option in section["options"]:
                     option_name = option["name"]
 
-                                                  
                     full_path = f"{section_name}:{option_name}"
                     value = conf.get(full_path)
 
                     if value is not None:
                         config_values[full_path] = value
                     else:
-                                     
+
                         config_values[full_path] = option["default"]
 
         return {
@@ -182,13 +166,11 @@ async def update_config(update: ConfigUpdate):
         hl = HyprLang(CONFIG_PATH)
         conf = hl.load()
 
-                       
         success = conf.set(update.path, to_hypr_value(update.value))
 
         if not success:
             raise HTTPException(status_code=400, detail=f"Failed to set {update.path}")
 
-                           
         hl.save()
 
         return {"success": True, "path": update.path, "value": update.value}
@@ -211,7 +193,6 @@ async def bulk_update_config(update: BulkConfigUpdate):
             success = conf.set(path, to_hypr_value(value))
             results[path] = {"success": success, "value": value}
 
-                           
         hl.save()
 
         return {"success": True, "results": results}
@@ -234,10 +215,6 @@ async def reload_hyprland():
         raise HTTPException(status_code=500, detail=str(e))
 
 
-                                                                               
-          
-                                                                               
-
 @hyprland_router.get("/monitors")
 async def get_monitors():
     """Get all monitor configurations."""
@@ -251,7 +228,7 @@ async def get_monitors():
         monitors = []
         for line in conf.lines:
             if line.key == "monitor":
-                                                                       
+
                 parts = [p.strip() for p in line.value.raw.split(",")]
                 if len(parts) >= 4:
                     monitors.append({
@@ -293,12 +270,10 @@ async def update_monitor(monitor: MonitorUpdate):
         hl = HyprLang(CONFIG_PATH)
         conf = hl.load()
 
-                                      
         value = f"{monitor.name}, {monitor.resolution}, {monitor.position}, {monitor.scale}"
         if monitor.extras:
             value += ", " + ", ".join(monitor.extras)
 
-                                                                          
         found = False
         for line in conf.lines:
             if line.key == "monitor" and line.value.raw.startswith(monitor.name + ","):
@@ -316,10 +291,6 @@ async def update_monitor(monitor: MonitorUpdate):
         raise HTTPException(status_code=500, detail=str(e))
 
 
-                                                                               
-          
-                                                                               
-
 @hyprland_router.get("/binds")
 async def get_binds():
     """Get all keybind configurations."""
@@ -331,43 +302,122 @@ async def get_binds():
         conf = hl.load()
 
         binds = []
-        bind_types = ["bind", "binde", "bindl", "bindr", "bindm", "bindc", "bindg", "bindd", "bindt", "binds", "bindo",
-                      "bindu"]
+        submaps = {"global"}
+        current_submap = "global"
+
+        import re
+        bindd_pattern = re.compile(r"^([^,]+),\s*([^,]+),\s*([^,]+),\s*([^,]+)(?:,\s*(.*))?$")
+        standard_pattern = re.compile(r"^([^,]*),\s*([^,]+),\s*([^,]+)(?:,\s*(.*))?$")
 
         for line in conf.lines:
-            if line.key in bind_types or line.key.startswith("bind"):
-                                                      
-                parts = [p.strip() for p in line.value.raw.split(",", 3)]
+            key = line.key.strip()
+            if key == "submap":
+                val = line.value.raw.strip().split(",")[0].strip()
+                if val == "reset":
+                    current_submap = "global"
+                else:
+                    current_submap = val
+                    submaps.add(val)
+                continue
+
+            if key == "unbind":
+                p = [x.strip() for x in line.value.raw.split(",", 1)]
                 bind_info = {
-                    "type": line.key,
+                    "type": "unbind",
+                    "raw_type": "unbind",
                     "raw": line.value.raw,
-                    "mods": parts[0] if len(parts) > 0 else "",
-                    "key": parts[1] if len(parts) > 1 else "",
-                    "dispatcher": parts[2] if len(parts) > 2 else "",
-                    "params": parts[3] if len(parts) > 3 else ""
+                    "flags": "",
+                    "mods": p[0] if len(p) > 0 else "",
+                    "key": p[1] if len(p) > 1 else "",
+                    "dispatcher": "",
+                    "params": "",
+                    "description": "",
+                    "submap": current_submap
+                }
+                binds.append(bind_info)
+                continue
+
+            if key.startswith("bind"):
+                raw = line.value.raw
+                flags = ""
+                description = ""
+
+                if key != "bind":
+                    suffix = key[4:]
+                    if suffix:
+                        flags = suffix
+
+                if "[" in key and key.endswith("]"):
+                    flags += key[key.find("[") + 1: key.find("]")]
+
+                parts = {}
+
+                if key == "bindd":
+                    match = bindd_pattern.match(raw)
+                    if match:
+                        parts = {
+                            "mods": match.group(1).strip(),
+                            "key": match.group(2).strip(),
+                            "description": match.group(3).strip(),
+                            "dispatcher": match.group(4).strip(),
+                            "params": match.group(5).strip() if match.group(5) else ""
+                        }
+                    else:
+                        p = [x.strip() for x in raw.split(",", 4)]
+                        if len(p) >= 4:
+                            parts = {"mods": p[0], "key": p[1], "description": p[2], "dispatcher": p[3],
+                                     "params": p[4] if len(p) > 4 else ""}
+
+                else:
+                    match = standard_pattern.match(raw)
+                    if match:
+                        parts = {
+                            "mods": match.group(1).strip(),
+                            "key": match.group(2).strip(),
+                            "dispatcher": match.group(3).strip(),
+                            "params": match.group(4).strip() if match.group(4) else ""
+                        }
+                    else:
+                        p = [x.strip() for x in raw.split(",", 3)]
+                        parts = {
+                            "mods": p[0] if len(p) > 0 else "",
+                            "key": p[1] if len(p) > 1 else "",
+                            "dispatcher": p[2] if len(p) > 2 else "",
+                            "params": p[3] if len(p) > 3 else ""
+                        }
+
+                bind_info = {
+                    "type": "bind",
+                    "raw_type": key,
+                    "raw": raw,
+                    "flags": flags,
+                    "mods": parts.get("mods", ""),
+                    "key": parts.get("key", ""),
+                    "dispatcher": parts.get("dispatcher", ""),
+                    "params": parts.get("params", ""),
+                    "description": parts.get("description", ""),
+                    "submap": current_submap
                 }
                 binds.append(bind_info)
 
-        return {"binds": binds}
+        return {"binds": binds, "submaps": sorted(list(submaps))}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
 
 class BindUpdate(BaseModel):
     """Keybind update model."""
-    action: str = "add"                             
+    action: str = "add"
     type: str = "bind"
+    flags: str = ""
     mods: str
     key: str
     dispatcher: str
     params: str = ""
+    description: str = ""
+    submap: str = "global"
     old_raw: Optional[str] = None
 
-
-                                                        
-                                                                               
-              
-                                                                               
 
 @hyprland_router.get("/windowrules")
 async def get_windowrules():
@@ -382,7 +432,6 @@ async def get_windowrules():
         rules = []
         for line in conf.lines:
             if line.key == "windowrule" or line.key == "windowrulev2":
-                                      
                 parts = [p.strip() for p in line.value.raw.split(",", 1)]
                 rules.append({
                     "type": line.key,
@@ -396,9 +445,129 @@ async def get_windowrules():
         raise HTTPException(status_code=500, detail=str(e))
 
 
-                                                                               
-             
-                                                                               
+class SubmapUpdate(BaseModel):
+    """Submap update model."""
+    action: str
+    name: str
+
+
+class BindReorder(BaseModel):
+    """Bind reordering model."""
+    submap: str
+    ordered_raws: list[str]
+
+
+@hyprland_router.post("/submaps")
+async def update_submap(update: SubmapUpdate):
+    """Add or delete a submap."""
+    if not os.path.exists(CONFIG_PATH):
+        raise HTTPException(status_code=404, detail="Hyprland config not found")
+
+    try:
+        with open(CONFIG_PATH, 'r') as f:
+            lines = f.readlines()
+
+        if update.action == "add":
+            # Check if exists
+            if any(l.strip() == f"submap = {update.name}" for l in lines):
+                return {"success": False, "message": "Submap already exists"}
+
+            # Append to end
+            lines.append(f"\n# Submap: {update.name}\n")
+            lines.append(f"bind = ALT, M, submap, {update.name} # Example entry\n")
+            lines.append(f"submap = {update.name}\n")
+            lines.append(f"bind = , ESCAPE, submap, reset\n")
+            lines.append(f"submap = reset\n")
+
+        elif update.action == "delete":
+            # Remove the submap block
+            # We look for `submap = name` ... `submap = reset`
+            new_lines = []
+            in_submap = False
+            for line in lines:
+                if line.strip() == f"submap = {update.name}":
+                    in_submap = True
+                    continue
+                if in_submap and line.strip() == "submap = reset":
+                    in_submap = False
+                    continue
+                if not in_submap:
+                    new_lines.append(line)
+            lines = new_lines
+
+        with open(CONFIG_PATH, 'w') as f:
+            f.writelines(lines)
+
+        return {"success": True}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# @hyprland_router.post("/binds/reorder")
+# async def reorder_binds(update: BindReorder):
+#     """Reorder keybinds within a submap."""
+#     if not os.path.exists(CONFIG_PATH):
+#         raise HTTPException(status_code=404, detail="Hyprland config not found")
+#
+#     try:
+#         with open(CONFIG_PATH, 'r') as f:
+#             lines = f.readlines()
+#
+#         # Identify submap range
+#         start_idx = -1
+#         end_idx = -1
+#
+#         if update.submap == "global":
+#             start_idx = 0
+#             pass # FUTURE
+#         else:
+#             for i, line in enumerate(lines):
+#                 if line.strip() == f"submap = {update.submap}":
+#                     start_idx = i
+#                 if start_idx != -1 and line.strip() == "submap = reset" and i > start_idx:
+#                     end_idx = i
+#                     break
+#
+#         lines_to_move = {}
+#         indices_to_remove = []
+#
+#         search_range = range(len(lines))
+#         if start_idx != -1 and end_idx != -1:
+#             search_range = range(start_idx + 1, end_idx)
+#         elif update.submap != "global":
+#             # Submap not found?
+#             return {"success": False}
+#
+#         # Find matching lines
+#         for i in search_range:
+#             raw_val = lines[i].split("=", 1)[1].strip() if "=" in lines[i] else ""
+#             if "=" in lines[i]:
+#                 parts = lines[i].split("=", 1)
+#                 val = parts[1].strip()
+#                 if val in update.ordered_raws:
+#                     lines_to_move[val] = lines[i]
+#                     indices_to_remove.append(i)
+#
+#         # Remove
+#         for i in sorted(indices_to_remove, reverse=True):
+#             del lines[i]
+#
+#         # Insert back
+#         insert_point = indices_to_remove[0] if indices_to_remove else (start_idx + 1 if start_idx != -1 else len(lines))
+#
+#         for raw in update.ordered_raws:
+#             if raw in lines_to_move:
+#                 lines.insert(insert_point, lines_to_move[raw])
+#                 insert_point += 1
+#
+#         with open(CONFIG_PATH, 'w') as f:
+#             f.writelines(lines)
+#
+#         return {"success": True}
+#
+#     except Exception as e:
+#         raise HTTPException(status_code=500, detail=str(e))
+
 
 @hyprland_router.get("/layerrules")
 async def get_layerrules():
@@ -413,24 +582,24 @@ async def get_layerrules():
         rules = []
         for line in conf.lines:
             if line.key == "layerrule":
-                                                                                          
+
                 raw = line.value.raw
                 parts = [p.strip() for p in raw.split(",", 1)]
-                
+
                 effect = parts[0] if len(parts) > 0 else ""
                 namespace = ""
-                
+
                 if len(parts) > 1:
                     match_part = parts[1]
                     if "match:namespace" in match_part.lower():
-                                                                                  
+
                         idx = match_part.lower().find("match:namespace")
                         rest = match_part[idx + 15:].strip()
                         namespace = rest.split(",")[0].strip()
                     else:
-                                       
+
                         namespace = match_part.strip()
-                
+
                 rules.append({
                     "raw": raw,
                     "effect": effect,
@@ -452,26 +621,24 @@ async def update_layer_rule(update: LayerRuleUpdate):
         with open(CONFIG_PATH, 'r') as f:
             lines = f.readlines()
 
-                                           
         version = HyprlandVersion.detect()
         use_new_syntax = False
-        
+
         if version:
             use_new_syntax = version.supports_new_window_rules()
         else:
-                            
+
             hl = HyprLang(CONFIG_PATH)
             conf = hl.load()
             for line in conf.lines:
                 if (line.key == "layerrule" and "match:" in line.value.raw):
                     use_new_syntax = True
                     break
-        
-                                            
+
         if use_new_syntax:
             # New syntax: effect on, match:namespace namespace
             effect_part = update.effect.strip()
-            
+
             # Normalize common legacy inputs to new syntax
             if effect_part == "ignorezero":
                 effect_part = "ignore_alpha 0"
@@ -490,25 +657,19 @@ async def update_layer_rule(update: LayerRuleUpdate):
         else:
             # Legacy syntax: effect, namespace
             effect_part = update.effect.strip()
-            
+
             # Back-port new syntax inputs to legacy if needed
             if effect_part == "stay_focused":
                 effect_part = "stayfocused"
             elif effect_part == "ignore_alpha 0":
                 effect_part = "ignorezero"
             elif effect_part.startswith("ignore_alpha"):
-                 # legacy used ignorealpha (no underscore)
-                 effect_part = effect_part.replace("ignore_alpha", "ignorealpha", 1)
-            
-            # Legacy doesn't use "on", usually just "effect"
-            # note: older hyprland might tolerate 'on' but usually it was 'blur,namespace'
+                effect_part = effect_part.replace("ignore_alpha", "ignorealpha", 1)
             if effect_part.endswith(" on"):
                 effect_part = effect_part[:-3]
-                
             new_line = f"layerrule = {effect_part}, {update.namespace}\n"
 
         if update.action == "add":
-                                                                                       
             insert_idx = len(lines)
             for i, line in enumerate(lines):
                 if line.strip().startswith("layerrule"):
@@ -534,10 +695,6 @@ async def update_layer_rule(update: LayerRuleUpdate):
         raise HTTPException(status_code=500, detail=str(e))
 
 
-                                                                               
-               
-                                                                               
-
 @hyprland_router.get("/exec")
 async def get_exec_commands():
     """Get all exec and exec-once commands."""
@@ -561,10 +718,6 @@ async def get_exec_commands():
         raise HTTPException(status_code=500, detail=str(e))
 
 
-                                                                               
-                       
-                                                                               
-
 @hyprland_router.get("/env")
 async def get_env_vars():
     """Get all environment variable configurations."""
@@ -578,7 +731,6 @@ async def get_env_vars():
         env_vars = []
         for i, line in enumerate(conf.lines):
             if line.key == "env":
-                                   
                 parts = line.value.raw.split(",", 1)
                 if len(parts) >= 2:
                     env_vars.append({
@@ -613,7 +765,6 @@ async def update_env_var(update: EnvUpdate):
         new_line = f"env = {update.name},{update.value}\n"
 
         if update.action == "add":
-                                                                    
             insert_idx = 0
             for i, line in enumerate(lines):
                 if line.strip().startswith("env ="):
@@ -652,7 +803,6 @@ async def update_exec_command(update: ExecUpdate):
         new_line = f"{update.type} = {update.command}\n"
 
         if update.action == "add":
-                                  
             insert_idx = len(lines)
             for i, line in enumerate(lines):
                 if line.strip().startswith("exec"):
@@ -688,35 +838,24 @@ async def update_window_rule(update: WindowRuleUpdate):
         with open(CONFIG_PATH, 'r') as f:
             lines = f.readlines()
 
-                                           
         version = HyprlandVersion.detect()
         use_new_syntax = False
-        
         if version:
             use_new_syntax = version.supports_new_window_rules()
         else:
-                            
             hl = HyprLang(CONFIG_PATH)
             conf = hl.load()
             for line in conf.lines:
                 if (line.key == "windowrule" and "match:" in line.value.raw):
                     use_new_syntax = True
                     break
-        
         if use_new_syntax:
-                                   
             rule_type = "windowrule"
-            
-                           
             effect = update.effect
             if " " not in effect:
                 effect = f"{effect} on"
-            
-                  
             if effect.startswith("ignorealpha"):
                 effect = effect.replace("ignorealpha", "ignore_alpha", 1)
-            
-                          
             match_parts = [p.strip() for p in update.match.split(",")]
             new_matches = []
             KNOWN_KEYS = {
@@ -724,7 +863,7 @@ async def update_window_rule(update: WindowRuleUpdate):
                 'floating', 'xwayland', 'pinned', 'workspace',
                 'fullscreen', 'monitor', 'address', 'pid', 'uid', 'group'
             }
-            
+
             for part in match_parts:
                 part_lower = part.lower()
                 if part_lower.startswith("match:"):
@@ -737,14 +876,14 @@ async def update_window_rule(update: WindowRuleUpdate):
                         new_matches.append(f"match:class {part}")
                 else:
                     new_matches.append(f"match:class {part}")
-            
+
             match_str = ", ".join(new_matches)
             new_line = f"windowrule = {effect}, {match_str}\n"
         else:
             new_line = f"{update.type} = {update.effect},{update.match}\n"
 
         if update.action == "add":
-                                  
+
             insert_idx = len(lines)
             for i, line in enumerate(lines):
                 if line.strip().startswith("windowrule"):
@@ -781,19 +920,40 @@ async def update_bind(update: BindUpdate):
             lines = f.readlines()
 
         if update.action == "add":
-            params = f",{update.params}" if update.params else ""
-            new_line = f"{update.type} = {update.mods},{update.key},{update.dispatcher}{params}\n"
-                                  
-            insert_idx = len(lines)
-            for i, line in enumerate(lines):
-                if line.strip().startswith("bind"):
-                    insert_idx = i + 1
-            lines.insert(insert_idx, new_line)
+            if update.type == "unbind":
+                new_line = f"{update.type} = {update.mods},{update.key}\n"
+            else:
+                params = f",{update.params}" if update.params else ""
+                new_line = f"{update.type} = {update.mods},{update.key},{update.dispatcher}{params}\n"
+
+            if update.submap and update.submap != "global":
+                submap_start = -1
+                submap_end = -1
+                for i, line in enumerate(lines):
+                    if line.strip() == f"submap = {update.submap}":
+                        submap_start = i
+                    if submap_start != -1 and i > submap_start and line.strip() == "submap = reset":
+                        submap_end = i
+                        break
+                
+                if submap_end != -1:
+                    lines.insert(submap_end, new_line)
+                else:
+                    lines.append(f"\n# Submap: {update.submap}\n")
+                    lines.append(f"submap = {update.submap}\n")
+                    lines.append(new_line)
+                    lines.append("submap = reset\n")
+            else:
+                lines.append(new_line)
 
         elif update.action == "update":
             if update.old_raw:
-                params = f",{update.params}" if update.params else ""
-                new_line = f"{update.type} = {update.mods},{update.key},{update.dispatcher}{params}\n"
+                if update.type == "unbind":
+                    new_line = f"{update.type} = {update.mods},{update.key}\n"
+                else:
+                    params = f",{update.params}" if update.params else ""
+                    new_line = f"{update.type} = {update.mods},{update.key},{update.dispatcher}{params}\n"
+                
                 for i, line in enumerate(lines):
                     if update.old_raw in line:
                         lines[i] = new_line
@@ -845,20 +1005,16 @@ async def get_open_windows():
         return {"windows": [], "error": str(e)}
 
 
-                                                                               
-          
-                                                                               
-
 class GestureUpdate(BaseModel):
     """Request model for gesture updates."""
-    action: str                             
+    action: str
     fingers: int
-    direction: str                                  
-    gesture_action: str                                                                                                   
-    dispatcher: Optional[str] = ""                                                       
+    direction: str
+    gesture_action: str
+    dispatcher: Optional[str] = ""
     params: Optional[str] = ""
-    mod: Optional[str] = ""                                       
-    scale: Optional[str] = ""                                       
+    mod: Optional[str] = ""
+    scale: Optional[str] = ""
     old_raw: Optional[str] = None
 
 
@@ -875,7 +1031,7 @@ async def get_gestures():
         gestures = []
         for line in conf.lines:
             if line.key == "gesture":
-                                                                                   
+
                 raw = line.value.raw
                 parts = [p.strip() for p in raw.split(",")]
 
@@ -883,7 +1039,6 @@ async def get_gestures():
                     fingers = parts[0]
                     direction = parts[1]
 
-                                                            
                     mod = ""
                     scale = ""
                     idx = 2
@@ -904,7 +1059,6 @@ async def get_gestures():
                         dispatcher = ""
                         params = ""
 
-                                                         
                         if action.lower() == "dispatcher" and idx + 1 < len(parts):
                             dispatcher = parts[idx + 1]
                             params = ",".join(parts[idx + 2:]) if idx + 2 < len(parts) else ""
@@ -938,21 +1092,16 @@ async def update_gesture(update: GestureUpdate):
         with open(CONFIG_PATH, 'r') as f:
             lines = f.readlines()
 
-                                                          
-                                                                            
         parts = [str(update.fingers), update.direction]
 
-                          
         if update.mod:
             parts.append(f"mod: {update.mod}")
 
-                            
         if update.scale:
             parts.append(f"scale: {update.scale}")
 
-                    
         if update.gesture_action == "dispatcher":
-                                                         
+
             parts.append("dispatcher")
             parts.append(update.dispatcher)
             if update.params:
@@ -965,7 +1114,7 @@ async def update_gesture(update: GestureUpdate):
         new_line = f"gesture = {', '.join(parts)}\n"
 
         if update.action == "add":
-                                  
+
             insert_idx = len(lines)
             for i, line in enumerate(lines):
                 if line.strip().startswith("gesture"):
@@ -990,10 +1139,6 @@ async def update_gesture(update: GestureUpdate):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-
-                                                                               
-                                                  
-                                                                               
 
 from plugins.hyprland.helpers.migration import HyprlandVersion, ConfigMigrator, MigrationResult
 from pathlib import Path
@@ -1027,7 +1172,6 @@ async def get_migration_status():
         needs_migration = ConfigMigrator.needs_migration(conf)
         summary = ConfigMigrator.get_migration_summary(conf) if needs_migration else ""
 
-                          
         version = HyprlandVersion.detect()
         version_info = None
         if version:
@@ -1063,14 +1207,11 @@ async def migrate_config():
                 "message": "Config is already using new syntax"
             }
 
-                       
         config_path = Path(CONFIG_PATH)
         backup_path = ConfigMigrator.backup_config(config_path)
 
-                           
         result = ConfigMigrator.migrate(conf)
 
-                              
         hl.save()
 
         return {
@@ -1081,5 +1222,118 @@ async def migrate_config():
             "backup_path": str(backup_path),
             "message": f"Migrated {result.migrated_rules} rules, renamed {result.renamed_options} options. Backup saved to {backup_path.name}"
         }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@hyprland_router.post("/submaps")
+async def update_submap(update: SubmapUpdate):
+    """Add or delete a submap."""
+    if not os.path.exists(CONFIG_PATH):
+        raise HTTPException(status_code=404, detail="Hyprland config not found")
+
+    try:
+        with open(CONFIG_PATH, 'r') as f:
+            lines = f.readlines()
+
+        if update.action == "add":
+            # Append new submap at the end
+            lines.append(f"\n# Submap: {update.name}\n")
+            lines.append(f"submap = {update.name}\n")
+            lines.append(f"submap = reset\n")
+
+        elif update.action == "delete":
+            # Remove submap block
+            new_lines = []
+            in_target_submap = False
+
+            for line in lines:
+                strip = line.strip()
+                if strip.startswith(f"submap = {update.name}"):
+                    in_target_submap = True
+                    continue
+
+                if in_target_submap:
+                    if strip.startswith("submap = reset"):
+                        in_target_submap = False
+                    continue
+
+                new_lines.append(line)
+
+            lines = new_lines
+
+        with open(CONFIG_PATH, 'w') as f:
+            f.writelines(lines)
+
+        return {"success": True, "action": update.action}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@hyprland_router.post("/binds/reorder")
+async def reorder_binds(update: BindReorder):
+    """Reorder binds within a submap."""
+    if not os.path.exists(CONFIG_PATH):
+        raise HTTPException(status_code=404, detail="Hyprland config not found")
+
+    try:
+        with open(CONFIG_PATH, 'r') as f:
+            lines = f.readlines()
+
+        start_idx = 0
+        end_idx = len(lines)
+
+        if update.submap != "global":
+            found_start = False
+            for i, line in enumerate(lines):
+                if line.strip().startswith(f"submap = {update.submap}"):
+                    start_idx = i + 1
+                    found_start = True
+                    break
+
+            if not found_start:
+                raise HTTPException(status_code=404, detail=f"Submap {update.submap} not found")
+
+            for i in range(start_idx, len(lines)):
+                if lines[i].strip().startswith("submap = reset"):
+                    end_idx = i
+                    break
+
+        lines_to_move = []
+        order_map = {r.strip(): i for i, r in enumerate(update.ordered_raws)}
+        indices_to_delete = []
+
+        for i in range(start_idx, end_idx):
+            line = lines[i]
+            parts = line.split('=', 1)
+            if len(parts) > 1:
+                key = parts[0].strip()
+                val = parts[1].strip()
+                if key.startswith("bind") and val in order_map:
+                    lines_to_move.append({
+                        "original_line": line,
+                        "sort_index": order_map[val]
+                    })
+                    indices_to_delete.append(i)
+
+        if not lines_to_move:
+            return {"success": True, "message": "No binds moved"}
+
+        lines_to_move.sort(key=lambda x: x["sort_index"])
+
+        insert_point = indices_to_delete[0]
+
+        for idx in sorted(indices_to_delete, reverse=True):
+            del lines[idx]
+
+        for i, item in enumerate(lines_to_move):
+            lines.insert(insert_point + i, item["original_line"])
+
+        with open(CONFIG_PATH, 'w') as f:
+            f.writelines(lines)
+
+        return {"success": True}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

@@ -1,47 +1,30 @@
-// ArchBoard Shared Utilities
-// Common functionality used across all tool pages
-
-// =============================================================================
-// SETTINGS STATE (persisted in localStorage)
-// =============================================================================
-
 const ArchBoard = {
-    // localStorage key mapping
     _storageKeys: {
         toastsEnabled: 'archboard_toasts',
         autosaveEnabled: 'archboard_autosave'
     },
 
-    // Settings with defaults
     settings: {
         toastsEnabled: localStorage.getItem('archboard_toasts') !== 'false',
         autosaveEnabled: localStorage.getItem('archboard_autosave') === 'true'
     },
 
-    // Update a setting
     setSetting(key, value) {
         this.settings[key] = value;
         const storageKey = this._storageKeys[key] || `archboard_${key}`;
         localStorage.setItem(storageKey, value.toString());
     },
 
-    // Get a setting
     getSetting(key) {
         return this.settings[key];
     }
 };
 
-// =============================================================================
-// TOAST NOTIFICATIONS
-// =============================================================================
-
 function showToast(message, type = 'info') {
-    // Skip if toasts are disabled
     if (!ArchBoard.settings.toastsEnabled) return;
 
     let container = document.getElementById('toast-container');
 
-    // Create container if it doesn't exist
     if (!container) {
         container = document.createElement('div');
         container.id = 'toast-container';
@@ -63,11 +46,9 @@ function showToast(message, type = 'info') {
     `;
     container.appendChild(toast);
 
-    // Auto remove after 3 seconds
     setTimeout(() => toast.remove(), 3000);
 }
 
-// Force show toast even if disabled (for settings confirmation)
 function forceShowToast(message, type = 'info') {
     let container = document.getElementById('toast-container');
     if (!container) {
@@ -89,14 +70,9 @@ function forceShowToast(message, type = 'info') {
     setTimeout(() => toast.remove(), 2000);
 }
 
-// =============================================================================
-// MODAL SYSTEM
-// =============================================================================
-
 function openGlobalModal(content) {
     let overlay = document.getElementById('global-modal-overlay');
 
-    // Create modal overlay if it doesn't exist
     if (!overlay) {
         overlay = document.createElement('div');
         overlay.id = 'global-modal-overlay';
@@ -122,9 +98,7 @@ function closeGlobalModal() {
     if (overlay) overlay.classList.remove('active');
 }
 
-// Shorter aliases for convenience - these check for page-specific modal first
 function openModal(content) {
-    // Check for page-specific modal overlay first (styled consistently with page)
     const pageOverlay = document.getElementById('modal-overlay');
     if (pageOverlay) {
         const modalContent = document.getElementById('modal-content');
@@ -134,22 +108,18 @@ function openModal(content) {
             return;
         }
     }
-    // Fall back to global modal
     openGlobalModal(content);
 }
 
 function closeModal() {
-    // Check for page-specific modal overlay first
     const pageOverlay = document.getElementById('modal-overlay');
     if (pageOverlay && pageOverlay.classList.contains('active')) {
         pageOverlay.classList.remove('active');
         return;
     }
-    // Fall back to global modal
     closeGlobalModal();
 }
 
-// Confirm dialog helper - shows a confirmation dialog with customizable action
 function confirmDialog(title, message, onConfirmFn, confirmText = 'Confirm', isDangerous = true) {
     const buttonClass = isDangerous
         ? 'bg-red-500/10 hover:bg-red-500/20 text-red-500 border border-red-500/50'
@@ -171,10 +141,6 @@ function confirmDialog(title, message, onConfirmFn, confirmText = 'Confirm', isD
     `);
 }
 
-// =============================================================================
-// GLOBAL SETTINGS MODAL
-// =============================================================================
-
 function toggleToasts(enabled) {
     ArchBoard.setSetting('toastsEnabled', enabled);
     forceShowToast(`Toasts ${enabled ? 'enabled' : 'disabled'}`);
@@ -184,12 +150,10 @@ function toggleGlobalAutosave(enabled) {
     ArchBoard.setSetting('autosaveEnabled', enabled);
     forceShowToast(`Autosave ${enabled ? 'enabled' : 'disabled'}`);
 
-    // Also update any tool-specific autosave state
     if (typeof autosaveEnabled !== 'undefined') {
         autosaveEnabled = enabled;
     }
 
-    // Update toggle in hyprland header if it exists
     const toggle = document.getElementById('autosave-toggle');
     if (toggle) toggle.checked = enabled;
 }
@@ -232,48 +196,37 @@ function showGlobalSettingsModal() {
     `);
 }
 
-// Initialize global settings button
 document.addEventListener('DOMContentLoaded', () => {
-    // Find the settings button in header and wire it up
     const settingsButtons = document.querySelectorAll('button[title="Settings"]');
     settingsButtons.forEach(btn => {
         btn.onclick = showGlobalSettingsModal;
     });
 });
 
-// =============================================================================
-// COLOR UTILITIES
-// =============================================================================
-
 const ColorUtils = {
-    // Converts various color formats to #RRGGBB for <input type="color">
     toHex(color) {
         if (!color || typeof color !== 'string') return '#ffffff';
         const str = String(color).trim();
         if (!str) return '#ffffff';
 
-        // 1. Handle Hex: #RRGGBB, #RGB, #RRGGBBAA
         if (str.startsWith('#')) {
-            if (str.length === 4) { // #RGB -> #RRGGBB
+            if (str.length === 4) {
                 return '#' + str[1] + str[1] + str[2] + str[2] + str[3] + str[3];
             }
-            if (str.length === 9) { // #RRGGBBAA -> #RRGGBB (discard alpha for picker)
+            if (str.length === 9) {
                 return str.substring(0, 7);
             }
-            return str.substring(0, 7); // Ensure 7 chars
+            return str.substring(0, 7);
         }
 
-        // 2. Handle Hyprland 0x format: 0xAARRGGBB or 0xRRGGBB
         if (str.startsWith('0x')) {
-            // Remove 0x
             let hex = str.substring(2);
-            if (hex.length === 8) { // AARRGGBB -> RRGGBB
+            if (hex.length === 8) {
                 return '#' + hex.substring(2);
             }
             return '#' + hex;
         }
 
-        // 3. Handle rgba(r, g, b, a) or rgb(r, g, b)
         const rgbMatch = str.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
         if (rgbMatch) {
             const r = parseInt(rgbMatch[1]);
@@ -282,56 +235,42 @@ const ColorUtils = {
             return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
         }
 
-        // 4. Handle Hyprland rgba(hex) format: rgba(33ccffee)
-        // This is weird but Hyprland supports it. It's basically rgba(RRGGBBAA)
         const rgbaHexMatch = str.match(/rgba\(([0-9a-fA-F]{8})\)/);
         if (rgbaHexMatch) {
-            // Extract RRGGBB from RRGGBBAA (first 6 chars)
             return '#' + rgbaHexMatch[1].substring(0, 6);
         }
 
-        // Default
         return '#ffffff';
     },
 
-    // Updates a color value with a new hex color, preserving the original format
     formatUpdate(originalValue, newHexValue) {
         console.log("Got " + originalValue + " and " + newHexValue);
         if (!originalValue) return newHexValue;
         const str = String(originalValue).trim();
 
-        // Remove # from new value
         const newHex = newHexValue.startsWith('#') ? newHexValue.substring(1) : newHexValue;
         const r = parseInt(newHex.substring(0, 2), 16);
         const g = parseInt(newHex.substring(2, 4), 16);
         const b = parseInt(newHex.substring(4, 6), 16);
 
-        // 1. Preserve rgba(r, g, b, a)
         if (str.startsWith('rgba(') && str.includes(',')) {
             const alphaMatch = str.match(/rgba?\(.*,\s*([\d\.]+)\)/);
             const alpha = alphaMatch ? alphaMatch[1] : '1.0';
             return `rgba(${r}, ${g}, ${b}, ${alpha})`;
         }
 
-        // 2. Preserve rgb(r, g, b)
         if (str.startsWith('rgb(')) {
             return `rgb(${r}, ${g}, ${b})`;
         }
 
-        // 3. Preserve 0x format (0xAARRGGBB)
         if (str.startsWith('0x')) {
-            // Need the original alpha
-            // If original was 8 chars (AARRGGBB)
-            if (str.length === 10) { // 0x + 8 chars
+            if (str.length === 10) {
                 const originalAlpha = str.substring(2, 4);
                 return `0x${originalAlpha}${newHex}`;
             }
-            // If original was 6 chars (RRGGBB)
             return `0x${newHex}`;
         }
 
-        // 4. Preserve Hyprland rgba(hex) format: rgba(33ccffee)
-        // Check if starts with rgba( and does NOT contain comma (decimal format)
         if (str.startsWith('rgba(') && !str.includes(',')) {
             const hexMatch = str.match(/([0-9a-fA-F]{8})/);
             if (hexMatch) {
@@ -344,18 +283,9 @@ const ColorUtils = {
     }
 };
 
-// Expose globally
 window.ColorUtils = ColorUtils;
 
-// =============================================================================
-// FONT UTILITIES
-// =============================================================================
-
 const FontUtils = {
-    /**
-     * Parse a font string like "Caveat Bold" into family, weight, and style.
-     * Applies the parsed values to an element.
-     */
     applyFontStyle(el, fontString) {
         if (!fontString) {
             el.style.fontFamily = 'Sans';
@@ -368,7 +298,6 @@ const FontUtils = {
 
         const lower = fontString.toLowerCase();
 
-        // Weights
         if (lower.includes('thin')) weight = '100';
         else if (lower.includes('extralight')) weight = '200';
         else if (lower.includes('light')) weight = '300';
@@ -378,11 +307,9 @@ const FontUtils = {
         else if (lower.includes('black')) weight = '900';
         else if (lower.includes('bold')) weight = '700';
 
-        // Styles
         if (lower.includes('italic')) style = 'italic';
         else if (lower.includes('oblique')) style = 'oblique';
 
-        // Strip keywords to get family name
         const remove = [
             'extralight', 'light', 'thin', 'medium', 'semibold', 'extrabold', 'heavy', 'black', 'bold',
             'italic', 'oblique', 'regular'
@@ -399,6 +326,5 @@ const FontUtils = {
     }
 };
 
-// Expose globally
 window.FontUtils = FontUtils;
 
