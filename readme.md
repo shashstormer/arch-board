@@ -175,8 +175,6 @@ arch_board/
 2. Create router in `plugins/name.py` or `plugins/name/__init__.py`
 3. Add route
 4. Register navigation component using utils, check out other plugins for reference
-[//]: # (2. Add a route handler in `routers/pages.py`)
-[//]: # (3. Update sidebar links in `components/layout/sidebar.html`)
 
 ### Tailwind CSS
 
