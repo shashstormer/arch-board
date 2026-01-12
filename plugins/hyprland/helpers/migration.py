@@ -110,6 +110,49 @@ class HyprlandVersion:
         return f"{self.major}.{self.minor}.{self.patch}"
 
 
+V53_EFFECT_RENAMES = {
+    # dynamic effects
+    'persistent_size': 'persistent_size', # no change
+    'nomaxsize': 'no_max_size',
+    'stayfocused': 'stay_focused',
+    'bordercolor': 'border_color',
+    'idleinhibit': 'idle_inhibit',
+    'maxsize': 'max_size',
+    'minsize': 'min_size',
+    'bordersize': 'border_size',
+    'roundingpower': 'rounding_power',
+    'allowsinput': 'allows_input',
+    'dimaround': 'dim_around',
+    'focusonactivate': 'focus_on_activate',
+    'keepaspectratio': 'keep_aspect_ratio',
+    'nearestneighbor': 'nearest_neighbor',
+    'noanim': 'no_anim',
+    'noblur': 'no_blur',
+    'nodim': 'no_dim',
+    'nofocus': 'no_focus',
+    'nofollowmouse': 'no_follow_mouse',
+    'noshadow': 'no_shadow',
+    'noshortcutsinhibit': 'no_shortcuts_inhibit',
+    'noscreenshare': 'no_screen_share',
+    'novrr': 'no_vrr',
+    'forcergbx': 'force_rgbx',
+    'syncfullscreen': 'sync_fullscreen',
+    'renderunfocused': 'render_unfocused',
+    'scrollmouse': 'scroll_mouse',
+    'scrolltouchpad': 'scroll_touchpad',
+    
+    # static effects
+    'noinitialfocus': 'no_initial_focus',
+    'suppressevent': 'suppress_event',
+    'noclosefor': 'no_close_for',
+    
+    # layer rules
+    'blurpopups': 'blur_popups',
+    'ignorealpha': 'ignore_alpha',
+    'abovelock': 'above_lock',
+}
+
+
 class ConfigMigrator:
     """Migrates Hyprland config from legacy syntax to new syntax."""
     

@@ -436,7 +436,7 @@ async def get_windowrules():
                 rules.append({
                     "type": line.key,
                     "raw": line.value.raw,
-                    "effect": parts[0] if len(parts) > 0 else "",
+                    "effect": parts[0][:-3] if len(parts) > 0 and parts[0].endswith(" on") else (parts[0] if len(parts) > 0 else ""),
                     "match": parts[1] if len(parts) > 1 else ""
                 })
 
@@ -468,20 +468,13 @@ async def update_submap(update: SubmapUpdate):
             lines = f.readlines()
 
         if update.action == "add":
-            # Check if exists
             if any(l.strip() == f"submap = {update.name}" for l in lines):
                 return {"success": False, "message": "Submap already exists"}
 
-            # Append to end
-            lines.append(f"\n# Submap: {update.name}\n")
-            lines.append(f"bind = ALT, M, submap, {update.name} # Example entry\n")
             lines.append(f"submap = {update.name}\n")
-            lines.append(f"bind = , ESCAPE, submap, reset\n")
             lines.append(f"submap = reset\n")
 
         elif update.action == "delete":
-            # Remove the submap block
-            # We look for `submap = name` ... `submap = reset`
             new_lines = []
             in_submap = False
             for line in lines:
@@ -600,6 +593,8 @@ async def get_layerrules():
 
                         namespace = match_part.strip()
 
+                if effect and effect.endswith(" on"):
+                     effect = effect[:-3]                
                 rules.append({
                     "raw": raw,
                     "effect": effect,
@@ -635,39 +630,55 @@ async def update_layer_rule(update: LayerRuleUpdate):
                     use_new_syntax = True
                     break
 
-        if use_new_syntax:
-            # New syntax: effect on, match:namespace namespace
-            effect_part = update.effect.strip()
+        new_line = ""
+        if update.action != "delete":
+            if use_new_syntax:
+                effect_raw = update.effect.strip()
+                effect_parts = effect_raw.split(None, 1)
+                
+                if effect_parts:
+                    effect_name = effect_parts[0]
+                    effect_args = effect_parts[1] if len(effect_parts) > 1 else ""
+                    
+                    if effect_name.endswith("on") and not effect_args:
+                        if effect_name.endswith(" on"): effect_name = effect_name[:-3]
+                        elif effect_name == "on": effect_name = ""
+                    
+                    if effect_name == "ignorezero":
+                        effect_name = "ignore_alpha"
+                        if not effect_args:
+                            effect_args = "0"
+                    elif effect_name == "stayfocused":
+                        effect_name = "stay_focused"
+                    elif effect_name.startswith("ignorealpha"):
+                        effect_name = "ignore_alpha"
+                        if len(effect_parts[0]) > 11 and not effect_args:
+                            val = effect_parts[0][11:]
+                            effect_args = val
 
-            # Normalize common legacy inputs to new syntax
-            if effect_part == "ignorezero":
-                effect_part = "ignore_alpha 0"
-            elif effect_part == "stayfocused":
-                effect_part = "stay_focused"
-            elif effect_part.startswith("ignorealpha"):
-                effect_part = effect_part.replace("ignorealpha", "ignore_alpha", 1)
+                    if effect_name in V53_EFFECT_RENAMES:
+                        effect_name = V53_EFFECT_RENAMES[effect_name]
+                    
+                    if effect_args:
+                        effect_part = f"{effect_name} {effect_args}"
+                    else:
+                        effect_part = f"{effect_name} on"
 
-            # Ensure proper formatting
-            # "blur" -> "blur on"
-            # "ignore_alpha 0.5" -> "ignore_alpha 0.5" (no on)
-            if " " not in effect_part:
-                effect_part = f"{effect_part} on"
+                    new_line = f"layerrule = {effect_part}, match:namespace {update.namespace}\n"
+                else:
+                    new_line = f"layerrule = , match:namespace {update.namespace}\n"
+            else:
+                effect_part = update.effect.strip()
 
-            new_line = f"layerrule = {effect_part}, match:namespace {update.namespace}\n"
-        else:
-            # Legacy syntax: effect, namespace
-            effect_part = update.effect.strip()
-
-            # Back-port new syntax inputs to legacy if needed
-            if effect_part == "stay_focused":
-                effect_part = "stayfocused"
-            elif effect_part == "ignore_alpha 0":
-                effect_part = "ignorezero"
-            elif effect_part.startswith("ignore_alpha"):
-                effect_part = effect_part.replace("ignore_alpha", "ignorealpha", 1)
-            if effect_part.endswith(" on"):
-                effect_part = effect_part[:-3]
-            new_line = f"layerrule = {effect_part}, {update.namespace}\n"
+                if effect_part == "stay_focused":
+                    effect_part = "stayfocused"
+                elif effect_part == "ignore_alpha 0":
+                    effect_part = "ignorezero"
+                elif effect_part.startswith("ignore_alpha"):
+                    effect_part = effect_part.replace("ignore_alpha", "ignorealpha", 1)
+                if effect_part.endswith(" on"):
+                    effect_part = effect_part[:-3]
+                new_line = f"layerrule = {effect_part}, {update.namespace}\n"
 
         if update.action == "add":
             insert_idx = len(lines)
@@ -849,38 +860,63 @@ async def update_window_rule(update: WindowRuleUpdate):
                 if (line.key == "windowrule" and "match:" in line.value.raw):
                     use_new_syntax = True
                     break
-        if use_new_syntax:
-            rule_type = "windowrule"
-            effect = update.effect
-            if " " not in effect:
-                effect = f"{effect} on"
-            if effect.startswith("ignorealpha"):
-                effect = effect.replace("ignorealpha", "ignore_alpha", 1)
-            match_parts = [p.strip() for p in update.match.split(",")]
-            new_matches = []
-            KNOWN_KEYS = {
-                'class', 'title', 'initialclass', 'initialtitle',
-                'floating', 'xwayland', 'pinned', 'workspace',
-                'fullscreen', 'monitor', 'address', 'pid', 'uid', 'group'
-            }
-
-            for part in match_parts:
-                part_lower = part.lower()
-                if part_lower.startswith("match:"):
-                    new_matches.append(part)
-                elif ":" in part:
-                    key, val = part.split(":", 1)
-                    if key.lower() in KNOWN_KEYS:
-                        new_matches.append(f"match:{key.lower()} {val}")
+        new_line = ""
+        if update.action != "delete":
+            if use_new_syntax:
+                rule_type = "windowrule"
+                effect_raw = update.effect
+                effect_parts = effect_raw.split(None, 1)
+                
+                if effect_parts:
+                    effect_name = effect_parts[0]
+                    effect_args = effect_parts[1] if len(effect_parts) > 1 else ""
+                    
+                    if effect_name.endswith("on") and not effect_args:
+                         if effect_name.endswith(" on"): effect_name = effect_name[:-3]
+                         
+                    if effect_name in V53_EFFECT_RENAMES:
+                        effect_name = V53_EFFECT_RENAMES[effect_name]
+                    
+                    if effect_args:
+                        effect = f"{effect_name} {effect_args}"
                     else:
-                        new_matches.append(f"match:class {part}")
-                else:
-                    new_matches.append(f"match:class {part}")
+                        effect = f"{effect_name} on"
 
-            match_str = ", ".join(new_matches)
-            new_line = f"windowrule = {effect}, {match_str}\n"
-        else:
-            new_line = f"{update.type} = {update.effect},{update.match}\n"
+                    match_parts = [p.strip() for p in update.match.split(",") if p.strip()]
+                    new_matches = []
+                    KNOWN_KEYS = {
+                        'class', 'title', 'initialclass', 'initialtitle',
+                        'floating', 'xwayland', 'pinned', 'workspace',
+                        'fullscreen', 'monitor', 'address', 'pid', 'uid', 'group',
+                        'tag'
+                    }
+                    
+                    KEY_MAP = {
+                        'floating': 'float',
+                    }
+
+                    for part in match_parts:
+                        part_lower = part.lower()
+                        if part_lower.startswith("match:"):
+                            new_matches.append(part)
+                        elif ":" in part:
+                            key, val = part.split(":", 1)
+                            key_lower = key.lower()
+                            
+                            if key_lower in KNOWN_KEYS:
+                                final_key = KEY_MAP.get(key_lower, key_lower)
+                                new_matches.append(f"match:{final_key} {val}")
+                            else:
+                                new_matches.append(f"match:class {part}")
+                        else:
+                            new_matches.append(f"match:class {part}")
+
+                    match_str = ", ".join(new_matches)
+                    new_line = f"windowrule = {effect}, {match_str}\n"
+                else:
+                    new_line = f"windowrule = , {update.match}\n"
+            else:
+                new_line = f"{update.type} = {update.effect},{update.match}\n"
 
         if update.action == "add":
 
@@ -927,10 +963,13 @@ async def update_bind(update: BindUpdate):
                 new_line = f"{update.type} = {update.mods},{update.key},{update.dispatcher}{params}\n"
 
             if update.submap and update.submap != "global":
+                import re
                 submap_start = -1
                 submap_end = -1
+                submap_regex = re.compile(rf"^submap\s*=\s*{re.escape(update.submap)}\s*$")
+                
                 for i, line in enumerate(lines):
-                    if line.strip() == f"submap = {update.submap}":
+                    if submap_regex.match(line.strip()):
                         submap_start = i
                     if submap_start != -1 and i > submap_start and line.strip() == "submap = reset":
                         submap_end = i
@@ -939,7 +978,6 @@ async def update_bind(update: BindUpdate):
                 if submap_end != -1:
                     lines.insert(submap_end, new_line)
                 else:
-                    lines.append(f"\n# Submap: {update.submap}\n")
                     lines.append(f"submap = {update.submap}\n")
                     lines.append(new_line)
                     lines.append("submap = reset\n")
@@ -1140,7 +1178,7 @@ async def update_gesture(update: GestureUpdate):
         raise HTTPException(status_code=500, detail=str(e))
 
 
-from plugins.hyprland.helpers.migration import HyprlandVersion, ConfigMigrator, MigrationResult
+from plugins.hyprland.helpers.migration import HyprlandVersion, ConfigMigrator, MigrationResult, V53_EFFECT_RENAMES
 from pathlib import Path
 
 
@@ -1239,13 +1277,10 @@ async def update_submap(update: SubmapUpdate):
             lines = f.readlines()
 
         if update.action == "add":
-            # Append new submap at the end
-            lines.append(f"\n# Submap: {update.name}\n")
             lines.append(f"submap = {update.name}\n")
             lines.append(f"submap = reset\n")
 
         elif update.action == "delete":
-            # Remove submap block
             new_lines = []
             in_target_submap = False
 
