@@ -385,6 +385,8 @@ class PresetManager:
             True if migration occurred, False otherwise
         """
         old_dir = Path(os.path.expanduser(old_presets_dir))
+        if old_dir == self.presets_dir:
+            return True
         if not old_dir.exists() or not old_dir.is_dir():
             return False
             
