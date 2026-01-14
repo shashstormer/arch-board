@@ -3,3 +3,6 @@
 start.sh
 plugins.txt
 .update_policy
+.lousy_ai
+*lousy.py
+!agent_lousy.py
