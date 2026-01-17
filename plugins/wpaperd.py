@@ -4,7 +4,7 @@ Wpaperd (wallpaper daemon) configuration router.
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import HTMLResponse
 from pydantic import BaseModel
-from typing import Dict, List, Optional, Any
+from typing import Dict, List, Optional, Any, Literal
 from xtracto import Parser
 from utils.config import get_context
 from utils.plugins_frontend import register_navigation, NavItem, NavGroup
@@ -30,7 +30,7 @@ class DisplayConfig(BaseModel):
     path: str = ""
     duration: Optional[str] = None
     sorting: Optional[str] = None  # ascending, descending, random
-    mode: Optional[str] = None  # fit, fit-border-color, center, stretch, tile
+    mode: Optional[Literal["fit", "fit-border-color", "center", "stretch", "tile"]] = None
     transition_time: Optional[int] = None
     recursive: Optional[bool] = None
     initial_transition: Optional[bool] = None
@@ -45,7 +45,7 @@ class WpaperdConfig(BaseModel):
 
 
 class ControlRequest(BaseModel):
-    action: str  # next, previous, pause, resume, toggle-pause
+    action: Literal["next", "previous", "pause", "resume", "toggle-pause"]
     display: Optional[str] = None
 
 
@@ -72,16 +72,12 @@ def get_config():
     try:
         with open(CONFIG_PATH, "rb") as f:
             data = tomllib.load(f)
-        
-        # Convert TOML sections to displays dict
+
         displays = {}
         for section, values in data.items():
             if isinstance(values, dict):
-                # Handle nested transition config
                 if "transition" in values:
-                    del values["transition"]  # Skip complex transition for now
-                
-                # Normalize keys (TOML uses - but we use _)
+                    del values["transition"] # Later
                 normalized = {}
                 for k, v in values.items():
                     normalized[k.replace("-", "_")] = v
@@ -97,20 +93,22 @@ def get_config():
 def save_config(config: WpaperdConfig):
     """Save wpaperd config to file."""
     try:
-        # Convert back to TOML format
         data = {}
         for display, settings in config.displays.items():
+            if os.path.exists(settings.path) and os.path.isfile(settings.path):
+                settings.duration = None
+                settings.sorting = None
+                settings.transition_time = None
+                settings.recursive = None
             section = {}
-            for key, value in settings.dict(exclude_none=True).items():
-                # Convert _ back to - for TOML keys
+            for key, value in settings.model_dump(exclude_none=True).items():
                 toml_key = key.replace("_", "-")
                 section[toml_key] = value
-            if section:  # Only add non-empty sections
+            if section:
                 data[display] = section
-        
-        # Ensure directory exists
+
         os.makedirs(os.path.dirname(CONFIG_PATH), exist_ok=True)
-        
+
         with open(CONFIG_PATH, "wb") as f:
             tomli_w.dump(data, f)
         
