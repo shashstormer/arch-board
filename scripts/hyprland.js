@@ -405,27 +405,433 @@ function renderTabContent(tabId) {
 
 
 function renderMonitorsTab() {
+    function parseResolution(res) {
+        if (!res) return { width: '', height: '', fps: '' };
+        const match = res.match(/^(\d+)x(\d+)(?:@(\d+))?/);
+        if (match) {
+            return { width: match[1], height: match[2], fps: match[3] || '60' };
+        }
+        return { width: '', height: '', fps: '' };
+    }
+
+    const listHtml = UI.renderTable({
+        headers: ['Name', 'Resolution', 'FPS', 'Position', 'Scale', 'Actions'],
+        data: monitors,
+        emptyMessage: 'No monitors configured. Click "Add Monitor" to configure your first display.',
+        rowRenderer: (m) => {
+            const parsed = parseResolution(m.resolution);
+            return `
+            <td class="p-3">
+                <code class="text-teal-500 font-mono font-medium">${m.name}</code>
+            </td>
+            <td class="p-3">
+                <span class="text-zinc-200">${parsed.width || '-'}x${parsed.height || '-'}</span>
+            </td>
+            <td class="p-3">
+                <span class="text-zinc-400">${parsed.fps || '-'} Hz</span>
+            </td>
+            <td class="p-3">
+                <span class="text-zinc-400">${m.position || '0x0'}</span>
+            </td>
+            <td class="p-3">
+                <span class="text-zinc-400">×${m.scale || '1'}</span>
+            </td>
+            <td class="p-3 w-24 text-right">
+                <div class="flex justify-end gap-2">
+                    <button class="p-1 text-zinc-500 hover:text-teal-500 transition-colors" onclick="showEditMonitorModal('${m.name}', '${m.resolution || ''}', '${m.position || '0x0'}', '${m.scale || '1'}', '${UI.escapeParam(m.raw)}')">✏️</button>
+                    <button class="p-1 text-zinc-500 hover:text-red-500 transition-colors" onclick="confirmDeleteMonitor('${m.name}')">🗑️</button>
+                </div>
+            </td>
+        `;
+        }
+    });
+
     return `
         <div class="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden mb-4 search-container">
-            <div class="px-5 py-3.5 bg-zinc-800/30 border-b border-zinc-800 flex justify-between items-center">
-                <h3 class="text-sm font-semibold text-zinc-200 uppercase tracking-wider m-0">Monitor Configuration</h3>
-            </div>
-            <div class="p-2">
-                ${monitors.length === 0 ? '<p class="text-center text-zinc-500 p-8">No monitors configured</p>' :
-            monitors.map((m, i) => `
-                    <div class="bg-zinc-800 border border-zinc-700 rounded-lg p-4 mb-3">
-                        <div class="font-semibold text-teal-500 text-base mb-2">${m.name}</div>
-                        <div class="flex gap-4 text-sm text-zinc-400 mb-2">
-                            <span class="text-zinc-200">${m.resolution || 'disabled'}</span>
-                            ${m.position ? `<span>@ ${m.position}</span>` : ''}
-                            ${m.scale ? `<span>×${m.scale}</span>` : ''}
-                        </div>
-                        <code class="block text-xs text-zinc-500 bg-zinc-900 p-2 rounded overflow-x-auto">${m.raw}</code>
-                    </div>
-                `).join('')}
-            </div>
+            ${UI.renderSectionHeader('Monitor Configuration', {
+                label: 'Add Monitor',
+                onclick: 'showAddMonitorModal()'
+            }, monitors.length)}
+            ${listHtml}
         </div>
     `;
+}
+
+async function showAddMonitorModal() {
+    let liveMonitors = [];
+    try {
+        const response = await fetch('/hyprland/monitors/live');
+        const data = await response.json();
+        liveMonitors = data.monitors || [];
+    } catch (e) {
+        console.warn('Could not fetch live monitors:', e);
+    }
+
+    const monitorOptions = liveMonitors.map(m => 
+        `<option value="${m.name}" data-modes='${JSON.stringify(m.available_modes)}' data-scale="${m.scale}">${m.name} (${m.make} ${m.model})</option>`
+    ).join('');
+
+    const popularResolutions = ["1920x1080", "2560x1440", "2560x1600", "3840x2160", "3440x1440", "1920x1200", "1680x1050", "1280x720"];
+    const popularRefreshRates = ["60", "75", "120", "144", "165", "240"];
+
+    const resOptions = popularResolutions.map(r => `<option value="${r}">${r}</option>`).join('');
+    const fpsOptions = popularRefreshRates.map(f => `<option value="${f}">${f} Hz</option>`).join('');
+
+    openModal(`
+        <h3 class="text-lg font-bold text-zinc-100 mb-4">Add Monitor</h3>
+        <div class="space-y-4">
+            <div>
+                <label class="block text-sm font-medium text-zinc-400 mb-1">Select Monitor</label>
+                <select id="monitor-select" onchange="onMonitorSelect()" class="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-zinc-200 focus:outline-none focus:border-teal-500">
+                    <option value="">-- Select a monitor or enter manually --</option>
+                    ${monitorOptions}
+                    <option value="custom">Custom (enter manually)</option>
+                </select>
+            </div>
+            <div id="monitor-name-row">
+                <label class="block text-sm font-medium text-zinc-400 mb-1">Monitor Name</label>
+                <input type="text" id="monitor-name" placeholder="e.g. DP-1, HDMI-A-1" class="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-zinc-200 focus:outline-none focus:border-teal-500">
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label class="block text-sm font-medium text-zinc-400 mb-1">Resolution</label>
+                    <select id="monitor-resolution" class="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-zinc-200 focus:outline-none focus:border-teal-500">
+                        <option value="">-- Select --</option>
+                        ${resOptions}
+                        <option value="custom">Custom...</option>
+                    </select>
+                    <input type="text" id="monitor-resolution-custom" placeholder="e.g. 2560x1440" class="hidden w-full mt-2 px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-zinc-200 focus:outline-none focus:border-teal-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-zinc-400 mb-1">Refresh Rate</label>
+                    <select id="monitor-fps" class="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-zinc-200 focus:outline-none focus:border-teal-500">
+                        <option value="">-- Select --</option>
+                        ${fpsOptions}
+                        <option value="custom">Custom...</option>
+                    </select>
+                    <input type="number" id="monitor-fps-custom" placeholder="e.g. 144" class="hidden w-full mt-2 px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-zinc-200 focus:outline-none focus:border-teal-500">
+                </div>
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label class="block text-sm font-medium text-zinc-400 mb-1">Position X</label>
+                    <input type="number" id="monitor-pos-x" placeholder="0" value="0" class="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-zinc-200 focus:outline-none focus:border-teal-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-zinc-400 mb-1">Position Y</label>
+                    <input type="number" id="monitor-pos-y" placeholder="0" value="0" class="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-zinc-200 focus:outline-none focus:border-teal-500">
+                </div>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-zinc-400 mb-1">Scale</label>
+                <input type="number" id="monitor-scale" placeholder="1" value="1" step="0.1" min="0.5" max="4" class="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-zinc-200 focus:outline-none focus:border-teal-500">
+            </div>
+            <div class="flex justify-end gap-3 pt-4">
+                <button class="px-4 py-2 bg-zinc-700 hover:bg-zinc-600 text-zinc-200 rounded-lg transition-colors" onclick="closeModal()">Cancel</button>
+                <button class="px-4 py-2 bg-teal-600 hover:bg-teal-500 text-white font-medium rounded-lg transition-colors" onclick="addMonitor()">Add Monitor</button>
+            </div>
+        </div>
+    `);
+    
+    document.getElementById('monitor-resolution').onchange = function() {
+        document.getElementById('monitor-resolution-custom').classList.toggle('hidden', this.value !== 'custom');
+    };
+    document.getElementById('monitor-fps').onchange = function() {
+        document.getElementById('monitor-fps-custom').classList.toggle('hidden', this.value !== 'custom');
+    };
+}
+
+function onMonitorSelect() {
+    const select = document.getElementById('monitor-select');
+    const nameRow = document.getElementById('monitor-name-row');
+    const nameInput = document.getElementById('monitor-name');
+    const resSelect = document.getElementById('monitor-resolution');
+    const fpsSelect = document.getElementById('monitor-fps');
+    const scaleInput = document.getElementById('monitor-scale');
+
+    const popularResolutions = ["1920x1080", "2560x1440", "2560x1600", "3840x2160", "3440x1440", "1920x1200"];
+    const popularRefreshRates = ["60", "75", "120", "144", "165", "240"];
+
+    if (select.value === 'custom' || select.value === '') {
+        nameRow.classList.remove('hidden');
+        return;
+    }
+
+    nameRow.classList.add('hidden');
+    nameInput.value = select.value;
+
+    const selectedOption = select.options[select.selectedIndex];
+    const liveModes = JSON.parse(selectedOption.dataset.modes || '[]');
+    const scale = selectedOption.dataset.scale || '1';
+    scaleInput.value = scale;
+
+    const liveResolutions = new Set();
+    const liveRefreshRates = new Set();
+    liveModes.forEach(m => {
+        const match = m.match(/^(\d+x\d+)@(\d+)/);
+        if (match) {
+            liveResolutions.add(match[1]);
+            liveRefreshRates.add(match[2]);
+        }
+    });
+
+    const allResolutions = [...new Set([...liveResolutions, ...popularResolutions])];
+    const allRefreshRates = [...new Set([...liveRefreshRates, ...popularRefreshRates])].sort((a,b) => parseInt(a) - parseInt(b));
+
+    resSelect.innerHTML = '<option value="">-- Select --</option>' + 
+        allResolutions.map(r => `<option value="${r}">${r}</option>`).join('') + 
+        '<option value="custom">Custom...</option>';
+    
+    fpsSelect.innerHTML = '<option value="">-- Select --</option>' + 
+        allRefreshRates.map(f => `<option value="${f}">${f} Hz</option>`).join('') + 
+        '<option value="custom">Custom...</option>';
+}
+
+async function showEditMonitorModal(name, resolution, position, scale, raw) {
+    let liveMonitors = [];
+    let availableModes = [];
+    
+    try {
+        const response = await fetch('/hyprland/monitors/live');
+        const data = await response.json();
+        liveMonitors = data.monitors || [];
+        const liveMonitor = liveMonitors.find(m => m.name === name);
+        if (liveMonitor) {
+            availableModes = liveMonitor.available_modes || [];
+        }
+    } catch (e) {
+        console.warn('Could not fetch live monitors:', e);
+    }
+
+    const popularResolutions = ["1920x1080", "2560x1440", "2560x1600", "3840x2160", "3440x1440", "1920x1200"];
+    const popularRefreshRates = ["60", "75", "120", "144", "165", "240"];
+
+    const liveResolutions = new Set();
+    const liveRefreshRates = new Set();
+    availableModes.forEach(m => {
+        const match = m.match(/^(\d+x\d+)@(\d+)/);
+        if (match) {
+            liveResolutions.add(match[1]);
+            liveRefreshRates.add(match[2]);
+        }
+    });
+
+    const allResolutions = [...new Set([...liveResolutions, ...popularResolutions])];
+    const allRefreshRates = [...new Set([...liveRefreshRates, ...popularRefreshRates])].sort((a,b) => parseInt(a) - parseInt(b));
+
+    const resMatch = resolution ? resolution.match(/^(\d+x\d+)/) : null;
+    const fpsMatch = resolution ? resolution.match(/@(\d+)/) : null;
+    const currentRes = resMatch ? resMatch[1] : '';
+    const currentFps = fpsMatch ? fpsMatch[1] : '60';
+
+    const resOptions = allResolutions.map(r => `<option value="${r}" ${r === currentRes ? 'selected' : ''}>${r}</option>`).join('');
+    const fpsOptions = allRefreshRates.map(f => `<option value="${f}" ${f === currentFps ? 'selected' : ''}>${f} Hz</option>`).join('');
+
+    const posMatch = position.match(/^(\d+)x(\d+)$/);
+    const posX = posMatch ? posMatch[1] : '0';
+    const posY = posMatch ? posMatch[2] : '0';
+
+    openModal(`
+        <h3 class="text-lg font-bold text-zinc-100 mb-4">Edit Monitor: ${name}</h3>
+        <input type="hidden" id="monitor-old-name" value="${name}">
+        <input type="hidden" id="monitor-old-raw" value="${UI.escapeParam(raw)}">
+        <div class="space-y-4">
+            <div>
+                <label class="block text-sm font-medium text-zinc-400 mb-1">Monitor Name</label>
+                <input type="text" id="monitor-name" value="${name}" class="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-zinc-200 focus:outline-none focus:border-teal-500">
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label class="block text-sm font-medium text-zinc-400 mb-1">Resolution</label>
+                    <select id="monitor-resolution" class="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-zinc-200 focus:outline-none focus:border-teal-500">
+                        <option value="">-- Select --</option>
+                        ${resOptions}
+                        <option value="custom">Custom...</option>
+                    </select>
+                    <input type="text" id="monitor-resolution-custom" placeholder="e.g. 2560x1440" class="hidden w-full mt-2 px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-zinc-200 focus:outline-none focus:border-teal-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-zinc-400 mb-1">Refresh Rate</label>
+                    <select id="monitor-fps" class="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-zinc-200 focus:outline-none focus:border-teal-500">
+                        <option value="">-- Select --</option>
+                        ${fpsOptions}
+                        <option value="custom">Custom...</option>
+                    </select>
+                    <input type="number" id="monitor-fps-custom" placeholder="e.g. 144" class="hidden w-full mt-2 px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-zinc-200 focus:outline-none focus:border-teal-500">
+                </div>
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label class="block text-sm font-medium text-zinc-400 mb-1">Position X</label>
+                    <input type="number" id="monitor-pos-x" value="${posX}" class="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-zinc-200 focus:outline-none focus:border-teal-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-zinc-400 mb-1">Position Y</label>
+                    <input type="number" id="monitor-pos-y" value="${posY}" class="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-zinc-200 focus:outline-none focus:border-teal-500">
+                </div>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-zinc-400 mb-1">Scale</label>
+                <input type="number" id="monitor-scale" value="${scale}" step="0.1" min="0.5" max="4" class="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-zinc-200 focus:outline-none focus:border-teal-500">
+            </div>
+            <div class="flex justify-end gap-3 pt-4">
+                <button class="px-4 py-2 bg-zinc-700 hover:bg-zinc-600 text-zinc-200 rounded-lg transition-colors" onclick="closeModal()">Cancel</button>
+                <button class="px-4 py-2 bg-teal-600 hover:bg-teal-500 text-white font-medium rounded-lg transition-colors" onclick="updateMonitor()">Save Changes</button>
+            </div>
+        </div>
+    `);
+    
+    document.getElementById('monitor-resolution').onchange = function() {
+        document.getElementById('monitor-resolution-custom').classList.toggle('hidden', this.value !== 'custom');
+    };
+    document.getElementById('monitor-fps').onchange = function() {
+        document.getElementById('monitor-fps-custom').classList.toggle('hidden', this.value !== 'custom');
+    };
+}
+
+async function addMonitor() {
+    const name = document.getElementById('monitor-name').value.trim();
+    const resSelect = document.getElementById('monitor-resolution');
+    const resCustom = document.getElementById('monitor-resolution-custom');
+    const fpsSelect = document.getElementById('monitor-fps');
+    const fpsCustom = document.getElementById('monitor-fps-custom');
+    const posX = document.getElementById('monitor-pos-x').value || '0';
+    const posY = document.getElementById('monitor-pos-y').value || '0';
+    const scale = document.getElementById('monitor-scale').value || '1';
+
+    let res = resSelect.value;
+    if (res === 'custom' || res === '') {
+        res = resCustom.value.trim();
+    }
+    
+    let fps = fpsSelect.value;
+    if (fps === 'custom' || fps === '') {
+        fps = fpsCustom.value.trim();
+    }
+
+    if (!name) {
+        showToast('Please select or enter a monitor name', 'error');
+        return;
+    }
+    
+    if (!res) {
+        showToast('Please select or enter a resolution', 'error');
+        return;
+    }
+
+    const resolution = fps ? `${res}@${fps}` : res;
+    const position = `${posX}x${posY}`;
+
+    try {
+        const response = await fetch('/hyprland/monitors', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'add', name, resolution, position, scale })
+        });
+        const data = await response.json();
+        if (data.success) {
+            closeModal();
+            await loadMonitors();
+            renderTabContent('monitors');
+            showToast('Monitor added successfully', 'success');
+        } else {
+            showToast('Failed to add monitor', 'error');
+        }
+    } catch (error) {
+        console.error('Failed to add monitor:', error);
+        showToast('Failed to add monitor', 'error');
+    }
+}
+
+async function updateMonitor() {
+    const oldName = document.getElementById('monitor-old-name').value;
+    const name = document.getElementById('monitor-name').value.trim();
+    const resSelect = document.getElementById('monitor-resolution');
+    const resCustom = document.getElementById('monitor-resolution-custom');
+    const fpsSelect = document.getElementById('monitor-fps');
+    const fpsCustom = document.getElementById('monitor-fps-custom');
+    const posX = document.getElementById('monitor-pos-x').value || '0';
+    const posY = document.getElementById('monitor-pos-y').value || '0';
+    const scale = document.getElementById('monitor-scale').value || '1';
+
+    let res = resSelect.value;
+    if (res === 'custom' || res === '') {
+        res = resCustom.value.trim();
+    }
+    
+    let fps = fpsSelect.value;
+    if (fps === 'custom' || fps === '') {
+        fps = fpsCustom.value.trim();
+    }
+
+    if (!name) {
+        showToast('Please enter a monitor name', 'error');
+        return;
+    }
+    
+    if (!res) {
+        showToast('Please select or enter a resolution', 'error');
+        return;
+    }
+
+    const resolution = fps ? `${res}@${fps}` : res;
+    const position = `${posX}x${posY}`;
+
+    try {
+        const response = await fetch('/hyprland/monitors', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'update', name, resolution, position, scale, old_name: oldName })
+        });
+        const data = await response.json();
+        if (data.success) {
+            closeModal();
+            await loadMonitors();
+            renderTabContent('monitors');
+            showToast('Monitor updated successfully', 'success');
+        } else {
+            showToast('Failed to update monitor', 'error');
+        }
+    } catch (error) {
+        console.error('Failed to update monitor:', error);
+        showToast('Failed to update monitor', 'error');
+    }
+}
+
+function confirmDeleteMonitor(name) {
+    openModal(`
+        <div class="text-center">
+            <div class="text-4xl mb-4">🗑️</div>
+            <h3 class="text-lg font-bold text-zinc-100 mb-2">Delete Monitor?</h3>
+            <p class="text-zinc-400 mb-6">Are you sure you want to remove <code class="text-teal-500">${name}</code> from your configuration?</p>
+            <div class="flex justify-center gap-3">
+                <button class="px-4 py-2 bg-zinc-700 hover:bg-zinc-600 text-zinc-200 rounded-lg transition-colors" onclick="closeModal()">Cancel</button>
+                <button class="px-4 py-2 bg-red-600 hover:bg-red-500 text-white font-medium rounded-lg transition-colors" onclick="deleteMonitor('${name}')">Delete</button>
+            </div>
+        </div>
+    `);
+}
+
+async function deleteMonitor(name) {
+    try {
+        const response = await fetch('/hyprland/monitors', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'delete', name })
+        });
+        const data = await response.json();
+        if (data.success) {
+            closeModal();
+            await loadMonitors();
+            renderTabContent('monitors');
+            showToast('Monitor deleted', 'success');
+        } else {
+            showToast('Failed to delete monitor', 'error');
+        }
+    } catch (error) {
+        console.error('Failed to delete monitor:', error);
+        showToast('Failed to delete monitor', 'error');
+    }
 }
 
 function toggleFlagFilter(flag) {

@@ -93,21 +93,24 @@ HYPRLAND_SCHEMA = [
                 name="general",
                 title="General Settings",
                 options=[
-                                    
                     Option("border_size", OptionType.INT, 1, "Border size in pixels", min=0, max=10, step=1),
                     Option("gaps_in", OptionType.INT, 5, "Gaps between windows", min=0, max=50, step=1),
                     Option("gaps_out", OptionType.INT, 20, "Gaps between windows and edges", min=0, max=100, step=1),
+                    Option("float_gaps", OptionType.INT, 0, "Gaps for floating windows (-1 for default)", min=-1, max=100, step=1),
                     Option("gaps_workspaces", OptionType.INT, 0, "Gaps between workspaces", min=0, max=50, step=1),
-                            
                     Option("col.active_border", OptionType.GRADIENT, "0xffffffff", "Active window border color"),
                     Option("col.inactive_border", OptionType.GRADIENT, "0xff444444", "Inactive window border color"),
-                            
+                    Option("col.nogroup_border", OptionType.GRADIENT, "0xffffaaff", "Border for windows that cannot join groups"),
+                    Option("col.nogroup_border_active", OptionType.GRADIENT, "0xffff00ff", "Active border for no-group windows"),
                     Option("layout", OptionType.ENUM, "dwindle", "Window layout", choices=["dwindle", "master"]),
+                    Option("no_focus_fallback", OptionType.BOOL, False, "No focus fallback when moving direction"),
                     Option("resize_on_border", OptionType.BOOL, False, "Resize by clicking borders"),
-                    Option("extend_border_grab_area", OptionType.INT, 15, "Border grab area", min=0, max=50, step=1),
+                    Option("extend_border_grab_area", OptionType.INT, 15, "Border grab area extension", min=0, max=50, step=1),
                     Option("hover_icon_on_border", OptionType.BOOL, True, "Show cursor on border hover"),
-                    Option("no_focus_fallback", OptionType.BOOL, False, "No focus fallback"),
-                    Option("allow_tearing", OptionType.BOOL, False, "Allow tearing"),
+                    Option("allow_tearing", OptionType.BOOL, False, "Allow tearing (master switch)"),
+                    Option("resize_corner", OptionType.INT, 0, "Force floating resize corner (0=disable, 1-4 clockwise from top-left)", min=0, max=4, step=1),
+                    Option("modal_parent_blocking", OptionType.BOOL, True, "Whether parent windows of modals are interactive"),
+                    Option("locale", OptionType.STRING, "", "Override system locale (e.g. en_US, es)"),
                 ]
             ),
             Section(
@@ -115,9 +118,10 @@ HYPRLAND_SCHEMA = [
                 title="Window Snapping",
                 options=[
                     Option("enabled", OptionType.BOOL, False, "Enable floating window snapping"),
-                    Option("window_gap", OptionType.INT, 10, "Gap before snapping", min=0, max=50, step=1),
-                    Option("monitor_gap", OptionType.INT, 10, "Monitor edge snap gap", min=0, max=50, step=1),
-                    Option("border_overlap", OptionType.BOOL, False, "Snap with border overlap"),
+                    Option("window_gap", OptionType.INT, 10, "Min gap between windows before snapping", min=0, max=50, step=1),
+                    Option("monitor_gap", OptionType.INT, 10, "Min gap between window and monitor edges", min=0, max=50, step=1),
+                    Option("border_overlap", OptionType.BOOL, False, "Snap with only one border width gap"),
+                    Option("respect_gaps", OptionType.BOOL, False, "Respect gaps_in when snapping"),
                 ]
             ),
             Section(

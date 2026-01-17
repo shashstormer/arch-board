@@ -6,7 +6,7 @@ Provides endpoints for reading and writing Hyprland config.
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import HTMLResponse
 from pydantic import BaseModel
-from typing import Dict, Any, Optional
+from typing import Dict, Any, Optional, Literal
 import os
 
 from plugins.hyprland.helpers.hyprlang import HyprLang
@@ -251,18 +251,75 @@ async def get_monitors():
         raise HTTPException(status_code=500, detail=str(e))
 
 
+@hyprland_router.get("/monitors/live")
+async def get_live_monitors():
+    """Get live monitor info from hyprctl with available modes."""
+    try:
+        import subprocess
+        import re
+        
+        result = subprocess.run(["hyprctl", "monitors"], capture_output=True, text=True)
+        if result.returncode != 0:
+            raise HTTPException(status_code=500, detail="Failed to get monitor info")
+        
+        monitors = []
+        current_monitor = None
+        
+        for line in result.stdout.split("\n"):
+            if line.startswith("Monitor "):
+                if current_monitor:
+                    monitors.append(current_monitor)
+                match = re.match(r"Monitor (\S+) \(ID (\d+)\):", line)
+                if match:
+                    current_monitor = {
+                        "name": match.group(1),
+                        "id": int(match.group(2)),
+                        "available_modes": [],
+                        "current_mode": "",
+                        "scale": "1",
+                        "make": "",
+                        "model": "",
+                        "vrr": False
+                    }
+            elif current_monitor:
+                line = line.strip()
+                if line.startswith("availableModes:"):
+                    modes_str = line.replace("availableModes:", "").strip()
+                    current_monitor["available_modes"] = [m.strip() for m in modes_str.split() if m.strip()]
+                elif "@" in line and line[0].isdigit():
+                    current_monitor["current_mode"] = line.split(" at ")[0].strip()
+                elif line.startswith("scale:"):
+                    current_monitor["scale"] = line.replace("scale:", "").strip()
+                elif line.startswith("make:"):
+                    current_monitor["make"] = line.replace("make:", "").strip()
+                elif line.startswith("model:"):
+                    current_monitor["model"] = line.replace("model:", "").strip()
+                elif line.startswith("vrr:"):
+                    current_monitor["vrr"] = line.replace("vrr:", "").strip().lower() == "true"
+        
+        if current_monitor:
+            monitors.append(current_monitor)
+        
+        return {"monitors": monitors}
+    except FileNotFoundError:
+        raise HTTPException(status_code=500, detail="hyprctl not found")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
 class MonitorUpdate(BaseModel):
     """Monitor update model."""
+    action: Literal["add", "update", "delete"] = "add"
     name: str
-    resolution: str
-    position: str
-    scale: str
+    resolution: str = ""
+    position: str = "0x0"
+    scale: str = "1"
     extras: list = []
+    old_name: Optional[str] = None
 
 
 @hyprland_router.post("/monitors")
 async def update_monitor(monitor: MonitorUpdate):
-    """Add or update a monitor configuration."""
+    """Add, update, or delete a monitor configuration."""
     if not os.path.exists(CONFIG_PATH):
         raise HTTPException(status_code=404, detail="Hyprland config not found")
 
@@ -270,23 +327,33 @@ async def update_monitor(monitor: MonitorUpdate):
         hl = HyprLang(CONFIG_PATH)
         conf = hl.load()
 
+        if monitor.action == "delete":
+            conf.lines = [
+                line for line in conf.lines
+                if not (line.key == "monitor" and line.value.raw.startswith(monitor.name + ","))
+            ]
+            hl.save()
+            return {"success": True, "action": "delete", "name": monitor.name}
+
         value = f"{monitor.name}, {monitor.resolution}, {monitor.position}, {monitor.scale}"
         if monitor.extras:
             value += ", " + ", ".join(monitor.extras)
 
         found = False
+        search_name = monitor.old_name if monitor.old_name else monitor.name
+        
         for line in conf.lines:
-            if line.key == "monitor" and line.value.raw.startswith(monitor.name + ","):
+            if line.key == "monitor" and line.value.raw.startswith(search_name + ","):
                 line.value.raw = value
                 found = True
                 break
 
-        if not found:
+        if not found and monitor.action != "update":
             from plugins.hyprland.helpers.hyprlang import HyprLine, HyprValue
             conf.lines.append(HyprLine(key="monitor", value=HyprValue(raw=value)))
 
         hl.save()
-        return {"success": True, "monitor": monitor.model_dump()}
+        return {"success": True, "action": monitor.action, "monitor": monitor.model_dump()}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
