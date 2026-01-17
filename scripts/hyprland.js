@@ -368,38 +368,61 @@ function switchTab(tabId) {
 
 function renderTabContent(tabId) {
     const content = document.getElementById('tab-content');
+    content.innerHTML = '';
 
-    let html = '';
+    let result = null;
     switch (tabId) {
         case 'monitors':
-            html = renderMonitorsTab();
+            result = renderMonitorsTab();
             break;
         case 'binds':
-            html = renderBindsTab();
+            result = renderBindsTab();
             break;
         case 'gestures':
-            html = renderGesturesTab();
+            result = renderGesturesTab();
             break;
         case 'windowrules':
-            html = renderWindowRulesTab();
+            result = renderWindowRulesTab();
             break;
         case 'layerrules':
-            html = renderLayerRulesTab();
+            result = renderLayerRulesTab();
             break;
         case 'exec':
-            html = renderExecTab();
+            result = renderExecTab();
             break;
         case 'env':
-            html = renderEnvTab();
+            result = renderEnvTab();
             break;
         default:
             const tab = schema.find(t => t.id === tabId);
             if (tab) {
-                html = tab.sections.map(section => renderSection(section)).join('');
+                result = tab.sections.map(section => renderSection(section));
             }
     }
 
-    content.innerHTML = html;
+    if (!result) {
+        checkHighlight();
+        return;
+    }
+
+    if (Array.isArray(result)) {
+        const frag = document.createDocumentFragment();
+        result.forEach(item => {
+            if (typeof item === 'string') {
+                const temp = document.createElement('div');
+                temp.innerHTML = item;
+                Array.from(temp.childNodes).forEach(child => frag.appendChild(child));
+            } else if (item instanceof Node) {
+                frag.appendChild(item);
+            }
+        });
+        content.appendChild(frag);
+    } else if (typeof result === 'string') {
+        content.innerHTML = result;
+    } else if (result instanceof Node) {
+        content.appendChild(result);
+    }
+
     checkHighlight();
 }
 
@@ -1280,40 +1303,32 @@ function renderEnvTab() {
                 <code class="text-teal-500 text-sm font-mono font-medium">${env.name}</code>
             </td>
             <td class="p-3">
-                <code class="text-zinc-400 text-sm font-mono break-all">${env.value}</code>
+                <code class="text-zinc-300 text-sm font-mono break-all">${env.value}</code>
             </td>
             <td class="p-3 w-24 text-right">
                 <div class="flex justify-end gap-2">
-                    <button class="p-1 text-zinc-500 hover:text-teal-500 transition-colors" onclick="showEditEnvModal('${env.name}', '${UI.escapeParam(env.value)}')">✏️</button>
-                    <button class="p-1 text-zinc-500 hover:text-red-500 transition-colors" onclick="confirmDeleteEnv('${env.name}')">🗑️</button>
+                    <button class="p-1 text-zinc-500 hover:text-teal-500 transition-colors" onclick="showEditEnvModal('${UI.escapeParam(env.name)}', '${UI.escapeParam(env.value)}')">✏️</button>
+                    <button class="p-1 text-zinc-500 hover:text-red-500 transition-colors" onclick="confirmDeleteEnv('${UI.escapeParam(env.name)}')">🗑️</button>
                 </div>
             </td>
-    `;
+            `;
         }
     });
 
     return `
         <div class="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden mb-4 search-container">
             ${UI.renderSectionHeader('Environment Variables', {
-        label: 'Add Variable',
-        onclick: 'showAddEnvModal()'
-    }, envVars.length)
-        }
+                label: 'Add Variable',
+                onclick: 'showAddEnvModal()'
+            }, envVars.length)}
             ${listHtml}
         </div>
-        `;
+    `;
 }
 
-
 function renderSection(section) {
-    return `
-        <div class="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden mb-4 search-container">
-            ${UI.renderSectionHeader(section.title, null)}
-            <div class="p-2">
-                ${section.options.map(opt => renderOption(section.name, opt)).join('')}
-            </div>
-        </div>
-        `;
+    const options = section.options.map(opt => renderOption(section.name, opt)).filter(Boolean);
+    return UIManager.createSection(section.title, null, options);
 }
 
 function renderOption(sectionName, option) {
@@ -1322,129 +1337,72 @@ function renderOption(sectionName, option) {
     const value = configValue !== undefined ? configValue : option.default;
     const hasChange = path in pendingChanges;
 
-    return `
-        <div class="searchable-item flex justify-between items-center px-4 py-3.5 hover:bg-zinc-800/40 transition-colors rounded-lg mb-1 ${hasChange ? 'bg-teal-500/5 border-l-2 border-teal-500' : ''}" data-path="${path}">
-            <div class="flex-1 min-w-0 mr-4">
-                <label class="block text-sm font-medium text-zinc-200 mb-0.5">${formatLabel(option.name)}</label>
-                <span class="block text-xs text-zinc-500 truncate max-w-md">${option.description}</span>
-            </div>
-            <div class="flex-shrink-0">
-                ${renderControl(path, option, value)}
-            </div>
-        </div>
-        `;
+    const control = renderControl(path, option, value);
+    if (!control) return null;
+    control.classList.add('searchable-item');
+    control.dataset.path = path;
+    
+    if (hasChange) {
+        control.classList.add('bg-teal-500/5', 'border-l-2', 'border-teal-500');
+    }
+
+    return control;
 }
 
 function formatLabel(name) {
     return name
         .replace(/_/g, ' ')
         .replace(/\./g, ' ')
-        .replace(/\b\w/g, c => c.toUpperCase());
+        .replace(/\w/g, c => c.toUpperCase());
 }
 
-
 function renderControl(path, option, value) {
+    const label = formatLabel(option.name);
+    const desc = option.description;
+    const onChange = (val) => updateValue(path, val);
+
     switch (option.type) {
         case 'bool':
-            return renderToggle(path, value);
+            const checked = value === true || value === 'true' || value === 'yes' || value === '1';
+            return UIManager.createToggle(label, desc, checked, onChange, path);
+            
         case 'int':
         case 'float':
             if (option.min !== null && option.max !== null) {
-                return renderSlider(path, option, value);
+                const step = option.step || (option.type === 'float' ? 0.1 : 1);
+                return UIManager.createSlider(label, desc, value, option.min, option.max, step, onChange, path);
             }
-            return renderNumberInput(path, option, value);
+            return UIManager.createInput(label, desc, value, "", onChange, path);
+            
         case 'color':
         case 'gradient':
-            return renderColorInput(path, value);
+            return UIManager.createColorPicker(
+                label, 
+                desc, 
+                value, 
+                (hex) => updateColor(path, hex), 
+                onChange, 
+                path
+            );
+            
         case 'enum':
-            return renderSelect(path, option, value);
+            const choices = (option.choices || []).map(c => ({ label: c || '(none)', value: c }));
+            return UIManager.createSelect(label, desc, value, choices, onChange, path);
+            
         case 'vec2':
-            return renderVec2Input(path, value);
+            return UIManager.createVec2Input(
+                label, 
+                desc, 
+                value, 
+                (x) => updateVec2(path, x, null),
+                (y) => updateVec2(path, null, y),
+                path
+            );
+            
         case 'string':
         default:
-            return renderTextInput(path, value);
+            return UIManager.createInput(label, desc, value, "", onChange, path);
     }
-}
-
-function renderToggle(path, value) {
-    const checked = value === true || value === 'true' || value === 'yes' || value === '1';
-    return `
-        <label class="relative inline-flex items-center cursor-pointer">
-            <input type="checkbox" class="sr-only peer" ${checked ? 'checked' : ''}
-                onchange="updateValue('${path}', this.checked)">
-            <div class="w-11 h-6 bg-zinc-700 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-teal-500/20 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-teal-500"></div>
-        </label>
-        `;
-}
-
-function renderSlider(path, option, value) {
-    const parsed = parseFloat(value);
-    const numValue = isNaN(parsed) ? option.default : parsed;
-    const step = option.step || (option.type === 'float' ? 0.1 : 1);
-    return `
-        <div class="flex items-center gap-3 min-w-[180px]">
-            <input type="range" class="flex-1 h-1.5 bg-zinc-700 rounded-lg appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:bg-teal-500 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:hover:scale-110 [&::-webkit-slider-thumb]:transition-transform"
-                min="${option.min}" max="${option.max}" step="${step}"
-                value="${numValue}"
-                oninput="updateSlider('${path}', this.value, this.parentElement)">
-            <span class="slider-value min-w-[40px] text-right text-sm font-medium text-zinc-200">${numValue}</span>
-        </div>
-        `;
-}
-
-function renderNumberInput(path, option, value) {
-    return `
-        <input type="number" class="w-20 px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-md text-zinc-200 text-sm text-center focus:outline-none focus:border-teal-500 transition-colors" value="${value}"
-               ${option.min !== null ? `min="${option.min}"` : ''}
-               ${option.max !== null ? `max="${option.max}"` : ''}
-               ${option.step ? `step="${option.step}"` : ''}
-               onchange="updateValue('${path}', this.value)">
-        `;
-}
-
-function renderColorInput(path, value) {
-    const hexColor = hyprColorToHex(value);
-    return `
-        <div class="flex items-center gap-2">
-            <input type="color" value="${hexColor}" class="w-8 h-8 rounded border-none cursor-pointer bg-transparent"
-                onchange="updateColor('${path}', this.value)">
-            <input type="text" class="w-28 px-2 py-1.5 bg-zinc-800 border border-zinc-700 rounded text-zinc-200 text-xs font-mono focus:outline-none focus:border-teal-500" value="${value}"
-                onchange="updateValue('${path}', this.value)">
-        </div>
-        `;
-}
-
-function renderSelect(path, option, value) {
-    return `
-        <select class="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-md text-zinc-200 text-sm focus:outline-none focus:border-teal-500 transition-colors cursor-pointer" onchange="updateValue('${path}', this.value)">
-            ${option.choices.map(choice => `
-                <option value="${choice}" ${value === choice ? 'selected' : ''}>
-                    ${choice || '(none)'}
-                </option>
-            `).join('')}
-        </select>
-        `;
-}
-
-function renderVec2Input(path, value) {
-    const parts = String(value).split(' ');
-    const x = parts[0] || '0';
-    const y = parts[1] || '0';
-    return `
-        <div class="flex gap-2">
-            <input type="number" class="w-16 px-2 py-1 bg-zinc-800 border border-zinc-700 rounded text-zinc-200 text-sm text-center focus:outline-none focus:border-teal-500" value="${x}" placeholder="X"
-                onchange="updateVec2('${path}', this.value, null)">
-            <input type="number" class="w-16 px-2 py-1 bg-zinc-800 border border-zinc-700 rounded text-zinc-200 text-sm text-center focus:outline-none focus:border-teal-500" value="${y}" placeholder="Y"
-                onchange="updateVec2('${path}', null, this.value)">
-        </div>
-        `;
-}
-
-function renderTextInput(path, value) {
-    return `
-        <input type="text" class="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-md text-zinc-200 text-sm focus:outline-none focus:border-teal-500 transition-colors" value="${value}"
-            onchange="updateValue('${path}', this.value)">
-        `;
 }
 
 

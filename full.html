@@ -5832,7 +5832,7 @@
 
     <!-- Tab Content -->
     <div id="tab-content"
-        class="bg-zinc-900/50 min-h-[500px] rounded-xl border border-zinc-800/50 backdrop-blur-sm relative">
+        class="min-h-[500px] rounded-xl backdrop-blur-sm relative">
         <!-- Loading state -->
         <div class="flex flex-col items-center justify-center h-96 gap-4 text-zinc-500">
             <div class="w-10 h-10 border-4 border-zinc-800 border-t-teal-500 rounded-full animate-spin"></div>
@@ -8359,148 +8359,6 @@ function addConsoleOutput(text, colorClass = 'text-zinc-300') {
     elements.scriptConsole.appendChild(d);
     elements.scriptConsole.scrollTop = elements.scriptConsole.scrollHeight;
 }
-
-/**
- * UI Renderer & Search Utility
- * Provides a consistent API for generating UI elements and handling search/filtering.
- */
-
-class UI {
-
-    /**
-     * Render a standard table with columns and actions
-     * @param {Object} options
-     * @param {string[]} options.headers - Column headers
-     * @param {Array} options.data - Data rows
-     * @param {Function} options.rowRenderer - Function(item) => html string for row cells <table> content
-     * @param {string} options.emptyMessage - Message to show if data is empty
-     * @returns {string} HTML string
-     */
-    static renderTable({headers, data, rowRenderer, emptyMessage = 'No items found'}) {
-        if (!data || data.length === 0) {
-            return `<div class="bg-zinc-900 border border-zinc-800 rounded-xl p-8 text-center text-zinc-500">${emptyMessage}</div>`;
-        }
-
-        const headerHtml = headers.map(h =>
-            `<th class="text-zinc-500 font-medium text-xs uppercase tracking-wider p-3 border-b border-zinc-800 text-left">${h}</th>`
-        ).join('');
-
-        const rowsHtml = data.map(item =>
-            `<tr class="hover:bg-zinc-800/40 border-b border-zinc-800 last:border-0 transition-colors">${rowRenderer(item)}</tr>`
-        ).join('');
-
-        return `
-            <div class="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden search-container">
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left text-sm border-collapse">
-                        <thead>
-                            <tr>${headerHtml}</tr>
-                        </thead>
-                        <tbody class="searchable-list">
-                            ${rowsHtml}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        `;
-    }
-
-    /**
-     * Render a section header with title and optional add button
-     */
-    static renderSectionHeader(title, addButtonFn_or_HTML, count = null) {
-        const countBadge = count !== null ? `<span class="text-zinc-500 ml-2 text-xs">(${count})</span>` : '';
-
-        let buttonHtml = '';
-        if (typeof addButtonFn_or_HTML === 'string') {
-            // If string passed, treat as label for button
-            buttonHtml = `<button class="flex items-center gap-2 px-3 py-1.5 bg-teal-500 hover:bg-teal-600 text-white rounded-md text-sm transition-colors" onclick="${addButtonFn_or_HTML}"> + Add </button>`;
-        } else if (addButtonFn_or_HTML) {
-            // If object passed (label, onclick)
-            buttonHtml = `<button class="flex items-center gap-2 px-3 py-1.5 bg-teal-500 hover:bg-teal-600 text-white rounded-md text-sm transition-colors" onclick="${addButtonFn_or_HTML.onclick}"> + ${addButtonFn_or_HTML.label} </button>`;
-        }
-
-        return `
-            <div class="px-5 py-3.5 bg-zinc-800/30 border-b border-zinc-800 flex justify-between items-center">
-                <h3 class="text-sm font-semibold text-zinc-200 uppercase tracking-wider m-0">${title} ${countBadge}</h3>
-                <div class="flex gap-4 items-center">
-                    <div class="relative">
-                        <input type="text" 
-                               placeholder="Search ${title.toLowerCase()}..." 
-                               onkeyup="UI.filterSection(this)"
-                               class="w-48 px-3 py-1.5 bg-zinc-900 border border-zinc-700 rounded-md text-xs text-zinc-300 focus:outline-none focus:border-teal-500 transition-width focus:w-64">
-                    </div>
-                    ${buttonHtml}
-                </div>
-            </div>
-        `;
-    }
-
-    /**
-     * Global filter function attached to section search inputs
-     */
-    static filterSection(input) {
-        const query = input.value.toLowerCase();
-        // Find the parent container (the section)
-        const container = input.closest('.search-container');
-        if (!container) return;
-
-        // Try to filter table rows
-        const rows = container.querySelectorAll('tbody tr');
-        if (rows.length > 0) {
-            rows.forEach(row => {
-                const text = row.innerText.toLowerCase();
-                row.style.display = text.includes(query) ? '' : 'none';
-            });
-            return;
-        }
-
-        // Try to filter divs (like in monitors or window rules list)
-        // We assume items are direct children of a specific container or marked with a class
-        // Let's look for common list item patterns
-        const listItems = container.querySelectorAll('.searchable-item, .bg-zinc-800.border.border-zinc-700, .border-b.border-zinc-800');
-
-        listItems.forEach(item => {
-            // Skip the header itself if matched
-            if (item.contains(input)) return;
-
-            const text = item.innerText.toLowerCase();
-            item.style.display = text.includes(query) ? '' : 'none';
-        });
-    }
-
-    /**
-     * Standard modal content generator
-     */
-    static renderModalHeader(title) {
-        return `
-            <div class="flex items-center justify-between mb-6">
-                <h3 class="text-xl font-bold text-white">${title}</h3>
-                <button class="text-zinc-500 hover:text-white text-2xl leading-none" onclick="closeModal()">×</button>
-            </div>
-        `;
-    }
-
-    static renderModalFooter(primaryAction, cancelAction = 'closeModal()', primaryLabel = 'Save', cancelLabel = 'Cancel') {
-        return `
-            <div class="flex justify-end gap-3 pt-4 border-t border-zinc-800/50">
-                <button class="px-4 py-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 rounded-lg transition-colors" onclick="${cancelAction}">${cancelLabel}</button>
-                <button class="px-4 py-2 bg-teal-600 hover:bg-teal-500 text-white font-medium rounded-lg transition-colors" onclick="${primaryAction}">${primaryLabel}</button>
-            </div>
-        `;
-    }
-
-    static escapeParam(str) {
-        if (str === null || str === undefined) return '';
-        return String(str)
-            .replace(/\\/g, '\\\\')
-            .replace(/'/g, "\\'")
-            .replace(/"/g, '&quot;')
-            .replace(/\n/g, '\\n');
-    }
-}
-
-window.UI = UI;
 
 class ImagePicker {
     constructor() {
@@ -11942,6 +11800,446 @@ function attachAutosaveListeners() {
     });
 }
 
+/**
+ * UI Renderer & Search Utility
+ * Provides a consistent API for generating UI elements and handling search/filtering.
+ */
+
+class UI {
+
+    /**
+     * Render a standard table with columns and actions
+     * @param {Object} options
+     * @param {string[]} options.headers - Column headers
+     * @param {Array} options.data - Data rows
+     * @param {Function} options.rowRenderer - Function(item) => html string for row cells <table> content
+     * @param {string} options.emptyMessage - Message to show if data is empty
+     * @returns {string} HTML string
+     */
+    static renderTable({headers, data, rowRenderer, emptyMessage = 'No items found'}) {
+        if (!data || data.length === 0) {
+            return `<div class="bg-zinc-900 border border-zinc-800 rounded-xl p-8 text-center text-zinc-500">${emptyMessage}</div>`;
+        }
+
+        const headerHtml = headers.map(h =>
+            `<th class="text-zinc-500 font-medium text-xs uppercase tracking-wider p-3 border-b border-zinc-800 text-left">${h}</th>`
+        ).join('');
+
+        const rowsHtml = data.map(item =>
+            `<tr class="hover:bg-zinc-800/40 border-b border-zinc-800 last:border-0 transition-colors">${rowRenderer(item)}</tr>`
+        ).join('');
+
+        return `
+            <div class="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden search-container">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-sm border-collapse">
+                        <thead>
+                            <tr>${headerHtml}</tr>
+                        </thead>
+                        <tbody class="searchable-list">
+                            ${rowsHtml}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        `;
+    }
+
+    /**
+     * Render a section header with title and optional add button
+     */
+    static renderSectionHeader(title, addButtonFn_or_HTML, count = null) {
+        const countBadge = count !== null ? `<span class="text-zinc-500 ml-2 text-xs">(${count})</span>` : '';
+
+        let buttonHtml = '';
+        if (typeof addButtonFn_or_HTML === 'string') {
+            // If string passed, treat as label for button
+            buttonHtml = `<button class="flex items-center gap-2 px-3 py-1.5 bg-teal-500 hover:bg-teal-600 text-white rounded-md text-sm transition-colors" onclick="${addButtonFn_or_HTML}"> + Add </button>`;
+        } else if (addButtonFn_or_HTML) {
+            // If object passed (label, onclick)
+            buttonHtml = `<button class="flex items-center gap-2 px-3 py-1.5 bg-teal-500 hover:bg-teal-600 text-white rounded-md text-sm transition-colors" onclick="${addButtonFn_or_HTML.onclick}"> + ${addButtonFn_or_HTML.label} </button>`;
+        }
+
+        return `
+            <div class="px-5 py-3.5 bg-zinc-800/30 border-b border-zinc-800 flex justify-between items-center">
+                <h3 class="text-sm font-semibold text-zinc-200 uppercase tracking-wider m-0">${title} ${countBadge}</h3>
+                <div class="flex gap-4 items-center">
+                    <div class="relative">
+                        <input type="text" 
+                               placeholder="Search ${title.toLowerCase()}..." 
+                               onkeyup="UI.filterSection(this)"
+                               class="w-48 px-3 py-1.5 bg-zinc-900 border border-zinc-700 rounded-md text-xs text-zinc-300 focus:outline-none focus:border-teal-500 transition-width focus:w-64">
+                    </div>
+                    ${buttonHtml}
+                </div>
+            </div>
+        `;
+    }
+
+    /**
+     * Global filter function attached to section search inputs
+     */
+    static filterSection(input) {
+        const query = input.value.toLowerCase();
+        // Find the parent container (the section)
+        const container = input.closest('.search-container');
+        if (!container) return;
+
+        // Try to filter table rows
+        const rows = container.querySelectorAll('tbody tr');
+        if (rows.length > 0) {
+            rows.forEach(row => {
+                const text = row.innerText.toLowerCase();
+                row.style.display = text.includes(query) ? '' : 'none';
+            });
+            return;
+        }
+
+        // Try to filter divs (like in monitors or window rules list)
+        // We assume items are direct children of a specific container or marked with a class
+        // Let's look for common list item patterns
+        const listItems = container.querySelectorAll('.searchable-item, .bg-zinc-800.border.border-zinc-700, .border-b.border-zinc-800');
+
+        listItems.forEach(item => {
+            // Skip the header itself if matched
+            if (item.contains(input)) return;
+
+            const text = item.innerText.toLowerCase();
+            item.style.display = text.includes(query) ? '' : 'none';
+        });
+    }
+
+    /**
+     * Standard modal content generator
+     */
+    static renderModalHeader(title) {
+        return `
+            <div class="flex items-center justify-between mb-6">
+                <h3 class="text-xl font-bold text-white">${title}</h3>
+                <button class="text-zinc-500 hover:text-white text-2xl leading-none" onclick="closeModal()">×</button>
+            </div>
+        `;
+    }
+
+    static renderModalFooter(primaryAction, cancelAction = 'closeModal()', primaryLabel = 'Save', cancelLabel = 'Cancel') {
+        return `
+            <div class="flex justify-end gap-3 pt-4 border-t border-zinc-800/50">
+                <button class="px-4 py-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 rounded-lg transition-colors" onclick="${cancelAction}">${cancelLabel}</button>
+                <button class="px-4 py-2 bg-teal-600 hover:bg-teal-500 text-white font-medium rounded-lg transition-colors" onclick="${primaryAction}">${primaryLabel}</button>
+            </div>
+        `;
+    }
+
+    static escapeParam(str) {
+        if (str === null || str === undefined) return '';
+        return String(str)
+            .replace(/\\/g, '\\\\')
+            .replace(/'/g, "\\'")
+            .replace(/"/g, '&quot;')
+            .replace(/\n/g, '\\n');
+    }
+}
+
+
+window.UI = UI;
+
+class UIManager {
+    static createContainer(className = "flex flex-col gap-3") {
+        const el = document.createElement('div');
+        el.className = className;
+        return el;
+    }
+
+    static createSection(title, description, children = []) {
+        // Main Card Container
+        const container = document.createElement('div');
+        container.className = "bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden mb-6 last:mb-0";
+        
+        // Header using standard UI style (if title exists)
+        if (title) {
+            const header = document.createElement('div');
+            header.className = "px-5 py-3.5 bg-zinc-800/30 border-b border-zinc-800 flex justify-between items-center";
+            header.innerHTML = `
+                <div>
+                    <h3 class="text-sm font-semibold text-zinc-200 uppercase tracking-wider m-0">${title}</h3>
+                    ${description ? `<p class="text-zinc-500 text-xs mt-0.5 normal-case tracking-normal">${description}</p>` : ''}
+                </div>
+            `;
+            container.appendChild(header);
+        }
+
+        // Content Container (List of items)
+        const content = document.createElement('div');
+        // divide-y for subtle substitution of borders between items
+        content.className = "divide-y divide-zinc-800/50";
+        children.forEach(child => {
+            if (child) content.appendChild(child);
+        });
+        container.appendChild(content);
+
+        return container;
+    }
+
+    static createToggle(label, description, checked, onChange, id = null) {
+        const wrapper = document.createElement('div');
+        // Clean list-item style: no border/bg by default, just padding and hover
+        wrapper.className = "flex justify-between items-center px-5 py-4 hover:bg-zinc-800/30 transition-colors";
+        
+        const info = document.createElement('div');
+        info.className = "flex-1 mr-4";
+        info.innerHTML = `
+            <div class="font-medium text-zinc-200 mb-1">${label}</div>
+            ${description ? `<div class="text-xs text-zinc-500">${description}</div>` : ''}
+        `;
+        
+        const labelEl = document.createElement('label');
+        labelEl.className = "relative inline-flex items-center cursor-pointer";
+        
+        const input = document.createElement('input');
+        input.type = "checkbox";
+        input.className = "sr-only peer";
+        input.checked = checked;
+        if (id) {
+            input.id = id;
+            input.name = id;
+        }
+        
+        if (onChange) {
+            input.addEventListener('change', (e) => onChange(e.target.checked));
+        }
+
+        const slider = document.createElement('div');
+        slider.className = "w-11 h-6 bg-zinc-700 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-teal-500/20 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-teal-500";
+        
+        labelEl.appendChild(input);
+        labelEl.appendChild(slider);
+        
+        wrapper.appendChild(info);
+        wrapper.appendChild(labelEl);
+        
+        return wrapper;
+    }
+
+    static createSlider(label, description, value, min, max, step = 1, onChange, id = null) {
+        const wrapper = document.createElement('div');
+        wrapper.className = "flex justify-between items-center px-5 py-4 hover:bg-zinc-800/30 transition-colors";
+        
+        const info = document.createElement('div');
+        info.className = "flex-1 mr-4 min-w-0";
+        info.innerHTML = `
+            <div class="font-medium text-zinc-200 mb-1 truncate">${label}</div>
+            ${description ? `<div class="text-xs text-zinc-500 truncate">${description}</div>` : ''}
+        `;
+        
+        const controlContainer = document.createElement('div');
+        controlContainer.className = "flex items-center gap-3 min-w-[200px] flex-shrink-0";
+        
+        const input = document.createElement('input');
+        input.type = "range";
+        input.className = "flex-1 h-1.5 bg-zinc-700 rounded-lg appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:bg-teal-500 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:hover:scale-110 [&::-webkit-slider-thumb]:transition-transform";
+        input.min = min;
+        input.max = max;
+        input.step = step;
+        input.value = value;
+        if (id) {
+            input.id = id;
+            input.name = id;
+        }
+        
+        const display = document.createElement('span');
+        display.className = "min-w-[40px] text-right text-sm font-medium text-zinc-200";
+        display.textContent = value;
+        
+        input.addEventListener('input', (e) => {
+            display.textContent = e.target.value;
+        });
+
+        if (onChange) {
+            input.addEventListener('change', (e) => onChange(e.target.value));
+        }
+
+        controlContainer.appendChild(input);
+        controlContainer.appendChild(display);
+        
+        wrapper.appendChild(info);
+        wrapper.appendChild(controlContainer);
+        
+        return wrapper;
+    }
+
+    static createSelect(label, description, value, options, onChange, id = null) {
+        const wrapper = document.createElement('div');
+        wrapper.className = "flex justify-between items-center px-5 py-4 hover:bg-zinc-800/30 transition-colors";
+        
+        const info = document.createElement('div');
+        info.className = "flex-1 mr-4 min-w-0";
+        info.innerHTML = `
+            <div class="font-medium text-zinc-200 mb-1 truncate">${label}</div>
+            ${description ? `<div class="text-xs text-zinc-500 truncate">${description}</div>` : ''}
+        `;
+        
+        const select = document.createElement('select');
+        select.className = "bg-zinc-900 border border-zinc-700 text-zinc-200 text-sm rounded-lg focus:ring-teal-500 focus:border-teal-500 block p-2.5 min-w-[150px]";
+        if (id) {
+            select.id = id;
+            select.name = id;
+        }
+        
+        options.forEach(opt => {
+            const option = document.createElement('option');
+            option.value = opt.value;
+            option.textContent = opt.label;
+            if (opt.value == value) option.selected = true;
+            select.appendChild(option);
+        });
+
+        if (onChange) {
+            select.addEventListener('change', (e) => onChange(e.target.value));
+        }
+
+        wrapper.appendChild(info);
+        wrapper.appendChild(select);
+        
+        return wrapper;
+    }
+
+    static createInput(label, description, value, placeholder = "", onChange, id = null) {
+        const wrapper = document.createElement('div');
+        wrapper.className = "flex justify-between items-center px-5 py-4 hover:bg-zinc-800/30 transition-colors";
+        
+        const info = document.createElement('div');
+        info.className = "flex-1 mr-4 min-w-0";
+        info.innerHTML = `
+            <div class="font-medium text-zinc-200 mb-1 truncate">${label}</div>
+            ${description ? `<div class="text-xs text-zinc-500 truncate">${description}</div>` : ''}
+        `;
+        
+        const input = document.createElement('input');
+        input.type = "text";
+        input.className = "w-64 px-3 py-2 bg-zinc-900 border border-zinc-700 rounded-md text-zinc-200 text-sm focus:outline-none focus:border-teal-500 transition-colors placeholder-zinc-600";
+        input.value = value || "";
+        input.placeholder = placeholder;
+        if (id) {
+            input.id = id;
+            input.name = id;
+        }
+
+        if (onChange) {
+            input.addEventListener('change', (e) => onChange(e.target.value));
+        }
+
+        wrapper.appendChild(info);
+        wrapper.appendChild(input);
+        
+        return wrapper;
+    }
+    // New Omnipotent Methods
+    static createColorPicker(label, description, value, onChange, onTextChange, id = null) {
+        const wrapper = document.createElement('div');
+        wrapper.className = "flex justify-between items-center px-5 py-4 hover:bg-zinc-800/30 transition-colors";
+        
+        const info = document.createElement('div');
+        info.className = "flex-1 mr-4";
+        info.innerHTML = `
+            <div class="font-medium text-zinc-200 mb-1">${label}</div>
+            ${description ? `<div class="text-xs text-zinc-500">${description}</div>` : ''}
+        `;
+
+        const controls = document.createElement('div');
+        controls.className = "flex items-center gap-2";
+        
+        const hexColor = window.UI && window.UI.ColorUtils ? window.UI.ColorUtils.toHex(value) : value;
+        
+        const colorInput = document.createElement('input');
+        colorInput.type = "color";
+        colorInput.value = hexColor;
+        colorInput.className = "w-8 h-8 rounded border-none cursor-pointer bg-transparent";
+        if (id) {
+            colorInput.id = id + '_picker';
+            colorInput.name = id + '_picker';
+        }
+        
+        if (onChange) {
+            colorInput.addEventListener('change', (e) => onChange(e.target.value));
+        }
+
+        const textInput = document.createElement('input');
+        textInput.type = "text";
+        textInput.className = "w-28 px-2 py-1.5 bg-zinc-800 border border-zinc-700 rounded text-zinc-200 text-xs font-mono focus:outline-none focus:border-teal-500 color-text";
+        textInput.value = value;
+        if (id) {
+            textInput.id = id;
+            textInput.name = id;
+        }
+
+        if (onTextChange) {
+            textInput.addEventListener('change', (e) => onTextChange(e.target.value));
+        }
+
+        controls.appendChild(colorInput);
+        controls.appendChild(textInput);
+        
+        wrapper.appendChild(info);
+        wrapper.appendChild(controls);
+        
+        return wrapper;
+    }
+
+    static createVec2Input(label, description, value, onXChange, onYChange, id = null) {
+        const wrapper = document.createElement('div');
+        wrapper.className = "flex justify-between items-center px-5 py-4 hover:bg-zinc-800/30 transition-colors";
+        
+        const info = document.createElement('div');
+        info.className = "flex-1 mr-4";
+        info.innerHTML = `
+            <div class="font-medium text-zinc-200 mb-1">${label}</div>
+            ${description ? `<div class="text-xs text-zinc-500">${description}</div>` : ''}
+        `;
+        
+        const parts = String(value).split(' ');
+        const xVal = parts[0] || '0';
+        const yVal = parts[1] || '0';
+        
+        const inputs = document.createElement('div');
+        inputs.className = "flex gap-2";
+        
+        const xInput = document.createElement('input');
+        xInput.type = "number";
+        xInput.className = "w-16 px-2 py-1 bg-zinc-800 border border-zinc-700 rounded text-zinc-200 text-sm text-center focus:outline-none focus:border-teal-500";
+        xInput.value = xVal;
+        xInput.placeholder = "X";
+        if (id) {
+            xInput.id = id + '_x';
+            xInput.name = id + '_x';
+        }
+        if (onXChange) {
+            xInput.addEventListener('change', (e) => onXChange(e.target.value));
+        }
+        
+        const yInput = document.createElement('input');
+        yInput.type = "number";
+        yInput.className = "w-16 px-2 py-1 bg-zinc-800 border border-zinc-700 rounded text-zinc-200 text-sm text-center focus:outline-none focus:border-teal-500";
+        yInput.value = yVal;
+        yInput.placeholder = "Y";
+        if (id) {
+            yInput.id = id + '_y';
+            yInput.name = id + '_y';
+        }
+        if (onYChange) {
+            yInput.addEventListener('change', (e) => onYChange(e.target.value));
+        }
+        
+        inputs.appendChild(xInput);
+        inputs.appendChild(yInput);
+        
+        wrapper.appendChild(info);
+        wrapper.appendChild(inputs);
+        
+        return wrapper;
+    }
+}
+window.UIManager = UIManager;
+
 let schema = [];
 let config = {};
 let monitors = [];
@@ -12312,38 +12610,61 @@ function switchTab(tabId) {
 
 function renderTabContent(tabId) {
     const content = document.getElementById('tab-content');
+    content.innerHTML = '';
 
-    let html = '';
+    let result = null;
     switch (tabId) {
         case 'monitors':
-            html = renderMonitorsTab();
+            result = renderMonitorsTab();
             break;
         case 'binds':
-            html = renderBindsTab();
+            result = renderBindsTab();
             break;
         case 'gestures':
-            html = renderGesturesTab();
+            result = renderGesturesTab();
             break;
         case 'windowrules':
-            html = renderWindowRulesTab();
+            result = renderWindowRulesTab();
             break;
         case 'layerrules':
-            html = renderLayerRulesTab();
+            result = renderLayerRulesTab();
             break;
         case 'exec':
-            html = renderExecTab();
+            result = renderExecTab();
             break;
         case 'env':
-            html = renderEnvTab();
+            result = renderEnvTab();
             break;
         default:
             const tab = schema.find(t => t.id === tabId);
             if (tab) {
-                html = tab.sections.map(section => renderSection(section)).join('');
+                result = tab.sections.map(section => renderSection(section));
             }
     }
 
-    content.innerHTML = html;
+    if (!result) {
+        checkHighlight();
+        return;
+    }
+
+    if (Array.isArray(result)) {
+        const frag = document.createDocumentFragment();
+        result.forEach(item => {
+            if (typeof item === 'string') {
+                const temp = document.createElement('div');
+                temp.innerHTML = item;
+                Array.from(temp.childNodes).forEach(child => frag.appendChild(child));
+            } else if (item instanceof Node) {
+                frag.appendChild(item);
+            }
+        });
+        content.appendChild(frag);
+    } else if (typeof result === 'string') {
+        content.innerHTML = result;
+    } else if (result instanceof Node) {
+        content.appendChild(result);
+    }
+
     checkHighlight();
 }
 
@@ -13224,40 +13545,32 @@ function renderEnvTab() {
                 <code class="text-teal-500 text-sm font-mono font-medium">${env.name}</code>
             </td>
             <td class="p-3">
-                <code class="text-zinc-400 text-sm font-mono break-all">${env.value}</code>
+                <code class="text-zinc-300 text-sm font-mono break-all">${env.value}</code>
             </td>
             <td class="p-3 w-24 text-right">
                 <div class="flex justify-end gap-2">
-                    <button class="p-1 text-zinc-500 hover:text-teal-500 transition-colors" onclick="showEditEnvModal('${env.name}', '${UI.escapeParam(env.value)}')">✏️</button>
-                    <button class="p-1 text-zinc-500 hover:text-red-500 transition-colors" onclick="confirmDeleteEnv('${env.name}')">🗑️</button>
+                    <button class="p-1 text-zinc-500 hover:text-teal-500 transition-colors" onclick="showEditEnvModal('${UI.escapeParam(env.name)}', '${UI.escapeParam(env.value)}')">✏️</button>
+                    <button class="p-1 text-zinc-500 hover:text-red-500 transition-colors" onclick="confirmDeleteEnv('${UI.escapeParam(env.name)}')">🗑️</button>
                 </div>
             </td>
-    `;
+            `;
         }
     });
 
     return `
         <div class="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden mb-4 search-container">
             ${UI.renderSectionHeader('Environment Variables', {
-        label: 'Add Variable',
-        onclick: 'showAddEnvModal()'
-    }, envVars.length)
-        }
+                label: 'Add Variable',
+                onclick: 'showAddEnvModal()'
+            }, envVars.length)}
             ${listHtml}
         </div>
-        `;
+    `;
 }
 
-
 function renderSection(section) {
-    return `
-        <div class="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden mb-4 search-container">
-            ${UI.renderSectionHeader(section.title, null)}
-            <div class="p-2">
-                ${section.options.map(opt => renderOption(section.name, opt)).join('')}
-            </div>
-        </div>
-        `;
+    const options = section.options.map(opt => renderOption(section.name, opt)).filter(Boolean);
+    return UIManager.createSection(section.title, null, options);
 }
 
 function renderOption(sectionName, option) {
@@ -13266,129 +13579,72 @@ function renderOption(sectionName, option) {
     const value = configValue !== undefined ? configValue : option.default;
     const hasChange = path in pendingChanges;
 
-    return `
-        <div class="searchable-item flex justify-between items-center px-4 py-3.5 hover:bg-zinc-800/40 transition-colors rounded-lg mb-1 ${hasChange ? 'bg-teal-500/5 border-l-2 border-teal-500' : ''}" data-path="${path}">
-            <div class="flex-1 min-w-0 mr-4">
-                <label class="block text-sm font-medium text-zinc-200 mb-0.5">${formatLabel(option.name)}</label>
-                <span class="block text-xs text-zinc-500 truncate max-w-md">${option.description}</span>
-            </div>
-            <div class="flex-shrink-0">
-                ${renderControl(path, option, value)}
-            </div>
-        </div>
-        `;
+    const control = renderControl(path, option, value);
+    if (!control) return null;
+    control.classList.add('searchable-item');
+    control.dataset.path = path;
+    
+    if (hasChange) {
+        control.classList.add('bg-teal-500/5', 'border-l-2', 'border-teal-500');
+    }
+
+    return control;
 }
 
 function formatLabel(name) {
     return name
         .replace(/_/g, ' ')
         .replace(/\./g, ' ')
-        .replace(/\b\w/g, c => c.toUpperCase());
+        .replace(/\w/g, c => c.toUpperCase());
 }
 
-
 function renderControl(path, option, value) {
+    const label = formatLabel(option.name);
+    const desc = option.description;
+    const onChange = (val) => updateValue(path, val);
+
     switch (option.type) {
         case 'bool':
-            return renderToggle(path, value);
+            const checked = value === true || value === 'true' || value === 'yes' || value === '1';
+            return UIManager.createToggle(label, desc, checked, onChange, path);
+            
         case 'int':
         case 'float':
             if (option.min !== null && option.max !== null) {
-                return renderSlider(path, option, value);
+                const step = option.step || (option.type === 'float' ? 0.1 : 1);
+                return UIManager.createSlider(label, desc, value, option.min, option.max, step, onChange, path);
             }
-            return renderNumberInput(path, option, value);
+            return UIManager.createInput(label, desc, value, "", onChange, path);
+            
         case 'color':
         case 'gradient':
-            return renderColorInput(path, value);
+            return UIManager.createColorPicker(
+                label, 
+                desc, 
+                value, 
+                (hex) => updateColor(path, hex), 
+                onChange, 
+                path
+            );
+            
         case 'enum':
-            return renderSelect(path, option, value);
+            const choices = (option.choices || []).map(c => ({ label: c || '(none)', value: c }));
+            return UIManager.createSelect(label, desc, value, choices, onChange, path);
+            
         case 'vec2':
-            return renderVec2Input(path, value);
+            return UIManager.createVec2Input(
+                label, 
+                desc, 
+                value, 
+                (x) => updateVec2(path, x, null),
+                (y) => updateVec2(path, null, y),
+                path
+            );
+            
         case 'string':
         default:
-            return renderTextInput(path, value);
+            return UIManager.createInput(label, desc, value, "", onChange, path);
     }
-}
-
-function renderToggle(path, value) {
-    const checked = value === true || value === 'true' || value === 'yes' || value === '1';
-    return `
-        <label class="relative inline-flex items-center cursor-pointer">
-            <input type="checkbox" class="sr-only peer" ${checked ? 'checked' : ''}
-                onchange="updateValue('${path}', this.checked)">
-            <div class="w-11 h-6 bg-zinc-700 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-teal-500/20 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-teal-500"></div>
-        </label>
-        `;
-}
-
-function renderSlider(path, option, value) {
-    const parsed = parseFloat(value);
-    const numValue = isNaN(parsed) ? option.default : parsed;
-    const step = option.step || (option.type === 'float' ? 0.1 : 1);
-    return `
-        <div class="flex items-center gap-3 min-w-[180px]">
-            <input type="range" class="flex-1 h-1.5 bg-zinc-700 rounded-lg appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:bg-teal-500 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:hover:scale-110 [&::-webkit-slider-thumb]:transition-transform"
-                min="${option.min}" max="${option.max}" step="${step}"
-                value="${numValue}"
-                oninput="updateSlider('${path}', this.value, this.parentElement)">
-            <span class="slider-value min-w-[40px] text-right text-sm font-medium text-zinc-200">${numValue}</span>
-        </div>
-        `;
-}
-
-function renderNumberInput(path, option, value) {
-    return `
-        <input type="number" class="w-20 px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-md text-zinc-200 text-sm text-center focus:outline-none focus:border-teal-500 transition-colors" value="${value}"
-               ${option.min !== null ? `min="${option.min}"` : ''}
-               ${option.max !== null ? `max="${option.max}"` : ''}
-               ${option.step ? `step="${option.step}"` : ''}
-               onchange="updateValue('${path}', this.value)">
-        `;
-}
-
-function renderColorInput(path, value) {
-    const hexColor = hyprColorToHex(value);
-    return `
-        <div class="flex items-center gap-2">
-            <input type="color" value="${hexColor}" class="w-8 h-8 rounded border-none cursor-pointer bg-transparent"
-                onchange="updateColor('${path}', this.value)">
-            <input type="text" class="w-28 px-2 py-1.5 bg-zinc-800 border border-zinc-700 rounded text-zinc-200 text-xs font-mono focus:outline-none focus:border-teal-500" value="${value}"
-                onchange="updateValue('${path}', this.value)">
-        </div>
-        `;
-}
-
-function renderSelect(path, option, value) {
-    return `
-        <select class="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-md text-zinc-200 text-sm focus:outline-none focus:border-teal-500 transition-colors cursor-pointer" onchange="updateValue('${path}', this.value)">
-            ${option.choices.map(choice => `
-                <option value="${choice}" ${value === choice ? 'selected' : ''}>
-                    ${choice || '(none)'}
-                </option>
-            `).join('')}
-        </select>
-        `;
-}
-
-function renderVec2Input(path, value) {
-    const parts = String(value).split(' ');
-    const x = parts[0] || '0';
-    const y = parts[1] || '0';
-    return `
-        <div class="flex gap-2">
-            <input type="number" class="w-16 px-2 py-1 bg-zinc-800 border border-zinc-700 rounded text-zinc-200 text-sm text-center focus:outline-none focus:border-teal-500" value="${x}" placeholder="X"
-                onchange="updateVec2('${path}', this.value, null)">
-            <input type="number" class="w-16 px-2 py-1 bg-zinc-800 border border-zinc-700 rounded text-zinc-200 text-sm text-center focus:outline-none focus:border-teal-500" value="${y}" placeholder="Y"
-                onchange="updateVec2('${path}', null, this.value)">
-        </div>
-        `;
-}
-
-function renderTextInput(path, value) {
-    return `
-        <input type="text" class="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-md text-zinc-200 text-sm focus:outline-none focus:border-teal-500 transition-colors" value="${value}"
-            onchange="updateValue('${path}', this.value)">
-        `;
 }
 
 

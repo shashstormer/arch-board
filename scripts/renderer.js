@@ -138,4 +138,302 @@ class UI {
     }
 }
 
+
 window.UI = UI;
+
+class UIManager {
+    static createContainer(className = "flex flex-col gap-3") {
+        const el = document.createElement('div');
+        el.className = className;
+        return el;
+    }
+
+    static createSection(title, description, children = []) {
+        // Main Card Container
+        const container = document.createElement('div');
+        container.className = "bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden mb-6 last:mb-0";
+        
+        // Header using standard UI style (if title exists)
+        if (title) {
+            const header = document.createElement('div');
+            header.className = "px-5 py-3.5 bg-zinc-800/30 border-b border-zinc-800 flex justify-between items-center";
+            header.innerHTML = `
+                <div>
+                    <h3 class="text-sm font-semibold text-zinc-200 uppercase tracking-wider m-0">${title}</h3>
+                    ${description ? `<p class="text-zinc-500 text-xs mt-0.5 normal-case tracking-normal">${description}</p>` : ''}
+                </div>
+            `;
+            container.appendChild(header);
+        }
+
+        // Content Container (List of items)
+        const content = document.createElement('div');
+        // divide-y for subtle substitution of borders between items
+        content.className = "divide-y divide-zinc-800/50";
+        children.forEach(child => {
+            if (child) content.appendChild(child);
+        });
+        container.appendChild(content);
+
+        return container;
+    }
+
+    static createToggle(label, description, checked, onChange, id = null) {
+        const wrapper = document.createElement('div');
+        // Clean list-item style: no border/bg by default, just padding and hover
+        wrapper.className = "flex justify-between items-center px-5 py-4 hover:bg-zinc-800/30 transition-colors";
+        
+        const info = document.createElement('div');
+        info.className = "flex-1 mr-4";
+        info.innerHTML = `
+            <div class="font-medium text-zinc-200 mb-1">${label}</div>
+            ${description ? `<div class="text-xs text-zinc-500">${description}</div>` : ''}
+        `;
+        
+        const labelEl = document.createElement('label');
+        labelEl.className = "relative inline-flex items-center cursor-pointer";
+        
+        const input = document.createElement('input');
+        input.type = "checkbox";
+        input.className = "sr-only peer";
+        input.checked = checked;
+        if (id) {
+            input.id = id;
+            input.name = id;
+        }
+        
+        if (onChange) {
+            input.addEventListener('change', (e) => onChange(e.target.checked));
+        }
+
+        const slider = document.createElement('div');
+        slider.className = "w-11 h-6 bg-zinc-700 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-teal-500/20 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-teal-500";
+        
+        labelEl.appendChild(input);
+        labelEl.appendChild(slider);
+        
+        wrapper.appendChild(info);
+        wrapper.appendChild(labelEl);
+        
+        return wrapper;
+    }
+
+    static createSlider(label, description, value, min, max, step = 1, onChange, id = null) {
+        const wrapper = document.createElement('div');
+        wrapper.className = "flex justify-between items-center px-5 py-4 hover:bg-zinc-800/30 transition-colors";
+        
+        const info = document.createElement('div');
+        info.className = "flex-1 mr-4 min-w-0";
+        info.innerHTML = `
+            <div class="font-medium text-zinc-200 mb-1 truncate">${label}</div>
+            ${description ? `<div class="text-xs text-zinc-500 truncate">${description}</div>` : ''}
+        `;
+        
+        const controlContainer = document.createElement('div');
+        controlContainer.className = "flex items-center gap-3 min-w-[200px] flex-shrink-0";
+        
+        const input = document.createElement('input');
+        input.type = "range";
+        input.className = "flex-1 h-1.5 bg-zinc-700 rounded-lg appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:bg-teal-500 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:hover:scale-110 [&::-webkit-slider-thumb]:transition-transform";
+        input.min = min;
+        input.max = max;
+        input.step = step;
+        input.value = value;
+        if (id) {
+            input.id = id;
+            input.name = id;
+        }
+        
+        const display = document.createElement('span');
+        display.className = "min-w-[40px] text-right text-sm font-medium text-zinc-200";
+        display.textContent = value;
+        
+        input.addEventListener('input', (e) => {
+            display.textContent = e.target.value;
+        });
+
+        if (onChange) {
+            input.addEventListener('change', (e) => onChange(e.target.value));
+        }
+
+        controlContainer.appendChild(input);
+        controlContainer.appendChild(display);
+        
+        wrapper.appendChild(info);
+        wrapper.appendChild(controlContainer);
+        
+        return wrapper;
+    }
+
+    static createSelect(label, description, value, options, onChange, id = null) {
+        const wrapper = document.createElement('div');
+        wrapper.className = "flex justify-between items-center px-5 py-4 hover:bg-zinc-800/30 transition-colors";
+        
+        const info = document.createElement('div');
+        info.className = "flex-1 mr-4 min-w-0";
+        info.innerHTML = `
+            <div class="font-medium text-zinc-200 mb-1 truncate">${label}</div>
+            ${description ? `<div class="text-xs text-zinc-500 truncate">${description}</div>` : ''}
+        `;
+        
+        const select = document.createElement('select');
+        select.className = "bg-zinc-900 border border-zinc-700 text-zinc-200 text-sm rounded-lg focus:ring-teal-500 focus:border-teal-500 block p-2.5 min-w-[150px]";
+        if (id) {
+            select.id = id;
+            select.name = id;
+        }
+        
+        options.forEach(opt => {
+            const option = document.createElement('option');
+            option.value = opt.value;
+            option.textContent = opt.label;
+            if (opt.value == value) option.selected = true;
+            select.appendChild(option);
+        });
+
+        if (onChange) {
+            select.addEventListener('change', (e) => onChange(e.target.value));
+        }
+
+        wrapper.appendChild(info);
+        wrapper.appendChild(select);
+        
+        return wrapper;
+    }
+
+    static createInput(label, description, value, placeholder = "", onChange, id = null) {
+        const wrapper = document.createElement('div');
+        wrapper.className = "flex justify-between items-center px-5 py-4 hover:bg-zinc-800/30 transition-colors";
+        
+        const info = document.createElement('div');
+        info.className = "flex-1 mr-4 min-w-0";
+        info.innerHTML = `
+            <div class="font-medium text-zinc-200 mb-1 truncate">${label}</div>
+            ${description ? `<div class="text-xs text-zinc-500 truncate">${description}</div>` : ''}
+        `;
+        
+        const input = document.createElement('input');
+        input.type = "text";
+        input.className = "w-64 px-3 py-2 bg-zinc-900 border border-zinc-700 rounded-md text-zinc-200 text-sm focus:outline-none focus:border-teal-500 transition-colors placeholder-zinc-600";
+        input.value = value || "";
+        input.placeholder = placeholder;
+        if (id) {
+            input.id = id;
+            input.name = id;
+        }
+
+        if (onChange) {
+            input.addEventListener('change', (e) => onChange(e.target.value));
+        }
+
+        wrapper.appendChild(info);
+        wrapper.appendChild(input);
+        
+        return wrapper;
+    }
+    // New Omnipotent Methods
+    static createColorPicker(label, description, value, onChange, onTextChange, id = null) {
+        const wrapper = document.createElement('div');
+        wrapper.className = "flex justify-between items-center px-5 py-4 hover:bg-zinc-800/30 transition-colors";
+        
+        const info = document.createElement('div');
+        info.className = "flex-1 mr-4";
+        info.innerHTML = `
+            <div class="font-medium text-zinc-200 mb-1">${label}</div>
+            ${description ? `<div class="text-xs text-zinc-500">${description}</div>` : ''}
+        `;
+
+        const controls = document.createElement('div');
+        controls.className = "flex items-center gap-2";
+        
+        const hexColor = window.UI && window.UI.ColorUtils ? window.UI.ColorUtils.toHex(value) : value;
+        
+        const colorInput = document.createElement('input');
+        colorInput.type = "color";
+        colorInput.value = hexColor;
+        colorInput.className = "w-8 h-8 rounded border-none cursor-pointer bg-transparent";
+        if (id) {
+            colorInput.id = id + '_picker';
+            colorInput.name = id + '_picker';
+        }
+        
+        if (onChange) {
+            colorInput.addEventListener('change', (e) => onChange(e.target.value));
+        }
+
+        const textInput = document.createElement('input');
+        textInput.type = "text";
+        textInput.className = "w-28 px-2 py-1.5 bg-zinc-800 border border-zinc-700 rounded text-zinc-200 text-xs font-mono focus:outline-none focus:border-teal-500 color-text";
+        textInput.value = value;
+        if (id) {
+            textInput.id = id;
+            textInput.name = id;
+        }
+
+        if (onTextChange) {
+            textInput.addEventListener('change', (e) => onTextChange(e.target.value));
+        }
+
+        controls.appendChild(colorInput);
+        controls.appendChild(textInput);
+        
+        wrapper.appendChild(info);
+        wrapper.appendChild(controls);
+        
+        return wrapper;
+    }
+
+    static createVec2Input(label, description, value, onXChange, onYChange, id = null) {
+        const wrapper = document.createElement('div');
+        wrapper.className = "flex justify-between items-center px-5 py-4 hover:bg-zinc-800/30 transition-colors";
+        
+        const info = document.createElement('div');
+        info.className = "flex-1 mr-4";
+        info.innerHTML = `
+            <div class="font-medium text-zinc-200 mb-1">${label}</div>
+            ${description ? `<div class="text-xs text-zinc-500">${description}</div>` : ''}
+        `;
+        
+        const parts = String(value).split(' ');
+        const xVal = parts[0] || '0';
+        const yVal = parts[1] || '0';
+        
+        const inputs = document.createElement('div');
+        inputs.className = "flex gap-2";
+        
+        const xInput = document.createElement('input');
+        xInput.type = "number";
+        xInput.className = "w-16 px-2 py-1 bg-zinc-800 border border-zinc-700 rounded text-zinc-200 text-sm text-center focus:outline-none focus:border-teal-500";
+        xInput.value = xVal;
+        xInput.placeholder = "X";
+        if (id) {
+            xInput.id = id + '_x';
+            xInput.name = id + '_x';
+        }
+        if (onXChange) {
+            xInput.addEventListener('change', (e) => onXChange(e.target.value));
+        }
+        
+        const yInput = document.createElement('input');
+        yInput.type = "number";
+        yInput.className = "w-16 px-2 py-1 bg-zinc-800 border border-zinc-700 rounded text-zinc-200 text-sm text-center focus:outline-none focus:border-teal-500";
+        yInput.value = yVal;
+        yInput.placeholder = "Y";
+        if (id) {
+            yInput.id = id + '_y';
+            yInput.name = id + '_y';
+        }
+        if (onYChange) {
+            yInput.addEventListener('change', (e) => onYChange(e.target.value));
+        }
+        
+        inputs.appendChild(xInput);
+        inputs.appendChild(yInput);
+        
+        wrapper.appendChild(info);
+        wrapper.appendChild(inputs);
+        
+        return wrapper;
+    }
+}
+window.UIManager = UIManager;

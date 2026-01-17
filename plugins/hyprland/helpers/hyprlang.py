@@ -507,7 +507,7 @@ class HyprConf:
             key_str = f'[{cat.key}]' if cat.key else ''
             lines.append(f"{prefix}{cat.name}{key_str} {{")
             lines.append(self._category_to_string(cat, indent + 1))
-            lines.append(f"{prefix}}}")
+            lines.append(f"{prefix}}}\n")
         
         return '\n'.join(lines)
     
