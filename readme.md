@@ -186,6 +186,13 @@ You just need to install and add to path (accessible by `tailwindcss` cmd) it au
 
 The generated CSS is saved to `assets/css/tailwind.css`.
 
+
+#### AI-NOTICE
+
+The Parser and most backend was fully written by me, and then AI was used to fix edge cases.
+
+The UI i.e. frontend is 85% AI-Generated.
+
 ## License
 
 MIT
