@@ -13318,7 +13318,7 @@ class WpaperdEditor {
             "0.5",
             (val) => this.updateSetting(name, 'offset', val ? parseFloat(val) : null),
             null,
-            "number" // TODO: Add step/min/max support to createInput or manual attr set
+            "number" // TODO: Add step/min/max support to createInput or manual attr set (just not gon get this done as it does not break anything)
         ));
         // Manual attribute setting for Offset until UIManager supports it
         const offInput = children[children.length - 1].querySelector('input');
