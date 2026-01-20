@@ -237,162 +237,189 @@ class WpaperdEditor {
         titleEl.textContent = name;
         const settings = this.config.displays[name] || {};
 
-
         const path = settings.path || '';
         const hasExtension = /\.[a-zA-Z0-9]{2,5}$/.test(path);
         const isFolder = path === '' || path.endsWith('/') || !hasExtension;
-        const disabledClass = 'opacity-50 cursor-not-allowed';
 
-        container.innerHTML = `
-            <div class="space-y-4">
-                <!-- Path -->
-                <div class="space-y-2">
-                    <label for="setting-path" class="text-sm text-zinc-400">Wallpaper Path</label>
-                    <div class="flex gap-2">
-                        <input type="text" id="setting-path" value="${settings.path || ''}" 
-                            placeholder="/path/to/wallpaper.jpg or /path/to/folder"
-                            class="flex-1 bg-zinc-950 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-white focus:border-teal-500 outline-none font-mono"
-                            onchange="wpaperdEditor.updateSetting('${name}', 'path', this.value); wpaperdEditor.renderDisplaySettings('${name}')">
-                        <button onclick="wpaperdEditor.browsePath('${name}')" 
-                            class="px-3 py-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 rounded-lg border border-zinc-700">
-                            📁
-                        </button>
-                    </div>
-                    <p class="text-xs text-zinc-600">Image file or directory containing wallpapers</p>
-                </div>
+        container.innerHTML = '';
 
-                <!-- Duration (folder only) -->
-                <div class="space-y-2 ${!isFolder ? disabledClass : ''}">
-                    <label for="setting-duration" class="text-sm text-zinc-400">Duration ${!isFolder ? '<span class="text-xs">(folders only)</span>' : ''}</label>
-                    <input type="text" id="setting-duration" value="${settings.duration || ''}" 
-                        placeholder="30m, 1h, 10s"
-                        ${!isFolder ? 'disabled' : ''}
-                        class="w-full bg-zinc-950 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-white focus:border-teal-500 outline-none ${!isFolder ? 'text-zinc-600' : ''}"
-                        onchange="wpaperdEditor.updateSetting('${name}', 'duration', this.value || null)">
-                    <p class="text-xs text-zinc-600">How long to display each wallpaper</p>
-                </div>
+        const children = [];
 
-                <!-- Sorting (folder only) -->
-                <div class="space-y-2 ${!isFolder ? disabledClass : ''}">
-                    <label for="setting-sorting" class="text-sm text-zinc-400">Sorting ${!isFolder ? '<span class="text-xs">(folders only)</span>' : ''}</label>
-                    <select id="setting-sorting"
-                        ${!isFolder ? 'disabled' : ''}
-                        class="w-full bg-zinc-950 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-white focus:border-teal-500 outline-none ${!isFolder ? 'text-zinc-600' : ''}"
-                        onchange="wpaperdEditor.updateSetting('${name}', 'sorting', this.value || null)">
-                        <option value="" ${!settings.sorting ? 'selected' : ''}>Default (random)</option>
-                        <option value="random" ${settings.sorting === 'random' ? 'selected' : ''}>Random</option>
-                        <option value="ascending" ${settings.sorting === 'ascending' ? 'selected' : ''}>Ascending</option>
-                        <option value="descending" ${settings.sorting === 'descending' ? 'selected' : ''}>Descending</option>
-                    </select>
-                </div>
+        // Path
+        children.push(UIManager.createActionInput(
+            "Wallpaper Path",
+            "Image file or directory containing wallpapers",
+            settings.path || '',
+            "/path/to/wallpaper.jpg or /path/to/folder",
+            "📁",
+            () => this.browsePath(name),
+            (val) => {
+                this.updateSetting(name, 'path', val);
+                // Trigger re-render to update isFolder states? 
+                // Currently renderDisplaySettings is called on change in the old code.
+                setTimeout(() => this.renderDisplaySettings(name), 10);
+            }
+        ));
 
-                <!-- Mode -->
-                <div class="space-y-2">
-                    <label for="setting-mode" class="text-sm text-zinc-400">Display Mode</label>
-                    <select id="setting-mode"
-                        class="w-full bg-zinc-950 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-white focus:border-teal-500 outline-none"
-                        onchange="wpaperdEditor.updateSetting('${name}', 'mode', this.value || null)">
-                        <option value="" ${!settings.mode ? 'selected' : ''}>Default</option>
-                        <option value="fit" ${settings.mode === 'fit' ? 'selected' : ''}>Fit</option>
-                        <option value="fit-border-color" ${settings.mode === 'fit-border-color' ? 'selected' : ''}>Fit (Border Color)</option>
-                        <option value="center" ${settings.mode === 'center' ? 'selected' : ''}>Center</option>
-                        <option value="stretch" ${settings.mode === 'stretch' ? 'selected' : ''}>Stretch</option>
-                        <option value="tile" ${settings.mode === 'tile' ? 'selected' : ''}>Tile</option>
-                    </select>
-                </div>
+        // Duration
+        const durEl = UIManager.createInput(
+            "Duration " + (!isFolder ? '<span class="text-xs text-zinc-500">(folders only)</span>' : ''),
+            "How long to display each wallpaper",
+            settings.duration || '',
+            "30m, 1h, 10s",
+            (val) => this.updateSetting(name, 'duration', val || null)
+        );
+        if (!isFolder) {
+            durEl.querySelector('input').disabled = true;
+            durEl.querySelector('input').classList.add('opacity-50', 'cursor-not-allowed');
+            durEl.classList.add('opacity-75');
+        }
+        children.push(durEl);
 
-                <!-- Transition Time -->
-                <div class="space-y-2">
-                    <label for="setting-transition_time" class="text-sm text-zinc-400">Transition Time (ms)</label>
-                    <input type="number" id="setting-transition_time" value="${settings.transition_time || ''}" 
-                        placeholder="300"
-                        class="w-full bg-zinc-950 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-white focus:border-teal-500 outline-none"
-                        onchange="wpaperdEditor.updateSetting('${name}', 'transition_time', this.value ? parseInt(this.value) : null)">
-                </div>
+        // Sorting
+        const sortOpts = [
+            { label: 'Default (random)', value: '' },
+            { label: 'Random', value: 'random' },
+            { label: 'Ascending', value: 'ascending' },
+            { label: 'Descending', value: 'descending' }
+        ];
+        const sortEl = UIManager.createSelect(
+            "Sorting " + (!isFolder ? '<span class="text-xs text-zinc-500">(folders only)</span>' : ''),
+            null,
+            settings.sorting || '',
+            sortOpts,
+            (val) => this.updateSetting(name, 'sorting', val || null)
+        );
+        if (!isFolder) {
+            sortEl.querySelector('select').disabled = true;
+            sortEl.querySelector('select').classList.add('opacity-50', 'cursor-not-allowed');
+            sortEl.classList.add('opacity-75');
+        }
+        children.push(sortEl);
 
-                <!-- Offset -->
-                <div class="space-y-2">
-                    <label for="setting-offset" class="text-sm text-zinc-400">Offset</label>
-                    <input type="number" id="setting-offset" value="${settings.offset ?? ''}" 
-                        placeholder="0.5" step="0.1" min="0" max="1"
-                        class="w-full bg-zinc-950 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-white focus:border-teal-500 outline-none"
-                        onchange="wpaperdEditor.updateSetting('${name}', 'offset', this.value ? parseFloat(this.value) : null)">
-                    <p class="text-xs text-zinc-600">Image offset (0.0-1.0). Default: 0.5 (0.0 for tile mode)</p>
-                </div>
+        // Mode
+        const modeOpts = [
+            { label: 'Default', value: '' },
+            { label: 'Fit', value: 'fit' },
+            { label: 'Fit (Border Color)', value: 'fit-border-color' },
+            { label: 'Center', value: 'center' },
+            { label: 'Stretch', value: 'stretch' },
+            { label: 'Tile', value: 'tile' }
+        ];
+        children.push(UIManager.createSelect(
+            "Display Mode",
+            null,
+            settings.mode || '',
+            modeOpts,
+            (val) => this.updateSetting(name, 'mode', val || null)
+        ));
 
-                <!-- Group (for random sorting) -->
-                <div class="space-y-2 ${!isFolder ? disabledClass : ''}">
-                    <label for="setting-group" class="text-sm text-zinc-400">Group ${!isFolder ? '<span class="text-xs">(folders only)</span>' : ''}</label>
-                    <input type="number" id="setting-group" value="${settings.group ?? ''}" 
-                        placeholder="1"
-                        ${!isFolder ? 'disabled' : ''}
-                        class="w-full bg-zinc-950 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-white focus:border-teal-500 outline-none ${!isFolder ? 'text-zinc-600' : ''}"
-                        onchange="wpaperdEditor.updateSetting('${name}', 'group', this.value ? parseInt(this.value) : null)">
-                    <p class="text-xs text-zinc-600">Assign displays to same group to share wallpaper</p>
-                </div>
+        // Transition Time
+        children.push(UIManager.createInput(
+            "Transition Time (ms)",
+            null,
+            settings.transition_time || '',
+            "300",
+            (val) => this.updateSetting(name, 'transition_time', val ? parseInt(val) : null),
+            null,
+            "number"
+        ));
 
-                <!-- Queue Size (for random sorting) -->
-                <div class="space-y-2 ${!isFolder ? disabledClass : ''}">
-                    <label for="setting-queue_size" class="text-sm text-zinc-400">Queue Size ${!isFolder ? '<span class="text-xs">(folders only)</span>' : ''}</label>
-                    <input type="number" id="setting-queue_size" value="${settings.queue_size ?? ''}" 
-                        placeholder="10"
-                        ${!isFolder ? 'disabled' : ''}
-                        class="w-full bg-zinc-950 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-white focus:border-teal-500 outline-none ${!isFolder ? 'text-zinc-600' : ''}"
-                        onchange="wpaperdEditor.updateSetting('${name}', 'queue_size', this.value ? parseInt(this.value) : null)">
-                    <p class="text-xs text-zinc-600">History size for prev/next navigation (default: 10)</p>
-                </div>
+        // Offset
+        children.push(UIManager.createInput(
+            "Offset",
+            "Image offset (0.0-1.0). Default: 0.5",
+            settings.offset ?? '',
+            "0.5",
+            (val) => this.updateSetting(name, 'offset', val ? parseFloat(val) : null),
+            null,
+            "number" // TODO: Add step/min/max support to createInput or manual attr set (just not gon get this done as it does not break anything)
+        ));
+        // Manual attribute setting for Offset until UIManager supports it
+        const offInput = children[children.length - 1].querySelector('input');
+        if (offInput) {
+            offInput.step = "0.1";
+            offInput.min = "0";
+            offInput.max = "1";
+        }
 
-                <!-- Exec Script -->
-                <div class="space-y-2">
-                    <label for="setting-exec" class="text-sm text-zinc-400">Exec Script</label>
-                    <input type="text" id="setting-exec" value="${settings.exec || ''}" 
-                        placeholder="/path/to/script.sh"
-                        class="w-full bg-zinc-950 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-white focus:border-teal-500 outline-none font-mono"
-                        onchange="wpaperdEditor.updateSetting('${name}', 'exec', this.value || null)">
-                    <p class="text-xs text-zinc-600">Script called on wallpaper change with (display, path) args</p>
-                </div>
+        // Group
+        const groupEl = UIManager.createInput(
+            "Group " + (!isFolder ? '<span class="text-xs text-zinc-500">(folders only)</span>' : ''),
+            "Assign displays to same group to share wallpaper",
+            settings.group ?? '',
+            "1",
+            (val) => this.updateSetting(name, 'group', val ? parseInt(val) : null),
+            null,
+            "number"
+        );
+        if (!isFolder) {
+            groupEl.querySelector('input').disabled = true;
+            groupEl.classList.add('opacity-75');
+        }
+        children.push(groupEl);
 
-                <!-- Toggles -->
-                <div class="space-y-3 pt-2">
-                    <div class="flex items-center justify-between p-3 bg-zinc-800/50 rounded-lg ${!isFolder ? disabledClass : ''}">
-                        <label for="setting-recursive" class="flex-1">
-                            <div class="text-sm text-zinc-300">Recursive ${!isFolder ? '<span class="text-xs text-zinc-500">(folders only)</span>' : ''}</div>
-                            <div class="text-xs text-zinc-600">Scan subdirectories</div>
-                        </label>
-                        <div class="relative inline-flex items-center ${!isFolder ? 'pointer-events-none' : 'cursor-pointer'}">
-                            <input type="checkbox" id="setting-recursive" class="sr-only peer" 
-                                ${settings.recursive !== false ? 'checked' : ''}
-                                ${!isFolder ? 'disabled' : ''}
-                                onchange="wpaperdEditor.updateSetting('${name}', 'recursive', this.checked)">
-                            <div class="w-11 h-6 bg-zinc-700 peer-focus:ring-2 peer-focus:ring-teal-500/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-teal-500"></div>
-                        </div>
-                    </div>
+        // Queue Size
+        const queueEl = UIManager.createInput(
+            "Queue Size " + (!isFolder ? '<span class="text-xs text-zinc-500">(folders only)</span>' : ''),
+            "History size for prev/next navigation",
+            settings.queue_size ?? '',
+            "10",
+            (val) => this.updateSetting(name, 'queue_size', val ? parseInt(val) : null),
+            null,
+            "number"
+        );
+        if (!isFolder) {
+            queueEl.querySelector('input').disabled = true;
+            queueEl.classList.add('opacity-75');
+        }
+        children.push(queueEl);
 
-                    <div class="flex items-center justify-between p-3 bg-zinc-800/50 rounded-lg">
-                        <label for="setting-initial_transition" class="flex-1">
-                            <div class="text-sm text-zinc-300">Initial Transition</div>
-                            <div class="text-xs text-zinc-600">Animate on startup</div>
-                        </label>
-                        <div class="relative inline-flex items-center cursor-pointer">
-                            <input type="checkbox" id="setting-initial_transition" class="sr-only peer"
-                                ${settings.initial_transition !== false ? 'checked' : ''}
-                                onchange="wpaperdEditor.updateSetting('${name}', 'initial_transition', this.checked)">
-                            <div class="w-11 h-6 bg-zinc-700 peer-focus:ring-2 peer-focus:ring-teal-500/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-teal-500"></div>
-                        </div>
-                    </div>
-                </div>
+        // Exec Script
+        children.push(UIManager.createInput(
+            "Exec Script",
+            "Script called on wallpaper change",
+            settings.exec || '',
+            "/path/to/script.sh",
+            (val) => this.updateSetting(name, 'exec', val || null)
+        ));
 
-                <!-- Delete Button -->
-                ${name !== 'default' && name !== 'any' ? `
-                <div class="pt-4 border-t border-zinc-800">
-                    <button onclick="wpaperdEditor.deleteDisplay('${name}')"
-                        class="px-4 py-2 bg-red-500/10 hover:bg-red-500/20 text-red-400 rounded-lg text-sm">
-                        Delete Display Config
-                    </button>
-                </div>
-                ` : ''}
-            </div>
-        `;
+        // Recursive Toggle
+        const recEl = UIManager.createToggle(
+            "Recursive " + (!isFolder ? '<span class="text-xs text-zinc-500">(folders only)</span>' : ''),
+            "Scan subdirectories",
+            settings.recursive !== false,
+            (val) => this.updateSetting(name, 'recursive', val)
+        );
+        if (!isFolder) {
+            recEl.querySelector('input').disabled = true;
+            recEl.classList.add('opacity-75');
+        }
+        children.push(recEl);
+
+        // Initial Transition Toggle
+        children.push(UIManager.createToggle(
+            "Initial Transition",
+            "Animate on startup",
+            settings.initial_transition !== false,
+            (val) => this.updateSetting(name, 'initial_transition', val)
+        ));
+
+        // Delete Button
+        if (name !== 'default' && name !== 'any') {
+            const btnContainer = document.createElement('div');
+            btnContainer.className = "pt-4 border-t border-zinc-800 flex justify-end";
+            const delBtn = document.createElement('button');
+            delBtn.className = "px-4 py-2 bg-red-500/10 hover:bg-red-500/20 text-red-400 rounded-lg text-sm transition-colors border border-red-500/20";
+            delBtn.textContent = "Delete Display Config";
+            delBtn.onclick = () => this.deleteDisplay(name);
+            btnContainer.appendChild(delBtn);
+            children.push(btnContainer);
+        }
+
+        // Render Section
+        const section = UIManager.createSection(null, null, children);
+        container.appendChild(section);
     }
 
     updateSetting(display, key, value) {

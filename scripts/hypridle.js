@@ -93,6 +93,7 @@ class HypridleEditor {
     renderListeners() {
         const container = document.getElementById('listeners-list');
         if (!container) return;
+        container.innerHTML = '';
 
         if (!this.config.listeners || this.config.listeners.length === 0) {
             container.innerHTML = `
@@ -105,51 +106,69 @@ class HypridleEditor {
             return;
         }
 
-        container.innerHTML = this.config.listeners.map((listener, idx) => this.renderListenerCard(listener, idx)).join('');
-    }
+        const grid = document.createElement('div');
+        grid.className = "flex flex-col gap-4";
 
-    renderListenerCard(listener, idx) {
-        const timeoutReadable = this.formatTimeout(listener.timeout);
+        this.config.listeners.forEach((listener, idx) => {
+            const card = document.createElement('div');
+            card.className = "bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden group hover:border-zinc-700 transition-colors relative";
 
-        return `
-            <div class="bg-zinc-800/50 border border-zinc-700/50 rounded-lg p-4 space-y-3 group relative">
-                <!-- Delete Button -->
-                <button onclick="hypridleEditor.deleteListener(${idx})" 
-                    class="absolute top-2 right-2 p-1.5 text-zinc-500 hover:text-red-400 hover:bg-red-500/10 rounded transition-colors opacity-0 group-hover:opacity-100">
-                    🗑️
-                </button>
-                
-                <!-- Timeout -->
-                <div class="flex items-center gap-4">
-                    <div class="flex-1">
-                        <label class="text-xs text-zinc-500">Timeout (seconds)</label>
-                        <div class="flex items-center gap-2">
-                            <input type="number" value="${listener.timeout}" min="1" step="1"
-                                class="w-24 bg-zinc-950 border border-zinc-700 rounded px-2 py-1 text-sm text-white focus:border-teal-500 outline-none"
-                                onchange="hypridleEditor.updateListener(${idx}, 'timeout', parseInt(this.value) || 60)">
-                            <span class="text-sm text-zinc-400">${timeoutReadable}</span>
-                        </div>
+            const timeoutReadable = this.formatTimeout(listener.timeout);
+
+            card.innerHTML = `
+                <div class="px-4 py-3 bg-zinc-800/30 border-b border-zinc-800 flex justify-between items-center">
+                    <div class="flex items-center gap-2">
+                         <div class="w-8 h-8 rounded-lg bg-zinc-800 flex items-center justify-center text-teal-400 font-bold text-xs border border-zinc-700">
+                            ${idx + 1}
+                         </div>
+                         <div class="flex flex-col">
+                            <span class="text-xs font-bold text-zinc-400 uppercase tracking-wider">Listener</span>
+                            <span class="text-xs text-teal-500 font-mono">${timeoutReadable}</span>
+                         </div>
+                    </div>
+                    <button onclick="hypridleEditor.deleteListener(${idx})" class="text-zinc-500 hover:text-red-400 transition-colors p-1">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                    </button>
+                </div>
+
+                <div class="p-4 space-y-4">
+                    <div class="space-y-1">
+                        <label class="text-[10px] uppercase font-bold text-zinc-500 tracking-wider">Timeout (Seconds)</label>
+                        <input type="number" 
+                               value="${listener.timeout}" 
+                               min="1"
+                               class="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-zinc-200 text-sm focus:outline-none focus:border-teal-500 transition-colors placeholder-zinc-700 font-mono"
+                               onchange="hypridleEditor.updateListener(${idx}, 'timeout', parseInt(this.value) || 60)">
+                    </div>
+
+                    </div>
+
+                    <div class="space-y-1">
+                         <label class="text-[10px] uppercase font-bold text-zinc-500 tracking-wider">On Timeout</label>
+                         <textarea class="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-zinc-200 text-sm focus:outline-none focus:border-teal-500 transition-colors placeholder-zinc-700 font-mono resize-y"
+                                   rows="3"
+                                   placeholder="e.g. hyprlock"
+                                   onchange="hypridleEditor.updateListener(${idx}, 'on_timeout', this.value)">${listener.on_timeout || ''}</textarea>
+                    </div>
+
+                    </div>
+
+                    <div class="space-y-1">
+                         <label class="text-[10px] uppercase font-bold text-zinc-500 tracking-wider">On Resume</label>
+                         <textarea class="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-zinc-200 text-sm focus:outline-none focus:border-teal-500 transition-colors placeholder-zinc-700 font-mono resize-y"
+                                   rows="3"
+                                   placeholder="e.g. killall hyprlock"
+                                   onchange="hypridleEditor.updateListener(${idx}, 'on_resume', this.value)">${listener.on_resume || ''}</textarea>
                     </div>
                 </div>
-                
-                <!-- On Timeout -->
-                <div>
-                    <label class="text-xs text-zinc-500">On Timeout</label>
-                    <input type="text" value="${this.escapeHtml(listener.on_timeout || '')}" placeholder="Command to run when idle..."
-                        class="w-full bg-zinc-950 border border-zinc-700 rounded px-2 py-1 text-sm text-white focus:border-teal-500 outline-none font-mono"
-                        onchange="hypridleEditor.updateListener(${idx}, 'on_timeout', this.value)">
-                </div>
-                
-                <!-- On Resume -->
-                <div>
-                    <label class="text-xs text-zinc-500">On Resume</label>
-                    <input type="text" value="${this.escapeHtml(listener.on_resume || '')}" placeholder="Command to run when activity resumes..."
-                        class="w-full bg-zinc-950 border border-zinc-700 rounded px-2 py-1 text-sm text-white focus:border-teal-500 outline-none font-mono"
-                        onchange="hypridleEditor.updateListener(${idx}, 'on_resume', this.value)">
-                </div>
-            </div>
-        `;
+            `;
+            grid.appendChild(card);
+        });
+
+        container.appendChild(grid);
     }
+
+
 
     formatTimeout(seconds) {
         if (seconds < 60) return `${seconds}s`;
@@ -163,9 +182,7 @@ class HypridleEditor {
         return mins > 0 ? `${hours}h ${mins}m` : `${hours}h`;
     }
 
-    escapeHtml(str) {
-        return str.replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-    }
+
 
     updateGeneral(key, value) {
         this.config.general[key] = value;
@@ -175,7 +192,6 @@ class HypridleEditor {
     updateListener(idx, key, value) {
         if (this.config.listeners[idx]) {
             this.config.listeners[idx][key] = value;
-            // Re-render to update timeout display
             if (key === 'timeout') {
                 this.renderListeners();
             }
@@ -203,13 +219,11 @@ class HypridleEditor {
         this.triggerAutosave();
     }
 
-    // Debounced autosave (500ms delay)
     triggerAutosave() {
         if (this.isAutosaveEnabled()) {
             if (this.saveTimeout) clearTimeout(this.saveTimeout);
             this.saveTimeout = setTimeout(async () => {
-                await this.save(true); // Silent save
-                // Update preset manager
+                await this.save(true);
                 if (window._presetManagers && window._presetManagers['hypridle']) {
                     window._presetManagers['hypridle'].updateActivePreset(true);
                 }

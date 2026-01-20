@@ -9,7 +9,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     setInterval(loadStatus, 5000);
 
     if (window.PresetManagerUI) {
-        window._presetManagers['gammastep'] =new PresetManagerUI('gammastep', {
+        window._presetManagers['gammastep'] = new PresetManagerUI('gammastep', {
             containerId: 'preset-container',
             onActivate: async () => {
                 await loadConfig();
@@ -47,33 +47,80 @@ async function loadStatus() {
 }
 
 function renderConfig() {
-    setValue('temp-day', config.temp_day);
-    setValue('temp-day-slider', config.temp_day);
-    setValue('temp-night', config.temp_night);
-    setValue('temp-night-slider', config.temp_night);
-    setValue('fade', config.fade === '1');
-    setValue('provider', config.location_provider);
-    setValue('lat', config.lat);
-    setValue('lon', config.lon);
+    const container = document.getElementById('gammastep-settings-content');
+    if (!container) return;
+    container.innerHTML = '';
 
-    const unifiedToggle = document.getElementById('unified-mode');
-    if (unifiedToggle) unifiedToggle.checked = isUnified;
+    const settingsGrid = document.createElement('div');
+    settingsGrid.className = "grid grid-cols-1 md:grid-cols-2 gap-8";
+
+    const tempColumn = document.createElement('div');
+    tempColumn.className = "space-y-6";
+
+    tempColumn.appendChild(UIManager.createToggle("Unified Day & Night", "Use the same temperature all day", isUnified, (v) => {
+        isUnified = v;
+        if (isUnified) config.temp_night = config.temp_day;
+        renderConfig();
+        debouncedSave();
+    }));
 
     if (isUnified) {
-        document.getElementById('unified-controls').classList.remove('hidden');
-        document.getElementById('split-controls').classList.add('hidden');
-
-        setValue('temp-unified', config.temp_day);
-        setValue('temp-unified-slider', config.temp_day);
-
-        disableLocationSection(true);
+        tempColumn.appendChild(UIManager.createSlider("Screen Temperature", "Kelvin (K)", config.temp_day || 6500, 1000, 6500, 100, (v) => {
+            config.temp_day = parseInt(v);
+            config.temp_night = parseInt(v);
+            debouncedSave();
+        }, 'temp-unified'));
     } else {
-        document.getElementById('unified-controls').classList.add('hidden');
-        document.getElementById('split-controls').classList.remove('hidden');
+        tempColumn.appendChild(UIManager.createSlider("Day Temperature", "Kelvin (K)", config.temp_day || 6500, 1000, 6500, 100, (v) => {
+            config.temp_day = parseInt(v);
+            debouncedSave();
+        }, 'temp-day'));
 
-        disableLocationSection(false);
-        toggleLocationInputs(config.location_provider === 'manual');
+        tempColumn.appendChild(UIManager.createSlider("Night Temperature", "Kelvin (K)", config.temp_night || 4500, 1000, 6500, 100, (v) => {
+            config.temp_night = parseInt(v);
+            debouncedSave();
+        }, 'temp-night'));
     }
+
+    tempColumn.appendChild(UIManager.createToggle("Smooth Transition", "Fade between temperature changes", config.fade === '1', (v) => {
+        config.fade = v ? '1' : '0';
+        debouncedSave();
+    }, 'fade'));
+
+    const locColumn = document.createElement('div');
+    locColumn.className = "space-y-6";
+
+    const providers = [
+        { value: 'manual', label: 'Manual Coordinates' },
+        { value: 'geoclue2', label: 'Automatic (GeoClue2)' }
+    ];
+
+    locColumn.appendChild(UIManager.createSelect("Location Provider", "Method to determine position", config.location_provider, providers, (v) => {
+        config.location_provider = v;
+        renderConfig();
+        debouncedSave();
+    }, 'provider'));
+
+    if (config.location_provider === 'manual') {
+        const manualGroup = document.createElement('div');
+        manualGroup.className = "space-y-4 pt-2 border-t border-zinc-800/50";
+
+        manualGroup.appendChild(UIManager.createInput("Latitude", "Positive for North", config.lat, "e.g. 48.1", (v) => {
+            config.lat = parseFloat(v) || 0;
+            debouncedSave();
+        }, 'lat', 'number'));
+
+        manualGroup.appendChild(UIManager.createInput("Longitude", "Positive for East", config.lon, "e.g. 11.6", (v) => {
+            config.lon = parseFloat(v) || 0;
+            debouncedSave();
+        }, 'lon', 'number'));
+
+        locColumn.appendChild(manualGroup);
+    }
+
+    settingsGrid.appendChild(tempColumn);
+    settingsGrid.appendChild(locColumn);
+    container.appendChild(settingsGrid);
 }
 
 function updateStatusUI() {
@@ -100,36 +147,15 @@ function updateStatusUI() {
 }
 
 async function saveConfig(silent = false) {
-    let dayTemp, nightTemp;
-
-    if (isUnified) {
-        const val = parseInt(getValue('temp-unified'));
-        dayTemp = val;
-        nightTemp = val;
-    } else {
-        dayTemp = parseInt(getValue('temp-day'));
-        nightTemp = parseInt(getValue('temp-night'));
-    }
-
-    const newConfig = {
-        temp_day: dayTemp,
-        temp_night: nightTemp,
-        fade: document.getElementById('fade').checked ? '1' : '0',
-        location_provider: getValue('provider'),
-        lat: parseFloat(getValue('lat')),
-        lon: parseFloat(getValue('lon'))
-    };
-
     try {
         const response = await fetch('/gammastep/config', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(newConfig)
+            body: JSON.stringify(config)
         });
 
         if (response.ok) {
             if (!silent) showToast('Configuration saved', 'success');
-            config = newConfig;
             loadStatus();
         } else {
             showToast('Failed to save', 'error');
@@ -137,15 +163,6 @@ async function saveConfig(silent = false) {
     } catch (e) {
         showToast('Error saving config', 'error');
     }
-}
-
-function toggleUnified() {
-    isUnified = !isUnified;
-    if (isUnified) {
-        config.temp_night = config.temp_day;
-    }
-    renderConfig();
-    debouncedSave();
 }
 
 async function toggleGammastep() {
@@ -160,47 +177,6 @@ async function toggleGammastep() {
     }
 }
 
-function getValue(id) {
-    return document.getElementById(id).value;
-}
-
-function setValue(id, value) {
-    const el = document.getElementById(id);
-    if (!el) return;
-    if (el.type === 'checkbox') {
-        el.checked = value;
-    } else {
-        el.value = value;
-    }
-}
-
-function handleProviderChange(select) {
-    toggleLocationInputs(select.value === 'manual');
-}
-
-function toggleLocationInputs(show) {
-    const container = document.getElementById('manual-location-group');
-    if (show) {
-        container.classList.remove('opacity-50', 'pointer-events-none');
-    } else {
-        container.classList.add('opacity-50', 'pointer-events-none');
-    }
-}
-
-function disableLocationSection(disable) {
-    const provider = document.getElementById('provider');
-    const container = document.getElementById('manual-location-group');
-
-    if (disable) {
-        provider.disabled = true;
-        provider.classList.add('opacity-50', 'cursor-not-allowed');
-        container.classList.add('opacity-50', 'pointer-events-none');
-    } else {
-        provider.disabled = false;
-        provider.classList.remove('opacity-50', 'cursor-not-allowed');
-    }
-}
-
 let saveTimeout = null;
 function debouncedSave() {
     if (saveTimeout) clearTimeout(saveTimeout);
@@ -210,22 +186,4 @@ function debouncedSave() {
 }
 
 function attachAutosaveListeners() {
-    const inputs = document.querySelectorAll('input, select');
-    inputs.forEach(input => {
-        input.addEventListener('input', () => {
-            if (input.type === 'range') {
-                const targetId = input.id.replace('-slider', '');
-                const target = document.getElementById(targetId);
-                if (target) target.value = input.value;
-            }
-            if (input.type === 'number') {
-                const targetId = input.id + '-slider';
-                const target = document.getElementById(targetId);
-                if (target) target.value = input.value;
-            }
-            debouncedSave();
-        });
-
-        input.addEventListener('change', debouncedSave);
-    });
 }

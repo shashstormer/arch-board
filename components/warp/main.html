@@ -1,36 +1,6 @@
 <div>
-    <div id="main-content justify-center text-center">
-        <span class="text-md font-semibold leading-5 display-flex">
-            Connect:
-        </span>
-        <label class="relative inline-flex items-center cursor-pointer mt-3">
-            <input type="checkbox" id="cf-enable" class="sr-only peer"
-                   onchange="syncCF()">
-            <span
-                    class="w-11 h-6 bg-zinc-700 peer-focus:ring-2 peer-focus:ring-teal-500/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-teal-500">
-            </span>
-        </label>
+    <div id="warp-content" class="p-6">
+        <!-- JS will render here -->
     </div>
-    <script>
-
-        async function init() {
-            await getStatus()
-            setInterval(getStatus, 10000);
-        }
-        async function getStatus() {
-                const cfEnable = document.getElementById('cf-enable');
-                if (!cfEnable) return;
-                cfEnable.disabled = true;
-            const res = await fetch('/warp/enabled');
-            const enabled = await res.json();
-            cfEnable.checked = enabled.enabled;
-            cfEnable.disabled = false;
-            }
-        async function syncCF() {
-            const cfEnable = document.getElementById('cf-enable');
-            const enabled = cfEnable.checked;
-            await fetch('/warp/update', { method: 'POST', body: JSON.stringify({ enabled }), headers: { 'Content-Type': 'application/json'} });
-        }
-        window.addEventListener('DOMContentLoaded', init);
-    </script>
+    <script src="/scripts/warp.js?k={{ cache_key }}"></script>
 </div>

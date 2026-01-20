@@ -611,90 +611,45 @@ function renderForm(schema, config) {
     const container = elements.viewSimple;
     container.innerHTML = '';
 
-    const grid = document.createElement('div');
-    grid.className = 'grid grid-cols-1 md:grid-cols-2 gap-4';
+    const children = [];
 
     schema.options.forEach(opt => {
-        const wrapper = document.createElement('div');
-        wrapper.className = 'bg-zinc-900/50 border border-zinc-800 rounded-xl p-3 flex flex-col gap-2 relative group focus-within:border-teal-500/50 transition-colors';
-        if (opt.type === 'json') wrapper.className += ' md:col-span-2';
+        let val = config[opt.name];
+        if (val === undefined) val = opt.default;
+        if (val === undefined) val = "";
 
-        const label = document.createElement('label');
-        label.className = 'text-[10px] uppercase font-bold text-zinc-500 tracking-wider';
-        label.textContent = opt.description || opt.name;
-        wrapper.appendChild(label);
-
-        const val = config[opt.name] !== undefined ? config[opt.name] : (opt.default !== undefined ? opt.default : "");
-
-        let input;
+        const label = opt.description || opt.name;
+        let component = null;
 
         if (opt.type === 'bool') {
-            const row = document.createElement('div');
-            row.className = 'flex items-center justify-between';
-
-            const toggleLabel = document.createElement('span');
-            toggleLabel.className = 'text-sm text-zinc-300';
-            toggleLabel.textContent = val ? 'Enabled' : 'Disabled';
-
-            const toggleContainer = document.createElement('label');
-            toggleContainer.className = 'relative inline-flex items-center cursor-pointer';
-
-            const chk = document.createElement('input');
-            chk.type = 'checkbox';
-            chk.className = 'sr-only peer';
-            chk.checked = val === true;
-            chk.onchange = (e) => {
-                updateFormValue(opt.name, e.target.checked);
-                toggleLabel.textContent = e.target.checked ? 'Enabled' : 'Disabled';
-            };
-
-            const slider = document.createElement('div');
-            slider.className = "w-9 h-5 bg-zinc-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-zinc-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-teal-500";
-
-            toggleContainer.appendChild(chk);
-            toggleContainer.appendChild(slider);
-            row.appendChild(toggleLabel);
-            row.appendChild(toggleContainer);
-            wrapper.appendChild(row);
+            component = UIManager.createToggle(label, null, val === true, (v) => updateFormValue(opt.name, v));
         }
         else if (opt.type === 'int' || opt.type === 'float') {
-            input = document.createElement('input');
-            input.type = 'number';
-            input.className = 'w-full bg-transparent text-sm text-zinc-200 focus:outline-none font-mono placeholder-zinc-700';
-            if (opt.type === 'float') input.step = opt.step || "0.1";
-            input.value = val;
-            input.placeholder = "0";
-            input.oninput = (e) => updateFormValue(opt.name, opt.type === 'int' ? parseInt(e.target.value) : parseFloat(e.target.value));
-            wrapper.appendChild(input);
+            component = UIManager.createInput(label, null, val, "0", (v) => {
+                const num = opt.type === 'int' ? parseInt(v) : parseFloat(v);
+                updateFormValue(opt.name, isNaN(num) ? v : num);
+            }, null, 'number');
+            if (opt.type === 'float') {
+                const input = component.querySelector('input');
+                if (input) input.step = opt.step || "0.1";
+            }
         }
         else if (opt.type === 'enum' && opt.choices) {
-            input = document.createElement('select');
-            input.className = 'w-full bg-transparent text-sm text-zinc-200 focus:outline-none cursor-pointer';
-            opt.choices.forEach(c => {
-                const o = document.createElement('option');
-                o.value = c;
-                o.textContent = c;
-                o.className = "bg-zinc-800";
-                if (c == val) o.selected = true;
-                input.appendChild(o);
-            });
-            input.onchange = (e) => updateFormValue(opt.name, e.target.value);
-            wrapper.appendChild(input);
+            const choices = opt.choices.map(c => ({ value: c, label: c }));
+            component = UIManager.createSelect(label, null, val, choices, (v) => updateFormValue(opt.name, v));
         }
         else {
-            input = document.createElement('input');
-            input.type = 'text';
-            input.className = 'w-full bg-transparent text-sm text-zinc-200 focus:outline-none font-mono placeholder-zinc-700';
-            input.value = val;
-            input.placeholder = "...";
-            input.oninput = (e) => updateFormValue(opt.name, e.target.value);
-            wrapper.appendChild(input);
+            component = UIManager.createInput(label, null, val, "...", (v) => updateFormValue(opt.name, v));
         }
 
-        grid.appendChild(wrapper);
+        if (component) children.push(component);
     });
 
-    container.appendChild(grid);
+    if (children.length > 0) {
+        container.appendChild(UIManager.createSection("Settings", null, children));
+    } else {
+        container.innerHTML = '<div class="p-8 text-center text-zinc-500 text-sm">No specific settings available.</div>';
+    }
 }
 
 function updateFormValue(key, value) {

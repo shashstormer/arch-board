@@ -36,90 +36,8 @@
             Settings
         </h2>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div class="space-y-6">
-                <div class="flex items-center gap-3 pb-2 border-b border-zinc-800">
-                    <input type="checkbox" id="unified-mode" onchange="toggleUnified()"
-                        class="w-5 h-5 rounded border-zinc-700 bg-zinc-800 text-teal-600 focus:ring-teal-500/20">
-                    <label for="unified-mode" class="text-sm font-medium text-zinc-300">Unified Day & Night
-                        Temperature</label>
-                </div>
+        <div id="gammastep-settings-content" class="min-h-[300px]">
 
-                <div id="unified-controls" class="hidden">
-                    <label class="block text-sm font-medium text-zinc-400 mb-2">Screen Temperature (K)</label>
-                    <div class="flex items-center gap-4">
-                        <input type="range" min="1000" max="6500" step="100" id="temp-unified-slider"
-                            class="flex-1 accent-teal-500"
-                            oninput="document.getElementById('temp-unified').value = this.value">
-                        <input type="number" id="temp-unified"
-                            class="w-20 px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-zinc-200 text-sm focus:outline-none focus:border-teal-500"
-                            oninput="document.getElementById('temp-unified-slider').value = this.value">
-                    </div>
-                    <p class="text-xs text-zinc-500 mt-1">Sets both day and night temperature.</p>
-                </div>
-
-                <div id="split-controls" class="space-y-6">
-                    <div>
-                        <label class="block text-sm font-medium text-zinc-400 mb-2">Day Temperature (K)</label>
-                        <div class="flex items-center gap-4">
-                            <input type="range" min="1000" max="6500" step="100" id="temp-day-slider"
-                                class="flex-1 accent-teal-500"
-                                oninput="document.getElementById('temp-day').value = this.value">
-                            <input type="number" id="temp-day"
-                                class="w-20 px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-zinc-200 text-sm focus:outline-none focus:border-teal-500"
-                                oninput="document.getElementById('temp-day-slider').value = this.value">
-                        </div>
-                        <p class="text-xs text-zinc-500 mt-1">Neutral is around 6500K. Lower is warmer.</p>
-                    </div>
-
-                    <div>
-                        <label class="block text-sm font-medium text-zinc-400 mb-2">Night Temperature (K)</label>
-                        <div class="flex items-center gap-4">
-                            <input type="range" min="1000" max="6500" step="100" id="temp-night-slider"
-                                class="flex-1 accent-orange-500"
-                                oninput="document.getElementById('temp-night').value = this.value">
-                            <input type="number" id="temp-night"
-                                class="w-20 px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-zinc-200 text-sm focus:outline-none focus:border-teal-500"
-                                oninput="document.getElementById('temp-night-slider').value = this.value">
-                        </div>
-                    </div>
-                </div>
-
-                <div class="flex items-center gap-3 pt-2">
-                    <input type="checkbox" id="fade"
-                        class="w-5 h-5 rounded border-zinc-700 bg-zinc-800 text-teal-600 focus:ring-teal-500/20">
-                    <label for="fade" class="text-sm text-zinc-300">Smooth Transition (Fade)</label>
-                </div>
-            </div>
-
-            <div class="space-y-6">
-                <div>
-                    <label class="block text-sm font-medium text-zinc-400 mb-2">Location Provider</label>
-                    <select id="provider" onchange="handleProviderChange(this)"
-                        class="w-full px-4 py-2.5 bg-zinc-800 border border-zinc-700 rounded-lg text-zinc-200 text-sm focus:outline-none focus:border-teal-500 appearance-none">
-                        <option value="manual">Manual Coordinates</option>
-                        <option value="geoclue2">Automatic (GeoClue2)</option>
-                    </select>
-                </div>
-
-                <div id="manual-location-group" class="grid grid-cols-2 gap-4 transition-opacity duration-200">
-                    <div>
-                        <label class="block text-sm font-medium text-zinc-400 mb-2">Latitude</label>
-                        <input type="number" id="lat" step="0.1"
-                            class="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-zinc-200 text-sm focus:outline-none focus:border-teal-500"
-                            placeholder="e.g. 48.1">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-zinc-400 mb-2">Longitude</label>
-                        <input type="number" id="lon" step="0.1"
-                            class="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-zinc-200 text-sm focus:outline-none focus:border-teal-500"
-                            placeholder="e.g. 11.6">
-                    </div>
-                    <div class="col-span-2 text-xs text-zinc-500">
-                        Positive for North/East, Negative for South/West.
-                    </div>
-                </div>
-            </div>
         </div>
 
         <div class="flex justify-end pt-8 mt-8 border-t border-zinc-800">
@@ -134,4 +52,4 @@
     </div>
 </div>
 
-<script src="/scripts/gammastep.js"></script>
+<script src="/scripts/gammastep.js?k={{ cache_key }}"></script>
