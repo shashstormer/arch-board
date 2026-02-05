@@ -486,16 +486,20 @@ class UIManager {
         return wrapper;
     }
     // Vertical Stack Variants (for Properties Panel)
-    static createStackInput(label, value, placeholder, onChange, type = "text", id = null) {
+    static createStackInput(label, description, value, placeholder, onChange, id = null, type = "text") {
         const wrapper = document.createElement('div');
         wrapper.className = "flex flex-col items-start px-5 py-3 hover:bg-zinc-800/30 transition-colors gap-2";
         const info = document.createElement('div');
         info.className = "w-full min-w-0";
         info.innerHTML = `
             <div class="font-medium text-zinc-200 text-xs uppercase tracking-wider mb-0.5">${label}</div>
+            ${description ? `<div class="text-xs text-zinc-500 truncate">${description}</div>` : ''}
         `;
         const input = document.createElement('input');
         input.type = type;
+        if (type === 'number') {
+            input.step = "any";
+        }
         input.className = "w-full px-3 py-2 bg-zinc-900 border border-zinc-700 rounded-md text-zinc-200 text-sm focus:outline-none focus:border-teal-500 transition-colors placeholder-zinc-600";
         input.value = (value !== undefined && value !== null) ? value : "";
         input.placeholder = placeholder;
