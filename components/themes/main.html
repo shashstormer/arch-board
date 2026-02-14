@@ -7,9 +7,14 @@
         </div>
 
         <div class="flex gap-3">
+            <button onclick="openGithubImportModal()"
+                class="px-4 py-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 rounded-lg flex items-center gap-2 transition-colors">
+                <i class="fa-brands fa-github"></i> GitHub
+            </button>
+
             <button onclick="document.getElementById('theme-upload').click()"
                 class="px-4 py-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 rounded-lg flex items-center gap-2 transition-colors">
-                <i class="fa-solid fa-upload"></i> Import Theme
+                <i class="fa-solid fa-upload"></i> Import Zip
             </button>
 
             <input type="file" id="theme-upload" accept=".zip" class="hidden" onchange="importTheme(this.files[0])">
@@ -66,7 +71,13 @@
                 </div>
 
                 <div>
-                    <h3 class="text-sm font-medium text-zinc-400 mb-3 uppercase tracking-wider">Dependencies</h3>
+                    <div class="flex justify-between items-center mb-3">
+                        <h3 class="text-sm font-medium text-zinc-400 uppercase tracking-wider">Dependencies</h3>
+                        <button onclick="autoDetectDependencies()"
+                            class="text-xs text-teal-500 hover:text-teal-400 font-medium flex items-center gap-1">
+                            <i class="fa-solid fa-wand-magic-sparkles"></i> Auto Detect
+                        </button>
+                    </div>
                     <div id="dependencies-list" class="space-y-2 mb-2">
                         <!-- Dependencies inputs -->
                     </div>
@@ -110,7 +121,7 @@
                 </button>
             </div>
 
-            <div class="p-6 space-y-4">
+            <div class="p-6 space-y-4 flex-1 overflow-hidden" id="export-step-1">
                 <p class="text-zinc-400 text-sm">Select which components to include in the export package.</p>
                 <input type="hidden" id="export-theme-id">
                 <div id="export-presets-list" class="space-y-2">
@@ -118,12 +129,64 @@
                 </div>
             </div>
 
+            <div class="p-6 space-y-4 flex-1 overflow-hidden hidden flex flex-col" id="export-step-2">
+                <p class="text-zinc-400 text-sm">Review detected assets. Uncheck any files you want to exclude.</p>
+                <div id="export-assets-loading" class="text-center py-8 text-zinc-500 hidden">
+                    <i class="fa-solid fa-circle-notch fa-spin text-2xl mb-2"></i>
+                    <div class="text-sm">Analyzing assets...</div>
+                </div>
+                <div id="export-assets-list" class="space-y-2 overflow-y-auto max-h-[300px] pr-2 custom-scrollbar">
+                    <!-- Assets Checkboxes -->
+                </div>
+            </div>
+
             <div class="p-6 border-t border-zinc-800 flex justify-end gap-3">
                 <button onclick="closeExportModal()"
                     class="px-4 py-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 rounded-lg">Cancel</button>
-                <button onclick="performExport()"
-                    class="px-4 py-2 bg-teal-600 hover:bg-teal-500 text-white rounded-lg flex items-center gap-2">
+
+                <button id="export-back-btn" onclick="backExportStep()"
+                    class="hidden px-4 py-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 rounded-lg">Back</button>
+
+                <button id="export-next-btn" onclick="advanceExportStep()"
+                    class="px-4 py-2 bg-teal-600 hover:bg-teal-500 text-white rounded-lg">Next</button>
+
+                <button id="export-download-btn" onclick="performExport()"
+                    class="hidden px-4 py-2 bg-teal-600 hover:bg-teal-500 text-white rounded-lg flex items-center gap-2">
                     <i class="fa-solid fa-download"></i> Download Zip
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="github-import-modal"
+        class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-200 [&.active]:opacity-100 [&.active]:pointer-events-auto"
+        onclick="closeGithubImportModal()">
+        <div class="bg-zinc-900 border border-zinc-800 rounded-xl w-full max-w-md flex flex-col shadow-2xl transform scale-95 transition-transform duration-200 [&.active]:scale-100"
+            onclick="event.stopPropagation()">
+            <div class="p-6 border-b border-zinc-800 flex justify-between items-center">
+                <h2 class="text-xl font-bold text-zinc-100">Import from GitHub</h2>
+                <button onclick="closeGithubImportModal()" class="text-zinc-400 hover:text-white">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <div class="p-6 space-y-4">
+                <p class="text-zinc-400 text-sm">Enter the URL of a GitHub repository containing a
+                    <code>theme.zip</code> file in its root.
+                </p>
+                <div>
+                    <label class="block text-sm font-medium text-zinc-400 mb-2">Repository URL</label>
+                    <input type="text" id="github-url" placeholder="https://github.com/user/repo"
+                        class="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-4 py-2 text-zinc-100 focus:outline-none focus:border-teal-500">
+                </div>
+            </div>
+
+            <div class="p-6 border-t border-zinc-800 flex justify-end gap-3">
+                <button onclick="closeGithubImportModal()"
+                    class="px-4 py-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 rounded-lg">Cancel</button>
+                <button onclick="importFromGithub()"
+                    class="px-4 py-2 bg-teal-600 hover:bg-teal-500 text-white rounded-lg flex items-center gap-2">
+                    <i class="fa-brands fa-github"></i> Import
                 </button>
             </div>
         </div>
@@ -135,6 +198,7 @@
     const TOOLS = ["hyprland", "waybar", "hyprlock", "hypridle", "wpaperd", "gammastep"];
     let availablePresets = {};
     let currentThemes = [];
+    let currentExportStep = 1;
 
     async function loadThemes() {
         try {
@@ -172,6 +236,11 @@
                             </div>
                         </div>
                         <div class="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                             ${theme.source_url ? `
+                                <button onclick="updateThemeSource('${theme.id}')" class="p-2 text-zinc-400 hover:text-teal-400 hover:bg-zinc-800 rounded-lg transition-colors" title="Update from Source">
+                                    <i class="fa-solid fa-rotate"></i>
+                                </button>
+                            ` : ''}
                              <button onclick="openExportModal('${theme.id}')" class="p-2 text-zinc-400 hover:text-white hover:bg-zinc-800 rounded-lg transition-colors" title="Export">
                                 <i class="fa-solid fa-download"></i>
                             </button>
@@ -188,9 +257,20 @@
                     
                     ${theme.dependencies && theme.dependencies.length > 0 ? `
                     <div class="mb-4">
-                         <div class="text-xs font-medium text-zinc-500 uppercase tracking-wider mb-1">Requires</div>
+                         <div class="flex justify-between items-end mb-1">
+                             <div class="text-xs font-medium text-zinc-500 uppercase tracking-wider">Requires</div>
+                             <button onclick="openInstallDepsModal(${JSON.stringify(theme.dependencies).replace(/"/g, '&quot;')})" class="text-[10px] bg-zinc-800 hover:bg-zinc-700 text-zinc-300 px-2 py-0.5 rounded border border-zinc-700 transition-colors">
+                                <i class="fa-solid fa-terminal mr-1"></i>Install
+                             </button>
+                         </div>
                          <div class="text-xs text-zinc-400 flex flex-wrap gap-x-3 gap-y-1">
-                            ${theme.dependencies.map(d => `<span><i class="fa-solid fa-wrench text-zinc-600 mr-1"></i>${d}</span>`).join('')}
+                            ${theme.dependencies.map(d => {
+            const name = typeof d === 'string' ? d : d.name;
+            const source = typeof d === 'string' ? 'pacman' : d.source;
+            const iconClass = source === 'aur' ? 'text-blue-400' : 'text-zinc-600';
+            const sourceLabel = source === 'aur' ? '(AUR)' : '';
+            return `<span title="${source}"><i class="fa-solid fa-wrench ${iconClass} mr-1"></i>${name} <span class="text-[10px] text-zinc-600">${sourceLabel}</span></span>`;
+        }).join('')}
                          </div>
                     </div>
                     ` : ''}
@@ -267,8 +347,16 @@
 
             if (res.ok) {
                 showToast('Theme imported successfully!', 'success');
+                const themeData = await res.json(); // Import should return theme data
                 loadThemes();
                 document.getElementById('theme-upload').value = '';
+
+                // If theme has dependencies, offer to install
+                if (themeData.dependencies && themeData.dependencies.length > 0) {
+                    if (confirm('Theme imported. Do you want to install its dependencies?')) {
+                        openInstallDepsModal(themeData.dependencies);
+                    }
+                }
             } else {
                 const err = await res.json();
                 showToast(err.detail || 'Import failed', 'error');
@@ -276,6 +364,77 @@
         } catch (e) {
             console.error(e);
             showToast('Error importing theme', 'error');
+        }
+    }
+
+    // --- GitHub Import ---
+
+    function openGithubImportModal() {
+        document.getElementById('github-url').value = '';
+        document.getElementById('github-import-modal').classList.add('active');
+        document.getElementById('github-import-modal').querySelector('div').classList.add('active');
+    }
+
+    function closeGithubImportModal() {
+        const modal = document.getElementById('github-import-modal');
+        modal.classList.remove('active');
+        modal.querySelector('div').classList.remove('active');
+    }
+
+    async function importFromGithub() {
+        const url = document.getElementById('github-url').value.trim();
+        if (!url) {
+            showToast('Please enter a URL', 'warning');
+            return;
+        }
+
+        try {
+            showToast('Downloading and importing...', 'info');
+            closeGithubImportModal();
+
+            const res = await fetch('/themes/import/github', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ url })
+            });
+
+            if (res.ok) {
+                showToast('Theme imported from GitHub!', 'success');
+                const themeData = await res.json();
+                loadThemes();
+
+                if (themeData.dependencies && themeData.dependencies.length > 0) {
+                    if (confirm('Theme imported. Do you want to install its dependencies?')) {
+                        openInstallDepsModal(themeData.dependencies);
+                    }
+                }
+            } else {
+                const err = await res.json();
+                showToast(err.detail || 'Import failed', 'error');
+            }
+        } catch (e) {
+            console.error(e);
+            showToast('Error importing from GitHub', 'error');
+        }
+    }
+
+    async function updateThemeSource(id) {
+        if (!confirm('Check for updates and overwrite this theme?')) return;
+
+        try {
+            showToast('Updating theme...', 'info');
+            const res = await fetch(`/themes/${id}/update`, { method: 'POST' });
+
+            if (res.ok) {
+                showToast('Theme updated successfully!', 'success');
+                loadThemes();
+            } else {
+                const err = await res.json();
+                showToast(err.detail || 'Update failed', 'error');
+            }
+        } catch (e) {
+            console.error(e);
+            showToast('Error updating theme', 'error');
         }
     }
 
@@ -329,11 +488,17 @@
         document.getElementById('preset-selectors').innerHTML = '';
     }
 
-    function addDependencyRow(value = '') {
+    function addDependencyRow(dep = { name: '', source: 'pacman' }) {
+        if (typeof dep === 'string') dep = { name: dep, source: 'pacman' };
+
         const div = document.createElement('div');
-        div.className = 'flex gap-2';
+        div.className = 'flex gap-2 items-center';
         div.innerHTML = `
-            <input type="text" value="${value}" placeholder="e.g. rofi, nerd-fonts" class="flex-1 bg-zinc-800 border border-zinc-700 rounded px-3 py-1.5 text-zinc-100 text-sm outline-none focus:border-teal-500 dep-input">
+            <input type="text" value="${dep.name}" placeholder="Package name" class="flex-1 bg-zinc-800 border border-zinc-700 rounded px-3 py-1.5 text-zinc-100 text-sm outline-none focus:border-teal-500 dep-name-input">
+            <select class="bg-zinc-800 border border-zinc-700 rounded px-3 py-1.5 text-zinc-100 text-sm outline-none focus:border-teal-500 dep-source-input">
+                <option value="pacman" ${dep.source === 'pacman' ? 'selected' : ''}>Pacman</option>
+                <option value="aur" ${dep.source === 'aur' ? 'selected' : ''}>AUR</option>
+            </select>
             <button onclick="this.parentElement.remove()" class="text-zinc-500 hover:text-red-400 px-2 transition-colors"><i class="fa-solid fa-trash"></i></button>
         `;
         document.getElementById('dependencies-list').appendChild(div);
@@ -392,10 +557,14 @@
         const author = document.getElementById('theme-author').value;
         const desc = document.getElementById('theme-desc').value;
 
-        // Collect dependencies
-        const dependencies = Array.from(document.querySelectorAll('.dep-input'))
-            .map(input => input.value.trim())
-            .filter(val => val !== '');
+        const dependencies = [];
+        document.querySelectorAll('#dependencies-list > div').forEach(div => {
+            const name = div.querySelector('.dep-name-input').value.trim();
+            const source = div.querySelector('.dep-source-input').value;
+            if (name) {
+                dependencies.push({ name, source });
+            }
+        });
 
         // Collect presets
         const presets = {};
@@ -443,7 +612,7 @@
             }
 
             if (res.ok) {
-                showToast(id ? 'Theme updated!' : 'Theme created!', 'success');
+                showToast(id ? 'Theme updated!' : 'Theme updated!', 'success');
                 closeThemeModal();
                 loadThemes();
             } else {
@@ -455,12 +624,95 @@
         }
     }
 
-    // --- Export Modal Logic ---
+    // --- Install Dependencies Modal ---
+
+    let currentInstallDeps = [];
+    let currentAurHelper = 'yay';
+
+    function openInstallDepsModal(dependencies) {
+        currentInstallDeps = dependencies;
+        const list = document.getElementById('install-list');
+        list.innerHTML = '';
+
+        if (!dependencies || dependencies.length === 0) {
+            list.innerHTML = '<div class="text-zinc-500 italic text-center py-4">No dependencies listed.</div>';
+        } else {
+            dependencies.forEach((dep, index) => {
+                const name = typeof dep === 'string' ? dep : dep.name;
+                const source = typeof dep === 'object' && dep.source ? dep.source : 'pacman';
+
+                const div = document.createElement('div');
+                div.className = 'flex items-center gap-3 p-2 bg-zinc-800/30 rounded border border-zinc-700/50 hover:border-zinc-600 transition-colors';
+                div.innerHTML = `
+                    <input type="checkbox" id="install-check-${index}" value="${index}" checked onchange="updateInstallCmd()" class="w-4 h-4 text-teal-600 rounded focus:ring-teal-600 bg-zinc-800 border-zinc-600 cursor-pointer">
+                    <div class="flex-1">
+                        <label for="install-check-${index}" class="text-zinc-200 font-medium cursor-pointer select-none">${name}</label>
+                         <span class="text-xs ml-2 px-1.5 py-0.5 rounded border ${source === 'aur' ? 'bg-blue-900/30 border-blue-800 text-blue-400' : 'bg-zinc-800 border-zinc-700 text-zinc-400'}">${source.toUpperCase()}</span>
+                    </div>
+                `;
+                list.appendChild(div);
+            });
+        }
+
+        document.getElementById('install-deps-modal').classList.add('active');
+        document.getElementById('install-deps-modal').querySelector('div').classList.add('active');
+        updateInstallCmd();
+    }
+
+    function closeInstallDepsModal() {
+        const modal = document.getElementById('install-deps-modal');
+        modal.classList.remove('active');
+        modal.querySelector('div').classList.remove('active');
+    }
+
+    function setAurHelper(helper) {
+        currentAurHelper = helper;
+        document.getElementById('btn-yay').className = `px-3 py-1 text-xs rounded-md transition-all font-medium ${helper === 'yay' ? 'bg-zinc-700 text-white shadow-sm' : 'text-zinc-500 hover:text-zinc-300'}`;
+        document.getElementById('btn-paru').className = `px-3 py-1 text-xs rounded-md transition-all font-medium ${helper === 'paru' ? 'bg-zinc-700 text-white shadow-sm' : 'text-zinc-500 hover:text-zinc-300'}`;
+        updateInstallCmd();
+    }
+
+    function updateInstallCmd() {
+        if (!currentInstallDeps) return;
+
+        const checkedIndices = Array.from(document.querySelectorAll('#install-list input[type="checkbox"]:checked'))
+            .map(cb => parseInt(cb.value));
+
+        const selectedDeps = checkedIndices.map(i => currentInstallDeps[i]);
+
+        const pacmanDeps = selectedDeps.filter(d => (typeof d === 'string' || !d.source || d.source === 'pacman'))
+            .map(d => typeof d === 'string' ? d : d.name);
+
+        const aurDeps = selectedDeps.filter(d => (typeof d === 'object' && d.source === 'aur'))
+            .map(d => d.name);
+
+        let cmds = [];
+        if (pacmanDeps.length > 0) {
+            cmds.push(`sudo pacman -S ${pacmanDeps.join(' ')}`);
+        }
+        if (aurDeps.length > 0) {
+            cmds.push(`${currentAurHelper} -S ${aurDeps.join(' ')}`);
+        }
+
+        const cmdString = cmds.length > 0 ? cmds.join(' && ') : '# No packages selected';
+        document.getElementById('install-cmd').textContent = cmdString;
+
+        // Init helper toggle UI
+        if (document.getElementById('btn-yay').className.includes('text-zinc-500') && currentAurHelper === 'yay') setAurHelper('yay');
+    }
+
+    function copyInstallCmd() {
+        const cmd = document.getElementById('install-cmd').textContent;
+        navigator.clipboard.writeText(cmd).then(() => {
+            showToast('Command copied to clipboard', 'success');
+        });
+    }
 
     function openExportModal(id) {
         const theme = currentThemes.find(t => t.id === id);
         if (!theme) return;
 
+        resetExportModal();
         document.getElementById('export-theme-id').value = id;
         const list = document.getElementById('export-presets-list');
         list.innerHTML = '';
@@ -489,15 +741,110 @@
         modal.querySelector('div').classList.remove('active');
     }
 
+    function resetExportModal() {
+        currentExportStep = 1;
+        updateExportModalState();
+        document.getElementById('export-assets-list').innerHTML = '';
+    }
+
+    function updateExportModalState() {
+        if (currentExportStep === 1) {
+            document.getElementById('export-step-1').classList.remove('hidden');
+            document.getElementById('export-step-2').classList.add('hidden');
+            document.getElementById('export-back-btn').classList.add('hidden');
+            document.getElementById('export-next-btn').classList.remove('hidden');
+            document.getElementById('export-download-btn').classList.add('hidden');
+        } else {
+            document.getElementById('export-step-1').classList.add('hidden');
+            document.getElementById('export-step-2').classList.remove('hidden');
+            document.getElementById('export-step-2').classList.add('flex'); // Ensure flex is added back
+            document.getElementById('export-back-btn').classList.remove('hidden');
+            document.getElementById('export-next-btn').classList.add('hidden');
+            document.getElementById('export-download-btn').classList.remove('hidden');
+        }
+    }
+
+    async function advanceExportStep() {
+        if (currentExportStep === 1) {
+            const checkboxes = document.querySelectorAll('#export-presets-list input[type="checkbox"]:checked');
+            if (checkboxes.length === 0) {
+                showToast('Select at least one preset', 'warning');
+                return;
+            }
+
+            const include_presets = Array.from(checkboxes).map(cb => cb.value);
+            const id = document.getElementById('export-theme-id').value;
+
+            currentExportStep = 2;
+            updateExportModalState();
+
+            document.getElementById('export-assets-loading').classList.remove('hidden');
+            document.getElementById('export-assets-list').innerHTML = '';
+
+            try {
+                const res = await fetch(`/themes/${id}/analyze_export`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ include_presets })
+                });
+                const assets = await res.json();
+                renderExportAssets(assets);
+            } catch (e) {
+                console.error(e);
+                showToast('Failed to analyze assets', 'error');
+                currentExportStep = 1;
+                updateExportModalState();
+            } finally {
+                document.getElementById('export-assets-loading').classList.add('hidden');
+            }
+        }
+    }
+
+    function backExportStep() {
+        currentExportStep = 1;
+        updateExportModalState();
+    }
+
+    function renderExportAssets(assets) {
+        const list = document.getElementById('export-assets-list');
+        if (assets.length === 0) {
+            list.innerHTML = '<div class="text-zinc-500 italic text-center py-4">No external assets detected.</div>';
+            return;
+        }
+
+        const byTool = {};
+        assets.forEach(a => {
+            if (!byTool[a.tool]) byTool[a.tool] = [];
+            byTool[a.tool].push(a);
+        });
+
+        let html = '';
+        for (const [tool, toolAssets] of Object.entries(byTool)) {
+            html += `<h4 class="text-xs font-bold text-teal-500 uppercase tracking-wider mt-3 mb-2 sticky top-0 bg-zinc-900 py-1">${tool}</h4>`;
+            toolAssets.forEach(asset => {
+                const filename = asset.original_path.split('/').pop();
+                html += `
+                    <div class="flex items-start gap-3 p-2 bg-zinc-800/30 rounded border border-zinc-700/50 mb-1 hover:border-zinc-600 transition-colors">
+                        <input type="checkbox" data-path="${asset.original_path}" checked class="w-4 h-4 mt-1 text-teal-600 rounded focus:ring-teal-600 bg-zinc-800 border-zinc-600 cursor-pointer">
+                        <div class="overflow-hidden">
+                            <div class="text-sm text-zinc-300 truncate font-medium" title="${asset.original_path}">${filename}</div>
+                            <div class="text-xs text-zinc-500 truncate font-mono" title="${asset.arcname}">${asset.arcname}</div>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+        list.innerHTML = html;
+    }
+
     async function performExport() {
         const id = document.getElementById('export-theme-id').value;
         const checkboxes = document.querySelectorAll('#export-presets-list input[type="checkbox"]:checked');
         const include_presets = Array.from(checkboxes).map(cb => cb.value);
 
-        if (include_presets.length === 0) {
-            showToast('Select at least one preset to export', 'warning');
-            return;
-        }
+        // Collect assets
+        const assetCheckboxes = document.querySelectorAll('#export-assets-list input[type="checkbox"]:checked');
+        const included_assets = Array.from(assetCheckboxes).map(cb => cb.getAttribute('data-path'));
 
         try {
             showToast('Preparing download...', 'info');
@@ -505,7 +852,7 @@
             const res = await fetch(`/themes/${id}/export`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ include_presets })
+                body: JSON.stringify({ include_presets, included_assets })
             });
 
             if (res.ok) {
@@ -513,7 +860,7 @@
                 const url = window.URL.createObjectURL(blob);
                 const a = document.createElement('a');
                 a.href = url;
-                a.download = `${id}.zip`; // The server might not set Content-Disposition with filename in a way XHR/fetch handles nicely transparently, but we can guess or use existing ID.
+                a.download = `${id}.zip`;
                 document.body.appendChild(a);
                 a.click();
                 window.URL.revokeObjectURL(url);
@@ -526,6 +873,70 @@
         } catch (e) {
             console.error(e);
             showToast('Error exporting theme', 'error');
+        }
+    }
+
+    async function autoDetectDependencies() {
+        // Collect current preset selections
+        const presets = {};
+        for (const tool of TOOLS) {
+            const select = document.getElementById(`preset-select-${tool}`);
+            if (select && select.value) {
+                presets[tool] = select.value;
+            }
+        }
+
+        if (Object.keys(presets).length === 0) {
+            showToast('Select presets first', 'warning');
+            return;
+        }
+
+        const btn = document.querySelector('button[onclick="autoDetectDependencies()"]');
+        const icon = btn.querySelector('i');
+        icon.classList.remove('fa-wand-magic-sparkles');
+        icon.classList.add('fa-circle-notch', 'fa-spin');
+        btn.disabled = true;
+
+        try {
+            const res = await fetch('/themes/detect_dependencies', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ presets })
+            });
+            const data = await res.json();
+
+            const currentDeps = Array.from(document.querySelectorAll('.dep-name-input'))
+                .map(input => input.value.trim().toLowerCase())
+                .filter(val => val !== '');
+
+            let count = 0;
+            if (data.dependencies) {
+                data.dependencies.forEach(dep => {
+                    // Start of Selection
+                    const depName = typeof dep === 'string' ? dep : dep.name;
+                    const depSource = typeof dep === 'object' && dep.source ? dep.source : 'pacman';
+
+                    if (!currentDeps.includes(depName.toLowerCase()) && !currentDeps.includes(depName)) {
+                        addDependencyRow({ name: depName, source: depSource });
+                        currentDeps.push(depName.toLowerCase()); // Track to avoid dupes in same run
+                        count++;
+                    }
+                });
+            }
+
+            if (count > 0) {
+                showToast(`Added ${count} dependencies`, 'success');
+            } else {
+                showToast('No new dependencies found', 'info');
+            }
+
+        } catch (e) {
+            console.error(e);
+            showToast('Failed to detect dependencies', 'error');
+        } finally {
+            icon.classList.remove('fa-circle-notch', 'fa-spin');
+            icon.classList.add('fa-wand-magic-sparkles');
+            btn.disabled = false;
         }
     }
 

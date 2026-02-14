@@ -23,7 +23,7 @@ Usage:
 import os
 import json
 import shutil
-from datetime import datetime
+import datetime
 from typing import Optional, List, Dict, Any
 from dataclasses import dataclass, asdict
 from pathlib import Path
@@ -158,7 +158,7 @@ class PresetManager:
             raise FileNotFoundError(f"Config file not found: {self.config_path}")
         
         preset_id = self._generate_unique_id(name)
-        now = datetime.utcnow().isoformat() + "Z"
+        now = datetime.datetime.now(datetime.timezone.utc).isoformat().replace("+00:00", "Z")
         
         preset = Preset(
             id=preset_id,
@@ -202,7 +202,7 @@ class PresetManager:
                     p["name"] = name
                 if description is not None:
                     p["description"] = description
-                p["updated_at"] = datetime.utcnow().isoformat() + "Z"
+                p["updated_at"] = datetime.datetime.now(datetime.timezone.utc).isoformat().replace("+00:00", "Z")
                 
                 manifest["presets"][i] = p
                 self._save_manifest(manifest)
@@ -234,7 +234,7 @@ class PresetManager:
         manifest = self._load_manifest()
         for p in manifest["presets"]:
             if p["id"] == preset_id:
-                p["updated_at"] = datetime.utcnow().isoformat() + "Z"
+                p["updated_at"] = datetime.datetime.now(datetime.timezone.utc).isoformat().replace("+00:00", "Z")
                 break
         self._save_manifest(manifest)
         
@@ -430,7 +430,7 @@ class PresetManager:
             pid = old_file.stem
             if pid not in existing_ids:
                 # Create default metadata
-                now = datetime.utcnow().isoformat() + "Z"
+                now = datetime.datetime.now(datetime.timezone.utc).isoformat().replace("+00:00", "Z")
                 new_preset = {
                     "id": pid,
                     "name": pid.replace("_", " ").title(),
