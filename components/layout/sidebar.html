@@ -143,18 +143,20 @@
             return null;
         }
 
-        document.getElementById('user-avatar').textContent = username[0].toUpperCase();
-        document.getElementById('user-name').textContent = username;
-        document.getElementById('user-host').textContent = username + '@localhost';
-        renderSidebar();
-        if (window.location.pathname === '/' && currentPage === 'home') {
-            const homeItem = archboardNav.find(n => n.type === 'item' && n.id === 'home');
-            if (!homeItem) {
-                const firstUrl = getFirstNavUrl();
-                if (firstUrl && firstUrl !== '/') {
-                    window.location.href = firstUrl;
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('user-avatar').textContent = username[0].toUpperCase();
+            document.getElementById('user-name').textContent = username;
+            document.getElementById('user-host').textContent = username + '@localhost';
+            renderSidebar();
+            if (window.location.pathname === '/' && currentPage === 'home') {
+                const homeItem = archboardNav.find(n => n.type === 'item' && n.id === 'home');
+                if (!homeItem) {
+                    const firstUrl = getFirstNavUrl();
+                    if (firstUrl && firstUrl !== '/') {
+                        window.location.href = firstUrl;
+                    }
                 }
             }
-        }
+        });
     </script>
 </aside>

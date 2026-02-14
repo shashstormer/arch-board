@@ -19,19 +19,19 @@ html
         link
             ;;rel="stylesheet" href="/tailwind.css?k={{ cache_key }}";;
         script
-            ;;src="/scripts/local_settings.js?k={{ cache_key }}";;
+            ;;src="/scripts/local_settings.js?k={{ cache_key }}" defer;;
         script
             ;;src="/scripts/renderer.js?k={{ cache_key }}";;
         script
-            ;;src="/scripts/utils.js?k={{ cache_key }}";;
+            ;;src="/scripts/utils.js?k={{ cache_key }}" defer;;
         script
-            ;;src="/scripts/image_picker.js?k={{ cache_key }}";;
+            ;;src="/scripts/image_picker.js?k={{ cache_key }}" defer;;
         script
-            ;;src="/scripts/preset_manager.js?k={{ cache_key }}";;
+            ;;src="/scripts/preset_manager.js?k={{ cache_key }}" defer;;
         script
-            ;;src="/scripts/font_manager.js?k={{ cache_key }}";;
+            ;;src="/scripts/font_manager.js?k={{ cache_key }}" defer;;
         script
-            ;;src="/scripts/font_picker.js?k={{ cache_key }}";;
+            ;;src="/scripts/font_picker.js?k={{ cache_key }}" defer;;
         script
             const prod = {{ production }};
             const plugin_enabled = {{ plugin_enabled }};
@@ -55,6 +55,6 @@ html
         div
             ;;id="toast-container" class="fixed bottom-6 right-6 flex flex-col gap-2 z-[9999] pointer-events-none";;
         script
-            ;;src="/scripts/main.js?k={{ cache_key }}";;
+            ;;src="/scripts/main.js?k={{ cache_key }}" defer;;
         script
-            ;;src="/scripts/api.js?k={{ cache_key }}";;
+            ;;src="/scripts/api.js?k={{ cache_key }}" defer;;

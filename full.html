@@ -1,4 +1,4 @@
-<html><head><title> </title><meta name="description" content=" " /><meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" /><link rel="preconnect" href="https://fonts.googleapis.com" /><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin /><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" /><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" /><link rel="stylesheet" href="/tailwind.css?k= " /><script src="/scripts/local_settings.js?k= "></script><script src="/scripts/renderer.js?k= "></script><script src="/scripts/utils.js?k= "></script><script src="/scripts/image_picker.js?k= "></script><script src="/scripts/preset_manager.js?k= "></script><script src="/scripts/font_manager.js?k= "></script><script src="/scripts/font_picker.js?k= "></script><script>const prod =  ;const plugin_enabled =  ;</script></head><body class="flex h-screen overflow-hidden bg-zinc-950 text-zinc-100 font-sans"><aside
+<html><head><title> </title><meta name="description" content=" " /><meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" /><link rel="preconnect" href="https://fonts.googleapis.com" /><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin /><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" /><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" /><link rel="stylesheet" href="/tailwind.css?k= " /><script src="/scripts/local_settings.js?k= " defer></script><script src="/scripts/renderer.js?k= "></script><script src="/scripts/utils.js?k= " defer></script><script src="/scripts/image_picker.js?k= " defer></script><script src="/scripts/preset_manager.js?k= " defer></script><script src="/scripts/font_manager.js?k= " defer></script><script src="/scripts/font_picker.js?k= " defer></script><script>const prod =  ;const plugin_enabled =  ;</script></head><body class="flex h-screen overflow-hidden bg-zinc-950 text-zinc-100 font-sans"><aside
         class="w-64 h-screen bg-zinc-900 text-zinc-400 border-r border-zinc-800/50 flex flex-col flex-shrink-0 select-none">
 
 
@@ -143,19 +143,21 @@
             return null;
         }
 
-        document.getElementById('user-avatar').textContent = username[0].toUpperCase();
-        document.getElementById('user-name').textContent = username;
-        document.getElementById('user-host').textContent = username + '@localhost';
-        renderSidebar();
-        if (window.location.pathname === '/' && currentPage === 'home') {
-            const homeItem = archboardNav.find(n => n.type === 'item' && n.id === 'home');
-            if (!homeItem) {
-                const firstUrl = getFirstNavUrl();
-                if (firstUrl && firstUrl !== '/') {
-                    window.location.href = firstUrl;
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('user-avatar').textContent = username[0].toUpperCase();
+            document.getElementById('user-name').textContent = username;
+            document.getElementById('user-host').textContent = username + '@localhost';
+            renderSidebar();
+            if (window.location.pathname === '/' && currentPage === 'home') {
+                const homeItem = archboardNav.find(n => n.type === 'item' && n.id === 'home');
+                if (!homeItem) {
+                    const firstUrl = getFirstNavUrl();
+                    if (firstUrl && firstUrl !== '/') {
+                        window.location.href = firstUrl;
+                    }
                 }
             }
-        }
+        });
     </script>
 </aside><main class="flex flex-col flex-1 overflow-hidden min-w-0"><header class="flex items-center justify-between px-6 py-4 bg-zinc-950/80 border-b border-zinc-800/50">
     <div class="flex items-center gap-3 text-zinc-100">
@@ -602,8 +604,8 @@
     }
 
     document.addEventListener('DOMContentLoaded', initSearch);
-</script><div id="modal-overlay" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-200 [&.active]:opacity-100 [&.active]:pointer-events-auto" onclick="closeModal()"><div id="modal-content" class="bg-zinc-900 border border-zinc-800 rounded-xl p-6 w-full max-w-md shadow-2xl transform scale-95 transition-transform duration-200 [&.active]:scale-100" onclick="event.stopPropagation()"></div></div><div id="toast-container" class="fixed bottom-6 right-6 flex flex-col gap-2 z-[9999] pointer-events-none"></div><script src="/scripts/main.js?k= "></script><script src="/scripts/api.js?k= "></script></body></html>
-<html><head><title> </title><meta name="description" content=" " /><meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" /><link rel="preconnect" href="https://fonts.googleapis.com" /><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin /><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" /><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" /><link rel="stylesheet" href="/tailwind.css?k= " /><script src="/scripts/local_settings.js?k= "></script><script src="/scripts/renderer.js?k= "></script><script src="/scripts/utils.js?k= "></script><script src="/scripts/image_picker.js?k= "></script><script src="/scripts/preset_manager.js?k= "></script><script src="/scripts/font_manager.js?k= "></script><script src="/scripts/font_picker.js?k= "></script><script>const prod =  ;const plugin_enabled =  ;</script></head><body class="flex h-screen overflow-hidden bg-zinc-950 text-zinc-100 font-sans"><aside
+</script><div id="modal-overlay" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-200 [&.active]:opacity-100 [&.active]:pointer-events-auto" onclick="closeModal()"><div id="modal-content" class="bg-zinc-900 border border-zinc-800 rounded-xl p-6 w-full max-w-md shadow-2xl transform scale-95 transition-transform duration-200 [&.active]:scale-100" onclick="event.stopPropagation()"></div></div><div id="toast-container" class="fixed bottom-6 right-6 flex flex-col gap-2 z-[9999] pointer-events-none"></div><script src="/scripts/main.js?k= " defer></script><script src="/scripts/api.js?k= " defer></script></body></html>
+<html><head><title> </title><meta name="description" content=" " /><meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" /><link rel="preconnect" href="https://fonts.googleapis.com" /><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin /><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" /><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" /><link rel="stylesheet" href="/tailwind.css?k= " /><script src="/scripts/local_settings.js?k= " defer></script><script src="/scripts/renderer.js?k= "></script><script src="/scripts/utils.js?k= " defer></script><script src="/scripts/image_picker.js?k= " defer></script><script src="/scripts/preset_manager.js?k= " defer></script><script src="/scripts/font_manager.js?k= " defer></script><script src="/scripts/font_picker.js?k= " defer></script><script>const prod =  ;const plugin_enabled =  ;</script></head><body class="flex h-screen overflow-hidden bg-zinc-950 text-zinc-100 font-sans"><aside
         class="w-64 h-screen bg-zinc-900 text-zinc-400 border-r border-zinc-800/50 flex flex-col flex-shrink-0 select-none">
 
 
@@ -748,19 +750,21 @@
             return null;
         }
 
-        document.getElementById('user-avatar').textContent = username[0].toUpperCase();
-        document.getElementById('user-name').textContent = username;
-        document.getElementById('user-host').textContent = username + '@localhost';
-        renderSidebar();
-        if (window.location.pathname === '/' && currentPage === 'home') {
-            const homeItem = archboardNav.find(n => n.type === 'item' && n.id === 'home');
-            if (!homeItem) {
-                const firstUrl = getFirstNavUrl();
-                if (firstUrl && firstUrl !== '/') {
-                    window.location.href = firstUrl;
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('user-avatar').textContent = username[0].toUpperCase();
+            document.getElementById('user-name').textContent = username;
+            document.getElementById('user-host').textContent = username + '@localhost';
+            renderSidebar();
+            if (window.location.pathname === '/' && currentPage === 'home') {
+                const homeItem = archboardNav.find(n => n.type === 'item' && n.id === 'home');
+                if (!homeItem) {
+                    const firstUrl = getFirstNavUrl();
+                    if (firstUrl && firstUrl !== '/') {
+                        window.location.href = firstUrl;
+                    }
                 }
             }
-        }
+        });
     </script>
 </aside><main class="flex flex-col flex-1 overflow-hidden min-w-0"><header class="flex items-center justify-between px-6 py-4 bg-zinc-950/80 border-b border-zinc-800/50">
     <div class="flex items-center gap-3 text-zinc-100">
@@ -1064,8 +1068,8 @@
     }
 
     document.addEventListener('DOMContentLoaded', initSearch);
-</script><div id="modal-overlay" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-200 [&.active]:opacity-100 [&.active]:pointer-events-auto" onclick="closeModal()"><div id="modal-content" class="bg-zinc-900 border border-zinc-800 rounded-xl p-6 w-full max-w-md shadow-2xl transform scale-95 transition-transform duration-200 [&.active]:scale-100" onclick="event.stopPropagation()"></div></div><div id="toast-container" class="fixed bottom-6 right-6 flex flex-col gap-2 z-[9999] pointer-events-none"></div><script src="/scripts/main.js?k= "></script><script src="/scripts/api.js?k= "></script></body></html>
-<html><head><title> </title><meta name="description" content=" " /><meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" /><link rel="preconnect" href="https://fonts.googleapis.com" /><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin /><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" /><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" /><link rel="stylesheet" href="/tailwind.css?k= " /><script src="/scripts/local_settings.js?k= "></script><script src="/scripts/renderer.js?k= "></script><script src="/scripts/utils.js?k= "></script><script src="/scripts/image_picker.js?k= "></script><script src="/scripts/preset_manager.js?k= "></script><script src="/scripts/font_manager.js?k= "></script><script src="/scripts/font_picker.js?k= "></script><script>const prod =  ;const plugin_enabled =  ;</script></head><body class="flex h-screen overflow-hidden bg-zinc-950 text-zinc-100 font-sans"><aside
+</script><div id="modal-overlay" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-200 [&.active]:opacity-100 [&.active]:pointer-events-auto" onclick="closeModal()"><div id="modal-content" class="bg-zinc-900 border border-zinc-800 rounded-xl p-6 w-full max-w-md shadow-2xl transform scale-95 transition-transform duration-200 [&.active]:scale-100" onclick="event.stopPropagation()"></div></div><div id="toast-container" class="fixed bottom-6 right-6 flex flex-col gap-2 z-[9999] pointer-events-none"></div><script src="/scripts/main.js?k= " defer></script><script src="/scripts/api.js?k= " defer></script></body></html>
+<html><head><title> </title><meta name="description" content=" " /><meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" /><link rel="preconnect" href="https://fonts.googleapis.com" /><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin /><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" /><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" /><link rel="stylesheet" href="/tailwind.css?k= " /><script src="/scripts/local_settings.js?k= " defer></script><script src="/scripts/renderer.js?k= "></script><script src="/scripts/utils.js?k= " defer></script><script src="/scripts/image_picker.js?k= " defer></script><script src="/scripts/preset_manager.js?k= " defer></script><script src="/scripts/font_manager.js?k= " defer></script><script src="/scripts/font_picker.js?k= " defer></script><script>const prod =  ;const plugin_enabled =  ;</script></head><body class="flex h-screen overflow-hidden bg-zinc-950 text-zinc-100 font-sans"><aside
         class="w-64 h-screen bg-zinc-900 text-zinc-400 border-r border-zinc-800/50 flex flex-col flex-shrink-0 select-none">
 
 
@@ -1210,19 +1214,21 @@
             return null;
         }
 
-        document.getElementById('user-avatar').textContent = username[0].toUpperCase();
-        document.getElementById('user-name').textContent = username;
-        document.getElementById('user-host').textContent = username + '@localhost';
-        renderSidebar();
-        if (window.location.pathname === '/' && currentPage === 'home') {
-            const homeItem = archboardNav.find(n => n.type === 'item' && n.id === 'home');
-            if (!homeItem) {
-                const firstUrl = getFirstNavUrl();
-                if (firstUrl && firstUrl !== '/') {
-                    window.location.href = firstUrl;
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('user-avatar').textContent = username[0].toUpperCase();
+            document.getElementById('user-name').textContent = username;
+            document.getElementById('user-host').textContent = username + '@localhost';
+            renderSidebar();
+            if (window.location.pathname === '/' && currentPage === 'home') {
+                const homeItem = archboardNav.find(n => n.type === 'item' && n.id === 'home');
+                if (!homeItem) {
+                    const firstUrl = getFirstNavUrl();
+                    if (firstUrl && firstUrl !== '/') {
+                        window.location.href = firstUrl;
+                    }
                 }
             }
-        }
+        });
     </script>
 </aside><main class="flex flex-col flex-1 overflow-hidden min-w-0"><header class="flex items-center justify-between px-6 py-4 bg-zinc-950/80 border-b border-zinc-800/50">
     <div class="flex items-center gap-3 text-zinc-100">
@@ -1871,8 +1877,8 @@
     }
 
     document.addEventListener('DOMContentLoaded', initSearch);
-</script><div id="modal-overlay" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-200 [&.active]:opacity-100 [&.active]:pointer-events-auto" onclick="closeModal()"><div id="modal-content" class="bg-zinc-900 border border-zinc-800 rounded-xl p-6 w-full max-w-md shadow-2xl transform scale-95 transition-transform duration-200 [&.active]:scale-100" onclick="event.stopPropagation()"></div></div><div id="toast-container" class="fixed bottom-6 right-6 flex flex-col gap-2 z-[9999] pointer-events-none"></div><script src="/scripts/main.js?k= "></script><script src="/scripts/api.js?k= "></script></body></html>
-<html><head><title> </title><meta name="description" content=" " /><meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" /><link rel="preconnect" href="https://fonts.googleapis.com" /><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin /><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" /><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" /><link rel="stylesheet" href="/tailwind.css?k= " /><script src="/scripts/local_settings.js?k= "></script><script src="/scripts/renderer.js?k= "></script><script src="/scripts/utils.js?k= "></script><script src="/scripts/image_picker.js?k= "></script><script src="/scripts/preset_manager.js?k= "></script><script src="/scripts/font_manager.js?k= "></script><script src="/scripts/font_picker.js?k= "></script><script>const prod =  ;const plugin_enabled =  ;</script></head><body class="flex h-screen overflow-hidden bg-zinc-950 text-zinc-100 font-sans"><aside
+</script><div id="modal-overlay" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-200 [&.active]:opacity-100 [&.active]:pointer-events-auto" onclick="closeModal()"><div id="modal-content" class="bg-zinc-900 border border-zinc-800 rounded-xl p-6 w-full max-w-md shadow-2xl transform scale-95 transition-transform duration-200 [&.active]:scale-100" onclick="event.stopPropagation()"></div></div><div id="toast-container" class="fixed bottom-6 right-6 flex flex-col gap-2 z-[9999] pointer-events-none"></div><script src="/scripts/main.js?k= " defer></script><script src="/scripts/api.js?k= " defer></script></body></html>
+<html><head><title> </title><meta name="description" content=" " /><meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" /><link rel="preconnect" href="https://fonts.googleapis.com" /><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin /><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" /><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" /><link rel="stylesheet" href="/tailwind.css?k= " /><script src="/scripts/local_settings.js?k= " defer></script><script src="/scripts/renderer.js?k= "></script><script src="/scripts/utils.js?k= " defer></script><script src="/scripts/image_picker.js?k= " defer></script><script src="/scripts/preset_manager.js?k= " defer></script><script src="/scripts/font_manager.js?k= " defer></script><script src="/scripts/font_picker.js?k= " defer></script><script>const prod =  ;const plugin_enabled =  ;</script></head><body class="flex h-screen overflow-hidden bg-zinc-950 text-zinc-100 font-sans"><aside
         class="w-64 h-screen bg-zinc-900 text-zinc-400 border-r border-zinc-800/50 flex flex-col flex-shrink-0 select-none">
 
 
@@ -2017,19 +2023,21 @@
             return null;
         }
 
-        document.getElementById('user-avatar').textContent = username[0].toUpperCase();
-        document.getElementById('user-name').textContent = username;
-        document.getElementById('user-host').textContent = username + '@localhost';
-        renderSidebar();
-        if (window.location.pathname === '/' && currentPage === 'home') {
-            const homeItem = archboardNav.find(n => n.type === 'item' && n.id === 'home');
-            if (!homeItem) {
-                const firstUrl = getFirstNavUrl();
-                if (firstUrl && firstUrl !== '/') {
-                    window.location.href = firstUrl;
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('user-avatar').textContent = username[0].toUpperCase();
+            document.getElementById('user-name').textContent = username;
+            document.getElementById('user-host').textContent = username + '@localhost';
+            renderSidebar();
+            if (window.location.pathname === '/' && currentPage === 'home') {
+                const homeItem = archboardNav.find(n => n.type === 'item' && n.id === 'home');
+                if (!homeItem) {
+                    const firstUrl = getFirstNavUrl();
+                    if (firstUrl && firstUrl !== '/') {
+                        window.location.href = firstUrl;
+                    }
                 }
             }
-        }
+        });
     </script>
 </aside><main class="flex flex-col flex-1 overflow-hidden min-w-0"><header class="flex items-center justify-between px-6 py-4 bg-zinc-950/80 border-b border-zinc-800/50">
     <div class="flex items-center gap-3 text-zinc-100">
@@ -2627,8 +2635,8 @@
     }
 
     document.addEventListener('DOMContentLoaded', initSearch);
-</script><div id="modal-overlay" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-200 [&.active]:opacity-100 [&.active]:pointer-events-auto" onclick="closeModal()"><div id="modal-content" class="bg-zinc-900 border border-zinc-800 rounded-xl p-6 w-full max-w-md shadow-2xl transform scale-95 transition-transform duration-200 [&.active]:scale-100" onclick="event.stopPropagation()"></div></div><div id="toast-container" class="fixed bottom-6 right-6 flex flex-col gap-2 z-[9999] pointer-events-none"></div><script src="/scripts/main.js?k= "></script><script src="/scripts/api.js?k= "></script></body></html>
-<html><head><title> </title><meta name="description" content=" " /><meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" /><link rel="preconnect" href="https://fonts.googleapis.com" /><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin /><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" /><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" /><link rel="stylesheet" href="/tailwind.css?k= " /><script src="/scripts/local_settings.js?k= "></script><script src="/scripts/renderer.js?k= "></script><script src="/scripts/utils.js?k= "></script><script src="/scripts/image_picker.js?k= "></script><script src="/scripts/preset_manager.js?k= "></script><script src="/scripts/font_manager.js?k= "></script><script src="/scripts/font_picker.js?k= "></script><script>const prod =  ;const plugin_enabled =  ;</script></head><body class="flex h-screen overflow-hidden bg-zinc-950 text-zinc-100 font-sans"><aside
+</script><div id="modal-overlay" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-200 [&.active]:opacity-100 [&.active]:pointer-events-auto" onclick="closeModal()"><div id="modal-content" class="bg-zinc-900 border border-zinc-800 rounded-xl p-6 w-full max-w-md shadow-2xl transform scale-95 transition-transform duration-200 [&.active]:scale-100" onclick="event.stopPropagation()"></div></div><div id="toast-container" class="fixed bottom-6 right-6 flex flex-col gap-2 z-[9999] pointer-events-none"></div><script src="/scripts/main.js?k= " defer></script><script src="/scripts/api.js?k= " defer></script></body></html>
+<html><head><title> </title><meta name="description" content=" " /><meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" /><link rel="preconnect" href="https://fonts.googleapis.com" /><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin /><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" /><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" /><link rel="stylesheet" href="/tailwind.css?k= " /><script src="/scripts/local_settings.js?k= " defer></script><script src="/scripts/renderer.js?k= "></script><script src="/scripts/utils.js?k= " defer></script><script src="/scripts/image_picker.js?k= " defer></script><script src="/scripts/preset_manager.js?k= " defer></script><script src="/scripts/font_manager.js?k= " defer></script><script src="/scripts/font_picker.js?k= " defer></script><script>const prod =  ;const plugin_enabled =  ;</script></head><body class="flex h-screen overflow-hidden bg-zinc-950 text-zinc-100 font-sans"><aside
         class="w-64 h-screen bg-zinc-900 text-zinc-400 border-r border-zinc-800/50 flex flex-col flex-shrink-0 select-none">
 
 
@@ -2773,19 +2781,21 @@
             return null;
         }
 
-        document.getElementById('user-avatar').textContent = username[0].toUpperCase();
-        document.getElementById('user-name').textContent = username;
-        document.getElementById('user-host').textContent = username + '@localhost';
-        renderSidebar();
-        if (window.location.pathname === '/' && currentPage === 'home') {
-            const homeItem = archboardNav.find(n => n.type === 'item' && n.id === 'home');
-            if (!homeItem) {
-                const firstUrl = getFirstNavUrl();
-                if (firstUrl && firstUrl !== '/') {
-                    window.location.href = firstUrl;
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('user-avatar').textContent = username[0].toUpperCase();
+            document.getElementById('user-name').textContent = username;
+            document.getElementById('user-host').textContent = username + '@localhost';
+            renderSidebar();
+            if (window.location.pathname === '/' && currentPage === 'home') {
+                const homeItem = archboardNav.find(n => n.type === 'item' && n.id === 'home');
+                if (!homeItem) {
+                    const firstUrl = getFirstNavUrl();
+                    if (firstUrl && firstUrl !== '/') {
+                        window.location.href = firstUrl;
+                    }
                 }
             }
-        }
+        });
     </script>
 </aside><main class="flex flex-col flex-1 overflow-hidden min-w-0"><header class="flex items-center justify-between px-6 py-4 bg-zinc-950/80 border-b border-zinc-800/50">
     <div class="flex items-center gap-3 text-zinc-100">
@@ -3194,8 +3204,8 @@
     }
 
     document.addEventListener('DOMContentLoaded', initSearch);
-</script><div id="modal-overlay" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-200 [&.active]:opacity-100 [&.active]:pointer-events-auto" onclick="closeModal()"><div id="modal-content" class="bg-zinc-900 border border-zinc-800 rounded-xl p-6 w-full max-w-md shadow-2xl transform scale-95 transition-transform duration-200 [&.active]:scale-100" onclick="event.stopPropagation()"></div></div><div id="toast-container" class="fixed bottom-6 right-6 flex flex-col gap-2 z-[9999] pointer-events-none"></div><script src="/scripts/main.js?k= "></script><script src="/scripts/api.js?k= "></script></body></html>
-<html><head><title> </title><meta name="description" content=" " /><meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" /><link rel="preconnect" href="https://fonts.googleapis.com" /><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin /><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" /><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" /><link rel="stylesheet" href="/tailwind.css?k= " /><script src="/scripts/local_settings.js?k= "></script><script src="/scripts/renderer.js?k= "></script><script src="/scripts/utils.js?k= "></script><script src="/scripts/image_picker.js?k= "></script><script src="/scripts/preset_manager.js?k= "></script><script src="/scripts/font_manager.js?k= "></script><script src="/scripts/font_picker.js?k= "></script><script>const prod =  ;const plugin_enabled =  ;</script></head><body class="flex h-screen overflow-hidden bg-zinc-950 text-zinc-100 font-sans"><aside
+</script><div id="modal-overlay" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-200 [&.active]:opacity-100 [&.active]:pointer-events-auto" onclick="closeModal()"><div id="modal-content" class="bg-zinc-900 border border-zinc-800 rounded-xl p-6 w-full max-w-md shadow-2xl transform scale-95 transition-transform duration-200 [&.active]:scale-100" onclick="event.stopPropagation()"></div></div><div id="toast-container" class="fixed bottom-6 right-6 flex flex-col gap-2 z-[9999] pointer-events-none"></div><script src="/scripts/main.js?k= " defer></script><script src="/scripts/api.js?k= " defer></script></body></html>
+<html><head><title> </title><meta name="description" content=" " /><meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" /><link rel="preconnect" href="https://fonts.googleapis.com" /><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin /><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" /><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" /><link rel="stylesheet" href="/tailwind.css?k= " /><script src="/scripts/local_settings.js?k= " defer></script><script src="/scripts/renderer.js?k= "></script><script src="/scripts/utils.js?k= " defer></script><script src="/scripts/image_picker.js?k= " defer></script><script src="/scripts/preset_manager.js?k= " defer></script><script src="/scripts/font_manager.js?k= " defer></script><script src="/scripts/font_picker.js?k= " defer></script><script>const prod =  ;const plugin_enabled =  ;</script></head><body class="flex h-screen overflow-hidden bg-zinc-950 text-zinc-100 font-sans"><aside
         class="w-64 h-screen bg-zinc-900 text-zinc-400 border-r border-zinc-800/50 flex flex-col flex-shrink-0 select-none">
 
 
@@ -3340,19 +3350,21 @@
             return null;
         }
 
-        document.getElementById('user-avatar').textContent = username[0].toUpperCase();
-        document.getElementById('user-name').textContent = username;
-        document.getElementById('user-host').textContent = username + '@localhost';
-        renderSidebar();
-        if (window.location.pathname === '/' && currentPage === 'home') {
-            const homeItem = archboardNav.find(n => n.type === 'item' && n.id === 'home');
-            if (!homeItem) {
-                const firstUrl = getFirstNavUrl();
-                if (firstUrl && firstUrl !== '/') {
-                    window.location.href = firstUrl;
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('user-avatar').textContent = username[0].toUpperCase();
+            document.getElementById('user-name').textContent = username;
+            document.getElementById('user-host').textContent = username + '@localhost';
+            renderSidebar();
+            if (window.location.pathname === '/' && currentPage === 'home') {
+                const homeItem = archboardNav.find(n => n.type === 'item' && n.id === 'home');
+                if (!homeItem) {
+                    const firstUrl = getFirstNavUrl();
+                    if (firstUrl && firstUrl !== '/') {
+                        window.location.href = firstUrl;
+                    }
                 }
             }
-        }
+        });
     </script>
 </aside><main class="flex flex-col flex-1 overflow-hidden min-w-0"><header class="flex items-center justify-between px-6 py-4 bg-zinc-950/80 border-b border-zinc-800/50">
     <div class="flex items-center gap-3 text-zinc-100">
@@ -3741,8 +3753,8 @@
     }
 
     document.addEventListener('DOMContentLoaded', initSearch);
-</script><div id="modal-overlay" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-200 [&.active]:opacity-100 [&.active]:pointer-events-auto" onclick="closeModal()"><div id="modal-content" class="bg-zinc-900 border border-zinc-800 rounded-xl p-6 w-full max-w-md shadow-2xl transform scale-95 transition-transform duration-200 [&.active]:scale-100" onclick="event.stopPropagation()"></div></div><div id="toast-container" class="fixed bottom-6 right-6 flex flex-col gap-2 z-[9999] pointer-events-none"></div><script src="/scripts/main.js?k= "></script><script src="/scripts/api.js?k= "></script></body></html>
-<html><head><title> </title><meta name="description" content=" " /><meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" /><link rel="preconnect" href="https://fonts.googleapis.com" /><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin /><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" /><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" /><link rel="stylesheet" href="/tailwind.css?k= " /><script src="/scripts/local_settings.js?k= "></script><script src="/scripts/renderer.js?k= "></script><script src="/scripts/utils.js?k= "></script><script src="/scripts/image_picker.js?k= "></script><script src="/scripts/preset_manager.js?k= "></script><script src="/scripts/font_manager.js?k= "></script><script src="/scripts/font_picker.js?k= "></script><script>const prod =  ;const plugin_enabled =  ;</script></head><body class="flex h-screen overflow-hidden bg-zinc-950 text-zinc-100 font-sans"><aside
+</script><div id="modal-overlay" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-200 [&.active]:opacity-100 [&.active]:pointer-events-auto" onclick="closeModal()"><div id="modal-content" class="bg-zinc-900 border border-zinc-800 rounded-xl p-6 w-full max-w-md shadow-2xl transform scale-95 transition-transform duration-200 [&.active]:scale-100" onclick="event.stopPropagation()"></div></div><div id="toast-container" class="fixed bottom-6 right-6 flex flex-col gap-2 z-[9999] pointer-events-none"></div><script src="/scripts/main.js?k= " defer></script><script src="/scripts/api.js?k= " defer></script></body></html>
+<html><head><title> </title><meta name="description" content=" " /><meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" /><link rel="preconnect" href="https://fonts.googleapis.com" /><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin /><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" /><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" /><link rel="stylesheet" href="/tailwind.css?k= " /><script src="/scripts/local_settings.js?k= " defer></script><script src="/scripts/renderer.js?k= "></script><script src="/scripts/utils.js?k= " defer></script><script src="/scripts/image_picker.js?k= " defer></script><script src="/scripts/preset_manager.js?k= " defer></script><script src="/scripts/font_manager.js?k= " defer></script><script src="/scripts/font_picker.js?k= " defer></script><script>const prod =  ;const plugin_enabled =  ;</script></head><body class="flex h-screen overflow-hidden bg-zinc-950 text-zinc-100 font-sans"><aside
         class="w-64 h-screen bg-zinc-900 text-zinc-400 border-r border-zinc-800/50 flex flex-col flex-shrink-0 select-none">
 
 
@@ -3887,19 +3899,21 @@
             return null;
         }
 
-        document.getElementById('user-avatar').textContent = username[0].toUpperCase();
-        document.getElementById('user-name').textContent = username;
-        document.getElementById('user-host').textContent = username + '@localhost';
-        renderSidebar();
-        if (window.location.pathname === '/' && currentPage === 'home') {
-            const homeItem = archboardNav.find(n => n.type === 'item' && n.id === 'home');
-            if (!homeItem) {
-                const firstUrl = getFirstNavUrl();
-                if (firstUrl && firstUrl !== '/') {
-                    window.location.href = firstUrl;
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('user-avatar').textContent = username[0].toUpperCase();
+            document.getElementById('user-name').textContent = username;
+            document.getElementById('user-host').textContent = username + '@localhost';
+            renderSidebar();
+            if (window.location.pathname === '/' && currentPage === 'home') {
+                const homeItem = archboardNav.find(n => n.type === 'item' && n.id === 'home');
+                if (!homeItem) {
+                    const firstUrl = getFirstNavUrl();
+                    if (firstUrl && firstUrl !== '/') {
+                        window.location.href = firstUrl;
+                    }
                 }
             }
-        }
+        });
     </script>
 </aside><main class="flex flex-col flex-1 overflow-hidden min-w-0"><header class="flex items-center justify-between px-6 py-4 bg-zinc-950/80 border-b border-zinc-800/50">
     <div class="flex items-center gap-3 text-zinc-100">
@@ -4283,8 +4297,8 @@
     }
 
     document.addEventListener('DOMContentLoaded', initSearch);
-</script><div id="modal-overlay" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-200 [&.active]:opacity-100 [&.active]:pointer-events-auto" onclick="closeModal()"><div id="modal-content" class="bg-zinc-900 border border-zinc-800 rounded-xl p-6 w-full max-w-md shadow-2xl transform scale-95 transition-transform duration-200 [&.active]:scale-100" onclick="event.stopPropagation()"></div></div><div id="toast-container" class="fixed bottom-6 right-6 flex flex-col gap-2 z-[9999] pointer-events-none"></div><script src="/scripts/main.js?k= "></script><script src="/scripts/api.js?k= "></script></body></html>
-<html><head><title> </title><meta name="description" content=" " /><meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" /><link rel="preconnect" href="https://fonts.googleapis.com" /><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin /><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" /><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" /><link rel="stylesheet" href="/tailwind.css?k= " /><script src="/scripts/local_settings.js?k= "></script><script src="/scripts/renderer.js?k= "></script><script src="/scripts/utils.js?k= "></script><script src="/scripts/image_picker.js?k= "></script><script src="/scripts/preset_manager.js?k= "></script><script src="/scripts/font_manager.js?k= "></script><script src="/scripts/font_picker.js?k= "></script><script>const prod =  ;const plugin_enabled =  ;</script></head><body class="flex h-screen overflow-hidden bg-zinc-950 text-zinc-100 font-sans"><aside
+</script><div id="modal-overlay" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-200 [&.active]:opacity-100 [&.active]:pointer-events-auto" onclick="closeModal()"><div id="modal-content" class="bg-zinc-900 border border-zinc-800 rounded-xl p-6 w-full max-w-md shadow-2xl transform scale-95 transition-transform duration-200 [&.active]:scale-100" onclick="event.stopPropagation()"></div></div><div id="toast-container" class="fixed bottom-6 right-6 flex flex-col gap-2 z-[9999] pointer-events-none"></div><script src="/scripts/main.js?k= " defer></script><script src="/scripts/api.js?k= " defer></script></body></html>
+<html><head><title> </title><meta name="description" content=" " /><meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" /><link rel="preconnect" href="https://fonts.googleapis.com" /><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin /><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" /><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" /><link rel="stylesheet" href="/tailwind.css?k= " /><script src="/scripts/local_settings.js?k= " defer></script><script src="/scripts/renderer.js?k= "></script><script src="/scripts/utils.js?k= " defer></script><script src="/scripts/image_picker.js?k= " defer></script><script src="/scripts/preset_manager.js?k= " defer></script><script src="/scripts/font_manager.js?k= " defer></script><script src="/scripts/font_picker.js?k= " defer></script><script>const prod =  ;const plugin_enabled =  ;</script></head><body class="flex h-screen overflow-hidden bg-zinc-950 text-zinc-100 font-sans"><aside
         class="w-64 h-screen bg-zinc-900 text-zinc-400 border-r border-zinc-800/50 flex flex-col flex-shrink-0 select-none">
 
 
@@ -4429,19 +4443,21 @@
             return null;
         }
 
-        document.getElementById('user-avatar').textContent = username[0].toUpperCase();
-        document.getElementById('user-name').textContent = username;
-        document.getElementById('user-host').textContent = username + '@localhost';
-        renderSidebar();
-        if (window.location.pathname === '/' && currentPage === 'home') {
-            const homeItem = archboardNav.find(n => n.type === 'item' && n.id === 'home');
-            if (!homeItem) {
-                const firstUrl = getFirstNavUrl();
-                if (firstUrl && firstUrl !== '/') {
-                    window.location.href = firstUrl;
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('user-avatar').textContent = username[0].toUpperCase();
+            document.getElementById('user-name').textContent = username;
+            document.getElementById('user-host').textContent = username + '@localhost';
+            renderSidebar();
+            if (window.location.pathname === '/' && currentPage === 'home') {
+                const homeItem = archboardNav.find(n => n.type === 'item' && n.id === 'home');
+                if (!homeItem) {
+                    const firstUrl = getFirstNavUrl();
+                    if (firstUrl && firstUrl !== '/') {
+                        window.location.href = firstUrl;
+                    }
                 }
             }
-        }
+        });
     </script>
 </aside><main class="flex flex-col flex-1 overflow-hidden min-w-0"><header class="flex items-center justify-between px-6 py-4 bg-zinc-950/80 border-b border-zinc-800/50">
     <div class="flex items-center gap-3 text-zinc-100">
@@ -4992,8 +5008,8 @@
     }
 
     document.addEventListener('DOMContentLoaded', initSearch);
-</script><div id="modal-overlay" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-200 [&.active]:opacity-100 [&.active]:pointer-events-auto" onclick="closeModal()"><div id="modal-content" class="bg-zinc-900 border border-zinc-800 rounded-xl p-6 w-full max-w-md shadow-2xl transform scale-95 transition-transform duration-200 [&.active]:scale-100" onclick="event.stopPropagation()"></div></div><div id="toast-container" class="fixed bottom-6 right-6 flex flex-col gap-2 z-[9999] pointer-events-none"></div><script src="/scripts/main.js?k= "></script><script src="/scripts/api.js?k= "></script></body></html>
-<html><head><title> </title><meta name="description" content=" " /><meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" /><link rel="preconnect" href="https://fonts.googleapis.com" /><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin /><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" /><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" /><link rel="stylesheet" href="/tailwind.css?k= " /><script src="/scripts/local_settings.js?k= "></script><script src="/scripts/renderer.js?k= "></script><script src="/scripts/utils.js?k= "></script><script src="/scripts/image_picker.js?k= "></script><script src="/scripts/preset_manager.js?k= "></script><script src="/scripts/font_manager.js?k= "></script><script src="/scripts/font_picker.js?k= "></script><script>const prod =  ;const plugin_enabled =  ;</script></head><body class="flex h-screen overflow-hidden bg-zinc-950 text-zinc-100 font-sans"><aside
+</script><div id="modal-overlay" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-200 [&.active]:opacity-100 [&.active]:pointer-events-auto" onclick="closeModal()"><div id="modal-content" class="bg-zinc-900 border border-zinc-800 rounded-xl p-6 w-full max-w-md shadow-2xl transform scale-95 transition-transform duration-200 [&.active]:scale-100" onclick="event.stopPropagation()"></div></div><div id="toast-container" class="fixed bottom-6 right-6 flex flex-col gap-2 z-[9999] pointer-events-none"></div><script src="/scripts/main.js?k= " defer></script><script src="/scripts/api.js?k= " defer></script></body></html>
+<html><head><title> </title><meta name="description" content=" " /><meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" /><link rel="preconnect" href="https://fonts.googleapis.com" /><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin /><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" /><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" /><link rel="stylesheet" href="/tailwind.css?k= " /><script src="/scripts/local_settings.js?k= " defer></script><script src="/scripts/renderer.js?k= "></script><script src="/scripts/utils.js?k= " defer></script><script src="/scripts/image_picker.js?k= " defer></script><script src="/scripts/preset_manager.js?k= " defer></script><script src="/scripts/font_manager.js?k= " defer></script><script src="/scripts/font_picker.js?k= " defer></script><script>const prod =  ;const plugin_enabled =  ;</script></head><body class="flex h-screen overflow-hidden bg-zinc-950 text-zinc-100 font-sans"><aside
         class="w-64 h-screen bg-zinc-900 text-zinc-400 border-r border-zinc-800/50 flex flex-col flex-shrink-0 select-none">
 
 
@@ -5138,19 +5154,21 @@
             return null;
         }
 
-        document.getElementById('user-avatar').textContent = username[0].toUpperCase();
-        document.getElementById('user-name').textContent = username;
-        document.getElementById('user-host').textContent = username + '@localhost';
-        renderSidebar();
-        if (window.location.pathname === '/' && currentPage === 'home') {
-            const homeItem = archboardNav.find(n => n.type === 'item' && n.id === 'home');
-            if (!homeItem) {
-                const firstUrl = getFirstNavUrl();
-                if (firstUrl && firstUrl !== '/') {
-                    window.location.href = firstUrl;
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('user-avatar').textContent = username[0].toUpperCase();
+            document.getElementById('user-name').textContent = username;
+            document.getElementById('user-host').textContent = username + '@localhost';
+            renderSidebar();
+            if (window.location.pathname === '/' && currentPage === 'home') {
+                const homeItem = archboardNav.find(n => n.type === 'item' && n.id === 'home');
+                if (!homeItem) {
+                    const firstUrl = getFirstNavUrl();
+                    if (firstUrl && firstUrl !== '/') {
+                        window.location.href = firstUrl;
+                    }
                 }
             }
-        }
+        });
     </script>
 </aside><main class="flex flex-col flex-1 overflow-hidden min-w-0"><header class="flex items-center justify-between px-6 py-4 bg-zinc-950/80 border-b border-zinc-800/50">
     <div class="flex items-center gap-3 text-zinc-100">
@@ -5508,8 +5526,8 @@
     }
 
     document.addEventListener('DOMContentLoaded', initSearch);
-</script><div id="modal-overlay" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-200 [&.active]:opacity-100 [&.active]:pointer-events-auto" onclick="closeModal()"><div id="modal-content" class="bg-zinc-900 border border-zinc-800 rounded-xl p-6 w-full max-w-md shadow-2xl transform scale-95 transition-transform duration-200 [&.active]:scale-100" onclick="event.stopPropagation()"></div></div><div id="toast-container" class="fixed bottom-6 right-6 flex flex-col gap-2 z-[9999] pointer-events-none"></div><script src="/scripts/main.js?k= "></script><script src="/scripts/api.js?k= "></script></body></html>
-<html><head><title> </title><meta name="description" content=" " /><meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" /><link rel="preconnect" href="https://fonts.googleapis.com" /><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin /><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" /><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" /><link rel="stylesheet" href="/tailwind.css?k= " /><script src="/scripts/local_settings.js?k= "></script><script src="/scripts/renderer.js?k= "></script><script src="/scripts/utils.js?k= "></script><script src="/scripts/image_picker.js?k= "></script><script src="/scripts/preset_manager.js?k= "></script><script src="/scripts/font_manager.js?k= "></script><script src="/scripts/font_picker.js?k= "></script><script>const prod =  ;const plugin_enabled =  ;</script></head><body class="flex h-screen overflow-hidden bg-zinc-950 text-zinc-100 font-sans"><aside
+</script><div id="modal-overlay" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-200 [&.active]:opacity-100 [&.active]:pointer-events-auto" onclick="closeModal()"><div id="modal-content" class="bg-zinc-900 border border-zinc-800 rounded-xl p-6 w-full max-w-md shadow-2xl transform scale-95 transition-transform duration-200 [&.active]:scale-100" onclick="event.stopPropagation()"></div></div><div id="toast-container" class="fixed bottom-6 right-6 flex flex-col gap-2 z-[9999] pointer-events-none"></div><script src="/scripts/main.js?k= " defer></script><script src="/scripts/api.js?k= " defer></script></body></html>
+<html><head><title> </title><meta name="description" content=" " /><meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" /><link rel="preconnect" href="https://fonts.googleapis.com" /><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin /><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" /><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" /><link rel="stylesheet" href="/tailwind.css?k= " /><script src="/scripts/local_settings.js?k= " defer></script><script src="/scripts/renderer.js?k= "></script><script src="/scripts/utils.js?k= " defer></script><script src="/scripts/image_picker.js?k= " defer></script><script src="/scripts/preset_manager.js?k= " defer></script><script src="/scripts/font_manager.js?k= " defer></script><script src="/scripts/font_picker.js?k= " defer></script><script>const prod =  ;const plugin_enabled =  ;</script></head><body class="flex h-screen overflow-hidden bg-zinc-950 text-zinc-100 font-sans"><aside
         class="w-64 h-screen bg-zinc-900 text-zinc-400 border-r border-zinc-800/50 flex flex-col flex-shrink-0 select-none">
 
 
@@ -5654,19 +5672,21 @@
             return null;
         }
 
-        document.getElementById('user-avatar').textContent = username[0].toUpperCase();
-        document.getElementById('user-name').textContent = username;
-        document.getElementById('user-host').textContent = username + '@localhost';
-        renderSidebar();
-        if (window.location.pathname === '/' && currentPage === 'home') {
-            const homeItem = archboardNav.find(n => n.type === 'item' && n.id === 'home');
-            if (!homeItem) {
-                const firstUrl = getFirstNavUrl();
-                if (firstUrl && firstUrl !== '/') {
-                    window.location.href = firstUrl;
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('user-avatar').textContent = username[0].toUpperCase();
+            document.getElementById('user-name').textContent = username;
+            document.getElementById('user-host').textContent = username + '@localhost';
+            renderSidebar();
+            if (window.location.pathname === '/' && currentPage === 'home') {
+                const homeItem = archboardNav.find(n => n.type === 'item' && n.id === 'home');
+                if (!homeItem) {
+                    const firstUrl = getFirstNavUrl();
+                    if (firstUrl && firstUrl !== '/') {
+                        window.location.href = firstUrl;
+                    }
                 }
             }
-        }
+        });
     </script>
 </aside><main class="flex flex-col flex-1 overflow-hidden min-w-0"><header class="flex items-center justify-between px-6 py-4 bg-zinc-950/80 border-b border-zinc-800/50">
     <div class="flex items-center gap-3 text-zinc-100">
@@ -6023,8 +6043,8 @@
     }
 
     document.addEventListener('DOMContentLoaded', initSearch);
-</script><div id="modal-overlay" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-200 [&.active]:opacity-100 [&.active]:pointer-events-auto" onclick="closeModal()"><div id="modal-content" class="bg-zinc-900 border border-zinc-800 rounded-xl p-6 w-full max-w-md shadow-2xl transform scale-95 transition-transform duration-200 [&.active]:scale-100" onclick="event.stopPropagation()"></div></div><div id="toast-container" class="fixed bottom-6 right-6 flex flex-col gap-2 z-[9999] pointer-events-none"></div><script src="/scripts/main.js?k= "></script><script src="/scripts/api.js?k= "></script></body></html>
-<html><head><title> </title><meta name="description" content=" " /><meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" /><link rel="preconnect" href="https://fonts.googleapis.com" /><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin /><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" /><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" /><link rel="stylesheet" href="/tailwind.css?k= " /><script src="/scripts/local_settings.js?k= "></script><script src="/scripts/renderer.js?k= "></script><script src="/scripts/utils.js?k= "></script><script src="/scripts/image_picker.js?k= "></script><script src="/scripts/preset_manager.js?k= "></script><script src="/scripts/font_manager.js?k= "></script><script src="/scripts/font_picker.js?k= "></script><script>const prod =  ;const plugin_enabled =  ;</script></head><body class="flex h-screen overflow-hidden bg-zinc-950 text-zinc-100 font-sans"><aside
+</script><div id="modal-overlay" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-200 [&.active]:opacity-100 [&.active]:pointer-events-auto" onclick="closeModal()"><div id="modal-content" class="bg-zinc-900 border border-zinc-800 rounded-xl p-6 w-full max-w-md shadow-2xl transform scale-95 transition-transform duration-200 [&.active]:scale-100" onclick="event.stopPropagation()"></div></div><div id="toast-container" class="fixed bottom-6 right-6 flex flex-col gap-2 z-[9999] pointer-events-none"></div><script src="/scripts/main.js?k= " defer></script><script src="/scripts/api.js?k= " defer></script></body></html>
+<html><head><title> </title><meta name="description" content=" " /><meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" /><link rel="preconnect" href="https://fonts.googleapis.com" /><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin /><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" /><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" /><link rel="stylesheet" href="/tailwind.css?k= " /><script src="/scripts/local_settings.js?k= " defer></script><script src="/scripts/renderer.js?k= "></script><script src="/scripts/utils.js?k= " defer></script><script src="/scripts/image_picker.js?k= " defer></script><script src="/scripts/preset_manager.js?k= " defer></script><script src="/scripts/font_manager.js?k= " defer></script><script src="/scripts/font_picker.js?k= " defer></script><script>const prod =  ;const plugin_enabled =  ;</script></head><body class="flex h-screen overflow-hidden bg-zinc-950 text-zinc-100 font-sans"><aside
         class="w-64 h-screen bg-zinc-900 text-zinc-400 border-r border-zinc-800/50 flex flex-col flex-shrink-0 select-none">
 
 
@@ -6169,19 +6189,21 @@
             return null;
         }
 
-        document.getElementById('user-avatar').textContent = username[0].toUpperCase();
-        document.getElementById('user-name').textContent = username;
-        document.getElementById('user-host').textContent = username + '@localhost';
-        renderSidebar();
-        if (window.location.pathname === '/' && currentPage === 'home') {
-            const homeItem = archboardNav.find(n => n.type === 'item' && n.id === 'home');
-            if (!homeItem) {
-                const firstUrl = getFirstNavUrl();
-                if (firstUrl && firstUrl !== '/') {
-                    window.location.href = firstUrl;
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('user-avatar').textContent = username[0].toUpperCase();
+            document.getElementById('user-name').textContent = username;
+            document.getElementById('user-host').textContent = username + '@localhost';
+            renderSidebar();
+            if (window.location.pathname === '/' && currentPage === 'home') {
+                const homeItem = archboardNav.find(n => n.type === 'item' && n.id === 'home');
+                if (!homeItem) {
+                    const firstUrl = getFirstNavUrl();
+                    if (firstUrl && firstUrl !== '/') {
+                        window.location.href = firstUrl;
+                    }
                 }
             }
-        }
+        });
     </script>
 </aside><main class="flex flex-col flex-1 overflow-hidden min-w-0"><header class="flex items-center justify-between px-6 py-4 bg-zinc-950/80 border-b border-zinc-800/50">
     <div class="flex items-center gap-3 text-zinc-100">
@@ -6490,7 +6512,7 @@
     }
 
     document.addEventListener('DOMContentLoaded', initSearch);
-</script><div id="modal-overlay" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-200 [&.active]:opacity-100 [&.active]:pointer-events-auto" onclick="closeModal()"><div id="modal-content" class="bg-zinc-900 border border-zinc-800 rounded-xl p-6 w-full max-w-md shadow-2xl transform scale-95 transition-transform duration-200 [&.active]:scale-100" onclick="event.stopPropagation()"></div></div><div id="toast-container" class="fixed bottom-6 right-6 flex flex-col gap-2 z-[9999] pointer-events-none"></div><script src="/scripts/main.js?k= "></script><script src="/scripts/api.js?k= "></script></body></html>
+</script><div id="modal-overlay" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-200 [&.active]:opacity-100 [&.active]:pointer-events-auto" onclick="closeModal()"><div id="modal-content" class="bg-zinc-900 border border-zinc-800 rounded-xl p-6 w-full max-w-md shadow-2xl transform scale-95 transition-transform duration-200 [&.active]:scale-100" onclick="event.stopPropagation()"></div></div><div id="toast-container" class="fixed bottom-6 right-6 flex flex-col gap-2 z-[9999] pointer-events-none"></div><script src="/scripts/main.js?k= " defer></script><script src="/scripts/api.js?k= " defer></script></body></html>
 // Main application script
 let production = prod || false;
 
