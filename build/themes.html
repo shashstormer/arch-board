@@ -197,111 +197,539 @@
             </svg>
         </button>
     </div>
-</header><div class="flex-1 overflow-y-auto overflow-x-hidden p-6 w-full scrollbar-thin scrollbar-thumb-zinc-700 scrollbar-track-transparent"><main class="h-full"><div class="w-full h-full flex flex-col">
-    <!-- Header -->
-    <div class="flex items-center justify-between mb-6">
-        <div>
-            <h1 class="text-2xl font-bold text-zinc-100">Hypridle</h1>
-            <p class="text-sm text-zinc-500">Configure Hyprland's idle management daemon</p>
-        </div>
-        <div class="flex items-center gap-3">
-            <!-- Preset Manager Container -->
-            <div id="preset-container"></div>
+</header><div class="flex-1 overflow-y-auto overflow-x-hidden p-6 w-full scrollbar-thin scrollbar-thumb-zinc-700 scrollbar-track-transparent"><main class="h-full"><div class="p-6 space-y-6">
 
-            <button onclick="hypridleEditor.reload()"
-                class="px-4 py-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 rounded-lg font-medium flex items-center gap-2 border border-zinc-700">
-                <span>🔄</span> Reload
+    <div class="flex items-center justify-between">
+        <div>
+            <h1 class="text-2xl font-bold text-zinc-100">Themes</h1>
+            <p class="text-zinc-400">Manage and share your system configuration bundles.</p>
+        </div>
+
+        <div class="flex gap-3">
+            <button onclick="document.getElementById('theme-upload').click()"
+                class="px-4 py-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 rounded-lg flex items-center gap-2 transition-colors">
+                <i class="fa-solid fa-upload"></i> Import Theme
             </button>
-            <button onclick="hypridleEditor.save()"
-                class="px-4 py-2 bg-teal-600 hover:bg-teal-500 text-white rounded-lg font-medium flex items-center gap-2">
-                <span>💾</span> Save
+
+            <input type="file" id="theme-upload" accept=".zip" class="hidden" onchange="importTheme(this.files[0])">
+
+            <button onclick="openCreateModal()"
+                class="px-4 py-2 bg-teal-600 hover:bg-teal-500 text-white rounded-lg flex items-center gap-2 transition-colors">
+                <i class="fa-solid fa-plus"></i> Create Theme
             </button>
         </div>
     </div>
 
-    <!-- Main Content -->
-    <div class="flex-1 flex gap-6 overflow-hidden">
-        <!-- General Settings -->
-        <div class="w-1/2 flex flex-col bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden">
-            <div class="px-4 py-3 border-b border-zinc-800 bg-zinc-900/80">
-                <h2 class="text-lg font-semibold text-white">General Settings</h2>
-            </div>
-            <div class="flex-1 overflow-y-auto p-4">
-                <div class="space-y-4">
-                    <div class="space-y-2">
-                        <label class="text-sm text-zinc-400">Lock Command</label>
-                        <input type="text" id="gen-lock_cmd" placeholder="pidof hyprlock || hyprlock"
-                            class="w-full bg-zinc-950 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-white focus:border-teal-500 outline-none"
-                            onchange="hypridleEditor.updateGeneral('lock_cmd', this.value)">
-                        <p class="text-xs text-zinc-600">Command to run when receiving a dbus lock event</p>
-                    </div>
-
-                    <div class="space-y-2">
-                        <label class="text-sm text-zinc-400">Unlock Command</label>
-                        <input type="text" id="gen-unlock_cmd" placeholder=""
-                            class="w-full bg-zinc-950 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-white focus:border-teal-500 outline-none"
-                            onchange="hypridleEditor.updateGeneral('unlock_cmd', this.value)">
-                        <p class="text-xs text-zinc-600">Command to run when receiving a dbus unlock event</p>
-                    </div>
-
-                    <div class="space-y-2">
-                        <label class="text-sm text-zinc-400">Before Sleep Command</label>
-                        <input type="text" id="gen-before_sleep_cmd" placeholder="loginctl lock-session"
-                            class="w-full bg-zinc-950 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-white focus:border-teal-500 outline-none"
-                            onchange="hypridleEditor.updateGeneral('before_sleep_cmd', this.value)">
-                        <p class="text-xs text-zinc-600">Command to run before system sleeps</p>
-                    </div>
-
-                    <div class="space-y-2">
-                        <label class="text-sm text-zinc-400">After Sleep Command</label>
-                        <input type="text" id="gen-after_sleep_cmd" placeholder="hyprctl dispatch dpms on"
-                            class="w-full bg-zinc-950 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-white focus:border-teal-500 outline-none"
-                            onchange="hypridleEditor.updateGeneral('after_sleep_cmd', this.value)">
-                        <p class="text-xs text-zinc-600">Command to run after system wakes</p>
-                    </div>
-
-                    <div class="flex items-center justify-between p-3 bg-zinc-800/50 rounded-lg">
-                        <div>
-                            <div class="text-sm text-zinc-300">Ignore DBus Inhibit</div>
-                            <div class="text-xs text-zinc-600">Ignore idle inhibit events from apps (e.g. video players)
-                            </div>
-                        </div>
-                        <label class="relative inline-flex items-center cursor-pointer">
-                            <input type="checkbox" id="gen-ignore_dbus_inhibit" class="sr-only peer"
-                                onchange="hypridleEditor.updateGeneral('ignore_dbus_inhibit', this.checked)">
-                            <div
-                                class="w-11 h-6 bg-zinc-700 peer-focus:ring-2 peer-focus:ring-teal-500/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-teal-500">
-                            </div>
-                        </label>
-                    </div>
-                </div>
-            </div>
+    <div id="themes-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <!-- Themes will be rendered here -->
+        <div class="col-span-full text-center py-12 text-zinc-500">
+            <i class="fa-solid fa-circle-notch fa-spin text-2xl mb-2"></i>
+            Loading themes...
         </div>
+    </div>
 
-        <!-- Listeners -->
-        <div class="w-1/2 flex flex-col bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden">
-            <div class="px-4 py-3 border-b border-zinc-800 bg-zinc-900/80 flex items-center justify-between">
-                <h2 class="text-lg font-semibold text-white">Listeners</h2>
-                <button onclick="hypridleEditor.addListener()"
-                    class="px-3 py-1.5 bg-teal-600 hover:bg-teal-500 text-white text-sm rounded-lg">
-                    + Add Listener
+    <!-- Create/Edit Theme Modal -->
+    <div id="theme-modal"
+        class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-200 [&.active]:opacity-100 [&.active]:pointer-events-auto"
+        onclick="closeThemeModal()">
+        <div class="bg-zinc-900 border border-zinc-800 rounded-xl w-full max-w-2xl max-h-[80vh] flex flex-col shadow-2xl transform scale-95 transition-transform duration-200 [&.active]:scale-100"
+            onclick="event.stopPropagation()">
+
+            <div class="p-6 border-b border-zinc-800 flex justify-between items-center">
+                <h2 id="modal-title" class="text-xl font-bold text-zinc-100">Create New Theme</h2>
+                <button onclick="closeThemeModal()" class="text-zinc-400 hover:text-white">
+                    <i class="fa-solid fa-xmark"></i>
                 </button>
             </div>
-            <div id="listeners-list" class="flex-1 overflow-y-auto p-4 space-y-3">
-                <!-- Populated by JS -->
-                <div class="text-zinc-500 text-center py-10">Loading...</div>
+
+            <div class="p-6 overflow-y-auto space-y-6">
+                <input type="hidden" id="theme-id">
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-zinc-400 mb-2">Theme Name</label>
+                        <input type="text" id="theme-name" placeholder="My Awesome Theme"
+                            class="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-4 py-2 text-zinc-100 focus:outline-none focus:border-teal-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-zinc-400 mb-2">Author</label>
+                        <input type="text" id="theme-author" placeholder="You"
+                            class="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-4 py-2 text-zinc-100 focus:outline-none focus:border-teal-500">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-zinc-400 mb-2">Description</label>
+                    <textarea id="theme-desc" placeholder="What's in this bundle?"
+                        class="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-4 py-2 text-zinc-100 focus:outline-none focus:border-teal-500 h-20 resize-none"></textarea>
+                </div>
+
+                <div>
+                    <h3 class="text-sm font-medium text-zinc-400 mb-3 uppercase tracking-wider">Dependencies</h3>
+                    <div id="dependencies-list" class="space-y-2 mb-2">
+                        <!-- Dependencies inputs -->
+                    </div>
+                    <button onclick="addDependencyRow()"
+                        class="text-sm text-teal-400 hover:text-teal-300 flex items-center gap-1">
+                        <i class="fa-solid fa-plus"></i> Add Dependency
+                    </button>
+                </div>
+
+                <div>
+                    <h3 class="text-sm font-medium text-zinc-400 mb-3 uppercase tracking-wider">Include Presets</h3>
+                    <div id="preset-selectors" class="space-y-4">
+                        <!-- Preset selectors will be injected here -->
+                        <div class="text-center text-zinc-500 py-4">
+                            Loading presets...
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="p-6 border-t border-zinc-800 flex justify-end gap-3">
+                <button onclick="closeThemeModal()"
+                    class="px-4 py-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 rounded-lg">Cancel</button>
+                <button id="modal-submit-btn" onclick="saveTheme()"
+                    class="px-4 py-2 bg-teal-600 hover:bg-teal-500 text-white rounded-lg">Create Theme</button>
             </div>
         </div>
     </div>
+
+    <!-- Export Options Modal -->
+    <div id="export-modal"
+        class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-200 [&.active]:opacity-100 [&.active]:pointer-events-auto"
+        onclick="closeExportModal()">
+        <div class="bg-zinc-900 border border-zinc-800 rounded-xl w-full max-w-md flex flex-col shadow-2xl transform scale-95 transition-transform duration-200 [&.active]:scale-100"
+            onclick="event.stopPropagation()">
+            <div class="p-6 border-b border-zinc-800 flex justify-between items-center">
+                <h2 class="text-xl font-bold text-zinc-100">Export Theme</h2>
+                <button onclick="closeExportModal()" class="text-zinc-400 hover:text-white">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <div class="p-6 space-y-4">
+                <p class="text-zinc-400 text-sm">Select which components to include in the export package.</p>
+                <input type="hidden" id="export-theme-id">
+                <div id="export-presets-list" class="space-y-2">
+                    <!-- Checkboxes -->
+                </div>
+            </div>
+
+            <div class="p-6 border-t border-zinc-800 flex justify-end gap-3">
+                <button onclick="closeExportModal()"
+                    class="px-4 py-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 rounded-lg">Cancel</button>
+                <button onclick="performExport()"
+                    class="px-4 py-2 bg-teal-600 hover:bg-teal-500 text-white rounded-lg flex items-center gap-2">
+                    <i class="fa-solid fa-download"></i> Download Zip
+                </button>
+            </div>
+        </div>
+    </div>
+
 </div>
 
-<script src="/scripts/hypridle.js?k={{ cache_key }}"></script>
 <script>
-    window.addEventListener('DOMContentLoaded', () => {
-        if (!window.hypridleEditor) {
-            window.hypridleEditor = new HypridleEditor();
+    const TOOLS = ["hyprland", "waybar", "hyprlock", "hypridle", "wpaperd", "gammastep"];
+    let availablePresets = {};
+    let currentThemes = [];
+
+    async function loadThemes() {
+        try {
+            const res = await fetch('/themes/list');
+            currentThemes = await res.json();
+            renderThemes(currentThemes);
+        } catch (e) {
+            console.error(e);
+            showToast('Failed to load themes', 'error');
         }
-    });
+    }
+
+    function renderThemes(themes) {
+        const grid = document.getElementById('themes-grid');
+        if (themes.length === 0) {
+            grid.innerHTML = `
+                <div class="col-span-full text-center py-12 text-zinc-500 bg-zinc-900/50 rounded-xl border border-zinc-800 border-dashed">
+                    <div class="text-4xl mb-4">🎨</div>
+                    <h3 class="text-lg font-medium text-zinc-300 mb-2">No themes found</h3>
+                    <p class="text-zinc-500">Create a bundle from your presets or import one.</p>
+                </div>
+            `;
+            return;
+        }
+
+        grid.innerHTML = themes.map(theme => `
+            <div class="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden hover:border-zinc-700 transition-all hover:shadow-lg group flex flex-col">
+                <div class="p-6 flex-1">
+                    <div class="flex justify-between items-start mb-4">
+                        <div>
+                            <h3 class="text-lg font-bold text-zinc-100 mb-1">${theme.name}</h3>
+                            <div class="text-xs text-zinc-500 flex gap-2">
+                                <span><i class="fa-regular fa-user mr-1"></i> ${theme.author}</span>
+                                <span><i class="fa-regular fa-clock mr-1"></i> ${new Date(theme.updated_at).toLocaleDateString()}</span>
+                            </div>
+                        </div>
+                        <div class="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                             <button onclick="openExportModal('${theme.id}')" class="p-2 text-zinc-400 hover:text-white hover:bg-zinc-800 rounded-lg transition-colors" title="Export">
+                                <i class="fa-solid fa-download"></i>
+                            </button>
+                            <button onclick="openEditModal('${theme.id}')" class="p-2 text-zinc-400 hover:text-teal-400 hover:bg-zinc-800 rounded-lg transition-colors" title="Edit">
+                                <i class="fa-solid fa-pen"></i>
+                            </button>
+                            <button onclick="deleteTheme('${theme.id}')" class="p-2 text-zinc-400 hover:text-red-400 hover:bg-zinc-800 rounded-lg transition-colors" title="Delete">
+                                <i class="fa-solid fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <p class="text-zinc-400 text-sm mb-4 line-clamp-2">${theme.description}</p>
+                    
+                    ${theme.dependencies && theme.dependencies.length > 0 ? `
+                    <div class="mb-4">
+                         <div class="text-xs font-medium text-zinc-500 uppercase tracking-wider mb-1">Requires</div>
+                         <div class="text-xs text-zinc-400 flex flex-wrap gap-x-3 gap-y-1">
+                            ${theme.dependencies.map(d => `<span><i class="fa-solid fa-wrench text-zinc-600 mr-1"></i>${d}</span>`).join('')}
+                         </div>
+                    </div>
+                    ` : ''}
+
+                    <div class="space-y-2 mb-4">
+                        <div class="text-xs font-medium text-zinc-500 uppercase tracking-wider mb-2">Includes</div>
+                        <div class="flex flex-wrap gap-2">
+                            ${Object.keys(theme.presets).map(tool => `
+                                <span class="px-2 py-1 bg-zinc-800 text-zinc-400 text-xs rounded border border-zinc-700">
+                                    ${tool}
+                                </span>
+                            `).join('')}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="p-4 border-t border-zinc-800 bg-zinc-900/50">
+                    <button onclick="applyTheme('${theme.id}')" class="w-full py-2 bg-zinc-800 hover:bg-teal-600 hover:text-white text-zinc-300 rounded-lg transition-all font-medium flex items-center justify-center gap-2 group-apply">
+                        <span>Apply Theme</span>
+                        <i class="fa-solid fa-arrow-right opacity-0 -ml-4 group-apply-hover:opacity-100 group-apply-hover:ml-0 transition-all"></i>
+                    </button>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    async function applyTheme(id) {
+        if (!confirm('Apply this theme? This will overwrite your active configuration.')) return;
+
+        try {
+            showToast('Applying theme...', 'info');
+            const res = await fetch(`/themes/${id}/apply`, { method: 'POST' });
+            const data = await res.json();
+
+            if (data.success) {
+                showToast('Theme applied successfully!', 'success');
+            } else {
+                showToast('Failed to apply some presets', 'warning');
+            }
+        } catch (e) {
+            console.error(e);
+            showToast('Error applying theme', 'error');
+        }
+    }
+
+    async function deleteTheme(id) {
+        if (!confirm('Delete this theme? This cannot be undone.')) return;
+
+        try {
+            const res = await fetch(`/themes/${id}`, { method: 'DELETE' });
+            if (res.ok) {
+                showToast('Theme deleted', 'success');
+                loadThemes();
+            } else {
+                showToast('Failed to delete theme', 'error');
+            }
+        } catch (e) {
+            showToast('Error deleting theme', 'error');
+        }
+    }
+
+    async function importTheme(file) {
+        if (!file) return;
+
+        const formData = new FormData();
+        formData.append('file', file);
+
+        try {
+            showToast('Importing theme...', 'info');
+            const res = await fetch('/themes/import', {
+                method: 'POST',
+                body: formData
+            });
+
+            if (res.ok) {
+                showToast('Theme imported successfully!', 'success');
+                loadThemes();
+                document.getElementById('theme-upload').value = '';
+            } else {
+                const err = await res.json();
+                showToast(err.detail || 'Import failed', 'error');
+            }
+        } catch (e) {
+            console.error(e);
+            showToast('Error importing theme', 'error');
+        }
+    }
+
+    // --- Modal Logic (Create/Edit) ---
+
+    function openCreateModal() {
+        resetModal();
+        document.getElementById('modal-title').textContent = 'Create New Theme';
+        document.getElementById('modal-submit-btn').textContent = 'Create Theme';
+        document.getElementById('theme-id').value = '';
+
+        document.getElementById('theme-modal').classList.add('active');
+        document.getElementById('theme-modal').querySelector('div').classList.add('active');
+        loadPresetOptions(); // Load empty/default options
+    }
+
+    function openEditModal(id) {
+        const theme = currentThemes.find(t => t.id === id);
+        if (!theme) return;
+
+        resetModal();
+        document.getElementById('modal-title').textContent = 'Edit Theme';
+        document.getElementById('modal-submit-btn').textContent = 'Save Changes';
+        document.getElementById('theme-id').value = theme.id;
+
+        document.getElementById('theme-name').value = theme.name;
+        document.getElementById('theme-author').value = theme.author;
+        document.getElementById('theme-desc').value = theme.description;
+
+        // Dependencies
+        if (theme.dependencies) {
+            theme.dependencies.forEach(dep => addDependencyRow(dep));
+        }
+
+        document.getElementById('theme-modal').classList.add('active');
+        document.getElementById('theme-modal').querySelector('div').classList.add('active');
+        loadPresetOptions(theme.presets); // Pre-select presets
+    }
+
+    function closeThemeModal() {
+        const modal = document.getElementById('theme-modal');
+        modal.classList.remove('active');
+        modal.querySelector('div').classList.remove('active');
+    }
+
+    function resetModal() {
+        document.getElementById('theme-name').value = '';
+        document.getElementById('theme-author').value = '';
+        document.getElementById('theme-desc').value = '';
+        document.getElementById('dependencies-list').innerHTML = '';
+        document.getElementById('preset-selectors').innerHTML = '';
+    }
+
+    function addDependencyRow(value = '') {
+        const div = document.createElement('div');
+        div.className = 'flex gap-2';
+        div.innerHTML = `
+            <input type="text" value="${value}" placeholder="e.g. rofi, nerd-fonts" class="flex-1 bg-zinc-800 border border-zinc-700 rounded px-3 py-1.5 text-zinc-100 text-sm outline-none focus:border-teal-500 dep-input">
+            <button onclick="this.parentElement.remove()" class="text-zinc-500 hover:text-red-400 px-2 transition-colors"><i class="fa-solid fa-trash"></i></button>
+        `;
+        document.getElementById('dependencies-list').appendChild(div);
+    }
+
+    async function loadPresetOptions(selectedPresets = {}) {
+        const container = document.getElementById('preset-selectors');
+        container.innerHTML = '<div class="text-center text-zinc-500 py-4"><i class="fa-solid fa-circle-notch fa-spin"></i> Loading presets...</div>';
+
+        availablePresets = {};
+        let html = '';
+
+        for (const tool of TOOLS) {
+            try {
+                const res = await fetch(`/presets/${tool}`);
+                const data = await res.json();
+                availablePresets[tool] = data.presets;
+
+                if (data.presets.length > 0) {
+                    const activeId = selectedPresets[tool] || data.active_preset;
+                    // If editing, we want to select what's in the theme, otherwise active. 
+                    // But if selectedPresets is passed (edit mode), use that.
+                    // If create mode, use active.
+                    // The logic above serves both if selectedPresets is empty object for create mode (undefined lookup).
+                    // Actually for create mode, we might want to default to active? Yes.
+
+                    const valueToSelect = selectedPresets[tool] !== undefined ? selectedPresets[tool] : data.active_preset;
+
+                    html += `
+                        <div class="flex items-center gap-4 p-3 bg-zinc-800/50 rounded-lg border border-zinc-800">
+                            <div class="w-24 font-medium text-zinc-300 capitalize">${tool}</div>
+                            <select id="preset-select-${tool}" class="flex-1 bg-zinc-900 border border-zinc-700 rounded px-3 py-1.5 text-zinc-100 text-sm outline-none focus:border-teal-500">
+                                <option value="">(Don't include)</option>
+                                ${data.presets.map(p => `
+                                    <option value="${p.id}" ${p.id === valueToSelect ? 'selected' : ''}>${p.name} ${p.id === data.active_preset ? '(Active)' : ''}</option>
+                                `).join('')}
+                            </select>
+                        </div>
+                    `;
+                }
+            } catch (e) {
+                console.error(`Failed to load presets for ${tool}`, e);
+            }
+        }
+
+        if (html === '') {
+            html = '<div class="text-center text-amber-500 py-2">No presets found. Create presets in tool settings first.</div>';
+        }
+
+        container.innerHTML = html;
+    }
+
+    async function saveTheme() {
+        const id = document.getElementById('theme-id').value;
+        const name = document.getElementById('theme-name').value;
+        const author = document.getElementById('theme-author').value;
+        const desc = document.getElementById('theme-desc').value;
+
+        // Collect dependencies
+        const dependencies = Array.from(document.querySelectorAll('.dep-input'))
+            .map(input => input.value.trim())
+            .filter(val => val !== '');
+
+        // Collect presets
+        const presets = {};
+        for (const tool of TOOLS) {
+            const select = document.getElementById(`preset-select-${tool}`);
+            if (select && select.value) {
+                presets[tool] = select.value;
+            }
+        }
+
+        if (!name) {
+            showToast('Please enter a theme name', 'warning');
+            return;
+        }
+
+        if (Object.keys(presets).length === 0) {
+            showToast('Please select at least one preset', 'warning');
+            return;
+        }
+
+        const payload = {
+            name,
+            description: desc,
+            author,
+            presets,
+            dependencies
+        };
+
+        try {
+            let res;
+            if (id) {
+                // Update
+                res = await fetch(`/themes/${id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+            } else {
+                // Create
+                res = await fetch('/themes', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+            }
+
+            if (res.ok) {
+                showToast(id ? 'Theme updated!' : 'Theme created!', 'success');
+                closeThemeModal();
+                loadThemes();
+            } else {
+                showToast('Failed to save theme', 'error');
+            }
+        } catch (e) {
+            console.error(e);
+            showToast('Error saving theme', 'error');
+        }
+    }
+
+    // --- Export Modal Logic ---
+
+    function openExportModal(id) {
+        const theme = currentThemes.find(t => t.id === id);
+        if (!theme) return;
+
+        document.getElementById('export-theme-id').value = id;
+        const list = document.getElementById('export-presets-list');
+        list.innerHTML = '';
+
+        if (Object.keys(theme.presets).length === 0) {
+            list.innerHTML = '<div class="text-zinc-500 italic">No presets in this theme?</div>';
+        } else {
+            Object.keys(theme.presets).forEach(tool => {
+                const div = document.createElement('div');
+                div.className = 'flex items-center gap-3 p-2 bg-zinc-800/30 rounded border border-zinc-700/50';
+                div.innerHTML = `
+                    <input type="checkbox" id="export-check-${tool}" value="${tool}" checked class="w-4 h-4 text-teal-600 rounded focus:ring-teal-600 bg-zinc-800 border-zinc-600">
+                    <label for="export-check-${tool}" class="text-zinc-200 capitalize cursor-pointer select-none">${tool}</label>
+                `;
+                list.appendChild(div);
+            });
+        }
+
+        document.getElementById('export-modal').classList.add('active');
+        document.getElementById('export-modal').querySelector('div').classList.add('active');
+    }
+
+    function closeExportModal() {
+        const modal = document.getElementById('export-modal');
+        modal.classList.remove('active');
+        modal.querySelector('div').classList.remove('active');
+    }
+
+    async function performExport() {
+        const id = document.getElementById('export-theme-id').value;
+        const checkboxes = document.querySelectorAll('#export-presets-list input[type="checkbox"]:checked');
+        const include_presets = Array.from(checkboxes).map(cb => cb.value);
+
+        if (include_presets.length === 0) {
+            showToast('Select at least one preset to export', 'warning');
+            return;
+        }
+
+        try {
+            showToast('Preparing download...', 'info');
+
+            const res = await fetch(`/themes/${id}/export`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ include_presets })
+            });
+
+            if (res.ok) {
+                const blob = await res.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `${id}.zip`; // The server might not set Content-Disposition with filename in a way XHR/fetch handles nicely transparently, but we can guess or use existing ID.
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                a.remove();
+                closeExportModal();
+                showToast('Export successful!', 'success');
+            } else {
+                showToast('Export failed', 'error');
+            }
+        } catch (e) {
+            console.error(e);
+            showToast('Error exporting theme', 'error');
+        }
+    }
+
+    // Init
+    loadThemes();
 </script></main></div><footer
     class="flex items-center justify-between px-6 py-3 bg-zinc-950/90 border-t border-zinc-800/50 text-xs text-zinc-500">
     <div class="flex items-center gap-4">

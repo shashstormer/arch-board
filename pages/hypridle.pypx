@@ -1,4 +1,3 @@
-_layout
-    main
-        ;;class="h-full";; 
-        [[hypridle/main.html]]
+main
+    ;;class="h-full";; 
+    [[hypridle/main.html]]

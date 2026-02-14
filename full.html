@@ -2835,7 +2835,7 @@
             </svg>
         </button>
     </div>
-</header><div class="flex-1 overflow-y-auto overflow-x-hidden p-6 w-full scrollbar-thin scrollbar-thumb-zinc-700 scrollbar-track-transparent">_layout<main class="h-full"><div class="w-full h-full flex flex-col">
+</header><div class="flex-1 overflow-y-auto overflow-x-hidden p-6 w-full scrollbar-thin scrollbar-thumb-zinc-700 scrollbar-track-transparent"><main class="h-full"><div class="w-full h-full flex flex-col">
     <!-- Header -->
     <div class="flex items-center justify-between mb-6">
         <div>
@@ -3404,7 +3404,7 @@
             </svg>
         </button>
     </div>
-</header><div class="flex-1 overflow-y-auto overflow-x-hidden p-6 w-full scrollbar-thin scrollbar-thumb-zinc-700 scrollbar-track-transparent">_layout<main class="h-full"><div class="w-full h-full flex flex-col">
+</header><div class="flex-1 overflow-y-auto overflow-x-hidden p-6 w-full scrollbar-thin scrollbar-thumb-zinc-700 scrollbar-track-transparent"><main class="h-full"><div class="w-full h-full flex flex-col">
     <!-- Header -->
     <div class="flex items-center justify-between mb-6">
         <div>
@@ -6249,6 +6249,1003 @@
     </div>
     <script src="/scripts/warp.js?k= "></script>
 </div></div><footer
+    class="flex items-center justify-between px-6 py-3 bg-zinc-950/90 border-t border-zinc-800/50 text-xs text-zinc-500">
+    <div class="flex items-center gap-4">
+        <div class="flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-teal-500 animate-pulse"></span>
+            <span>System Online</span>
+        </div>
+        <div class="flex items-center gap-2">
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <span>Last sync: just now</span>
+        </div>
+    </div>
+
+    <div class="flex gap-4">
+        <a href="#" class="hover:text-teal-400 transition-colors">Documentation</a>
+        <a href="#" class="hover:text-teal-400 transition-colors">GitHub</a>
+        <span class="text-zinc-600">v1.0.0</span>
+    </div>
+</footer></main><div id="search-modal" class="hidden fixed inset-0 z-50 overflow-y-auto" role="dialog" aria-modal="true">
+
+    <div id="search-backdrop"
+         class="fixed inset-0 bg-black/60 backdrop-blur-sm transition-opacity duration-300 opacity-0" aria-hidden="true"
+         onclick="closeSearch()"></div>
+
+    <div class="flex min-h-full items-start justify-center p-4 text-center sm:p-0 mt-20">
+        <div id="search-panel"
+             class="relative transform overflow-hidden rounded-xl bg-zinc-900 border border-zinc-800 text-left shadow-2xl transition-all duration-300 scale-95 opacity-0 sm:w-full sm:max-w-2xl ring-1 ring-white/10">
+            <div class="relative flex items-center border-b border-zinc-800/50 p-4 sticky top-0 bg-zinc-900 z-10">
+                <svg class="h-6 w-6 text-teal-500 pointer-events-none transition-colors duration-200" fill="none"
+                     viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                </svg>
+                <input type="text" id="search-input"
+                       class="h-full w-full bg-transparent border-0 focus:ring-0 focus:outline-none text-zinc-100 placeholder-zinc-500 pl-4 text-lg font-medium"
+                       placeholder="Search settings, commands, pages..." autocomplete="off">
+                <div class="ml-auto flex items-center gap-2">
+                    <span class="text-xs text-zinc-500 font-medium">ESC</span>
+                </div>
+            </div>
+
+
+            <div id="search-results"
+                 class="max-h-[60vh] overflow-y-auto scrollbar-thin scrollbar-thumb-zinc-700 scrollbar-track-zinc-900">
+                <div id="search-empty" class="hidden py-16 text-center">
+                    <svg class="mx-auto h-12 w-12 text-zinc-700 mb-4" fill="none" viewBox="0 0 24 24"
+                         stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                              d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                    <p class="text-zinc-500 text-sm">No results found.</p>
+                </div>
+                <div id="search-list" class="p-2 space-y-1">
+                </div>
+            </div>
+
+            <div
+                    class="bg-zinc-900/80 px-4 py-2.5 border-t border-zinc-800/50 flex justify-between items-center text-xs text-zinc-500 select-none">
+                <div class="flex gap-4">
+                    <span class="flex items-center gap-1.5"><kbd
+                            class="font-sans bg-zinc-800 border border-zinc-700 rounded px-1 min-w-[1.2rem] text-center">↑↓</kbd>
+                        navigate</span>
+                    <span class="flex items-center gap-1.5"><kbd
+                            class="font-sans bg-zinc-800 border border-zinc-700 rounded px-1 min-w-[1.2rem] text-center">↵</kbd>
+                        select</span>
+                </div>
+                <div class="text-zinc-600">ArchBoard Config</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script src="https://cdn.jsdelivr.net/npm/fuse.js@6.6.2"></script>
+
+<script>
+    const searchIndex =  ;
+    let fuse;
+    let selectedIndex = 0;
+    const modal = document.getElementById('search-modal');
+    const backdrop = document.getElementById('search-backdrop');
+    const panel = document.getElementById('search-panel');
+    const input = document.getElementById('search-input');
+    const list = document.getElementById('search-list');
+    const empty = document.getElementById('search-empty');
+    function initSearch() {
+        const options = {
+            includeScore: true,
+            distance: 100,
+            threshold: 0.3,
+            keys: [
+                {name: 'title', weight: 0.5},
+                {name: 'description', weight: 0.3},
+                {name: 'keywords', weight: 0.4},
+                {name: 'category', weight: 0.1}
+            ]
+        };
+        fuse = new Fuse(searchIndex, options);
+    }
+
+
+    function openSearch() {
+        modal.classList.remove('hidden');
+
+        requestAnimationFrame(() => {
+            backdrop.classList.remove('opacity-0');
+            panel.classList.remove('scale-95', 'opacity-0');
+            panel.classList.add('scale-100', 'opacity-100');
+        });
+
+        input.value = '';
+        renderResults([]);
+        input.focus();
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeSearch() {
+
+        backdrop.classList.add('opacity-0');
+        panel.classList.remove('scale-100', 'opacity-100');
+        panel.classList.add('scale-95', 'opacity-0');
+
+        setTimeout(() => {
+            modal.classList.add('hidden');
+            document.body.style.overflow = '';
+        }, 300);
+    }
+
+
+    document.addEventListener('keydown', (e) => {
+        if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+            e.preventDefault();
+            if (modal.classList.contains('hidden')) {
+                openSearch();
+            } else {
+                closeSearch();
+            }
+        }
+
+        if (e.key === 'Escape' && !modal.classList.contains('hidden')) {
+            closeSearch();
+        }
+
+        if (!modal.classList.contains('hidden')) {
+            const items = list.querySelectorAll('.search-item');
+            if (items.length === 0) return;
+
+            if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                selectedIndex = (selectedIndex + 1) % items.length;
+                updateSelection(items);
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                selectedIndex = (selectedIndex - 1 + items.length) % items.length;
+                updateSelection(items);
+            } else if (e.key === 'Enter') {
+                e.preventDefault();
+                const selected = items[selectedIndex];
+                if (selected) {
+                    selected.click();
+                }
+            }
+        }
+    });
+
+
+    input.addEventListener('input', (e) => {
+        const query = e.target.value;
+        if (!query) {
+            renderResults([]);
+            return;
+        }
+
+        const results = fuse.search(query);
+
+        renderResults(results.slice(0, 20).map(r => r.item));
+    });
+
+
+    function renderResults(items) {
+        list.innerHTML = '';
+        selectedIndex = 0;
+
+        if (items.length === 0 && input.value) {
+            empty.classList.remove('hidden');
+            return;
+        }
+
+        empty.classList.add('hidden');
+
+        if (items.length === 0 && !input.value) {
+            return;
+        }
+
+        items.forEach((item, index) => {
+            const div = document.createElement('div');
+
+            div.className = `search-item group flex cursor-pointer select-none items-start gap-4 rounded-lg px-4 py-3 transition-colors duration-200`;
+
+            div.onclick = () => {
+                let url = item.url;
+                if (item.selector) {
+                    const separator = url.includes('?') ? '&' : '?';
+                    url += `${separator}highlight=${encodeURIComponent(item.selector)}`;
+                }
+                window.location.href = url;
+            };
+
+            const isFirst = index === 0;
+
+
+
+            div.innerHTML = `
+                <div class="mt-1 flex-none text-zinc-500 group-hover:text-teal-400 transition-colors">
+                   ${getCategoryIcon(item.category)}
+                </div>
+                <div class="flex-auto overflow-hidden">
+                    <div class="flex items-center gap-2 mb-0.5">
+                        <span class="inline-flex items-center rounded-md bg-zinc-800/50 border border-zinc-700/50 px-1.5 py-0.5 text-[10px] font-medium text-zinc-400 uppercase tracking-wider group-hover:border-teal-500/30 group-hover:text-teal-400 transition-colors">
+                            ${item.category}
+                        </span>
+                    </div>
+                    <div class="truncate font-semibold text-sm text-zinc-200 group-hover:text-teal-400 pl-0.5">${item.title}</div>
+                    ${item.description ? `<div class="mt-0.5 truncate text-xs text-zinc-500 pl-0.5 group-hover:text-zinc-400">${item.description}</div>` : ''}
+                </div>
+            `;
+            list.appendChild(div);
+        });
+
+        if (list.children.length > 0) {
+            updateSelection(list.querySelectorAll('.search-item'));
+        }
+    }
+
+    function getCategoryIcon(category) {
+
+        if (category.toLowerCase().includes('hyprland')) return `<svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 10l-2 1m0 0l-2-1m2 1v2.5M20 7l-2 1m2-1l-2-1m2 1v2.5M14 4l-2-1-2 1M4 7l2-1M4 7l2 1M4 7v2.5M12 21l-2-1m2 1l2-1m-2 1v-2.5M6 18l-2-1v-2.5M18 18l2-1v-2.5" /></svg>`;
+        return `<svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>`;
+    }
+
+    function updateSelection(items) {
+        items.forEach((item, index) => {
+            if (index === selectedIndex) {
+                item.classList.add('bg-zinc-800');
+                item.classList.remove('hover:bg-zinc-800');
+
+                const title = item.querySelector('.text-zinc-200');
+                if (title) title.classList.add('text-teal-400');
+
+                item.scrollIntoView({block: 'nearest'});
+            } else {
+                item.classList.remove('bg-zinc-800');
+                item.classList.add('hover:bg-zinc-800/50');
+
+                const title = item.querySelector('.text-zinc-200');
+                if (title) title.classList.remove('text-teal-400');
+            }
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', initSearch);
+</script><div id="modal-overlay" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-200 [&.active]:opacity-100 [&.active]:pointer-events-auto" onclick="closeModal()"><div id="modal-content" class="bg-zinc-900 border border-zinc-800 rounded-xl p-6 w-full max-w-md shadow-2xl transform scale-95 transition-transform duration-200 [&.active]:scale-100" onclick="event.stopPropagation()"></div></div><div id="toast-container" class="fixed bottom-6 right-6 flex flex-col gap-2 z-[9999] pointer-events-none"></div><script src="/scripts/main.js?k= " defer></script><script src="/scripts/api.js?k= " defer></script></body></html>
+<html><head><title> </title><meta name="description" content=" " /><meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" /><link rel="preconnect" href="https://fonts.googleapis.com" /><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin /><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" /><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" /><link rel="stylesheet" href="/tailwind.css?k= " /><script src="/scripts/local_settings.js?k= " defer></script><script src="/scripts/renderer.js?k= "></script><script src="/scripts/utils.js?k= " defer></script><script src="/scripts/image_picker.js?k= " defer></script><script src="/scripts/preset_manager.js?k= " defer></script><script src="/scripts/font_manager.js?k= " defer></script><script src="/scripts/font_picker.js?k= " defer></script><script>const prod =  ;const plugin_enabled =  ;</script></head><body class="flex h-screen overflow-hidden bg-zinc-950 text-zinc-100 font-sans"><aside
+        class="w-64 h-screen bg-zinc-900 text-zinc-400 border-r border-zinc-800/50 flex flex-col flex-shrink-0 select-none">
+
+
+    <div class="h-14 flex items-center px-5 border-b border-zinc-800/30">
+        <svg class="w-5 h-5 text-teal-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M14 10l-2 1m0 0l-2-1m2 1v2.5M20 7l-2 1m2-1l-2-1m2 1v2.5M14 4l-2-1-2 1M4 7l2-1M4 7l2 1M4 7v2.5M12 21l-2-1m2 1l2-1m-2 1v-2.5M6 18l-2-1v-2.5M18 18l2-1v-2.5">
+            </path>
+        </svg>
+        <span class="text-base font-semibold text-zinc-100">ArchBoard</span>
+    </div>
+
+
+    <nav id="sidebar-nav" class="flex-1 overflow-y-auto py-3 px-3 space-y-1">
+
+        <div class="text-zinc-500 text-sm px-2">Loading...</div>
+    </nav>
+
+
+    <div class="border-t border-zinc-800/30 p-3">
+        <div class="flex items-center gap-2">
+            <div id="user-avatar"
+                 class="w-7 h-7 rounded-full bg-gradient-to-br from-teal-500 to-teal-600 flex items-center justify-center text-white text-xs font-medium">
+                ?
+            </div>
+            <div class="flex flex-col">
+                <span id="user-name" class="text-xs font-medium text-zinc-200">...</span>
+                <span id="user-host" class="text-xs text-zinc-500">...@arch</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const archboardNav =  ;
+        const currentPage = ' ';
+        const username = ' ';
+
+        const icons = {
+            dashboard: `<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+      </svg>`,
+            system: `<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 01-2 2v4a2 2 0 012 2h14a2 2 0 012-2v-4a2 2 0 01-2-2m-2-4h.01M17 16h.01" />
+      </svg>`,
+            config: `<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+      </svg>`,
+            default: `<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+      </svg>`,
+            hyprland: `<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z" />
+      </svg>`,
+            waybar: `<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M4 14h16M4 14v-4M8 14v-2M12 14v-4M16 14v-2M20 14v-4" />
+      </svg>`,
+            hyprlock: `<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+      </svg>`,
+            hypridle: `<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+      </svg>`,
+            wpaperd: `<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+      </svg>`,
+            bulb: `<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 18h6M12 3a6 6 0 00-3 11.196V16a3 3 0 003 3 3 3 0 003-3v-1.804A6 6 0 0012 3z" />
+      </svg>`,
+            menu: `<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+      </svg>`
+        };
+
+        function renderSidebar() {
+            const nav = document.getElementById('sidebar-nav');
+            let html = '';
+
+            archboardNav.forEach(item => {
+                if (item.type === 'item') {
+                    const isActive = currentPage === item.id;
+                    const icon = item.icon_svg || icons[item.icon] || icons.default;
+                    html += `<a href="${item.url}" class="flex items-center gap-2 px-3 py-2 rounded-md text-sm transition-all duration-150 cursor-pointer border-none hover:bg-white/5 hover:text-zinc-100 ${isActive ? 'bg-teal-500/10 text-teal-500 font-medium' : 'text-zinc-400 bg-transparent'}">${icon}${item.title}</a>`;
+                } else if (item.type === 'group') {
+                    const isExpanded = item.item_ids && item.item_ids.includes(currentPage);
+                    const icon = item.icon_svg || icons[item.icon] || icons.menu;
+                    const arrowClass = isExpanded ? 'rotate-90' : '';
+                    const menuClass = isExpanded ? '' : 'hidden';
+
+                    html += `
+            <div class="pt-2">
+              <button onclick="toggleSection('${item.id}-menu', '${item.id}-arrow')" class="flex items-center justify-between w-full gap-2 px-3 py-2 rounded-md text-sm transition-all duration-150 cursor-pointer border-none hover:bg-white/5 hover:text-zinc-100 text-zinc-400 bg-transparent">
+                <div class="flex items-center gap-2">${icon}${item.title}</div>
+                <svg id="${item.id}-arrow" class="w-3 h-3 transition-transform duration-200 ${arrowClass}" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                </svg>
+              </button>
+              <div id="${item.id}-menu" class="${menuClass} pl-6 mt-1 space-y-1">
+                ${item.items.map(sub => {
+                        const subActive = currentPage === sub.id;
+                        const subIcon = sub.icon_svg || icons[sub.icon] || icons.default;
+                        return `<a href="${sub.url}" class="flex items-center gap-2 pl-10 pr-3 py-2 text-sm rounded-md transition-all duration-150 border-none hover:text-zinc-100 hover:bg-white/5 ${subActive ? 'text-teal-500 bg-white/5 font-medium' : 'text-zinc-500 bg-transparent'}">
+              ${subIcon}
+              ${sub.title}
+            </a>`;
+                    }).join('')}
+              </div>
+            </div>`;
+                }
+            });
+
+            nav.innerHTML = html;
+        }
+
+        function toggleSection(menuId, arrowId) {
+            const menu = document.getElementById(menuId);
+            const arrow = document.getElementById(arrowId);
+            if (menu.classList.contains('hidden')) {
+                menu.classList.remove('hidden');
+                arrow.classList.add('rotate-90');
+            } else {
+                menu.classList.add('hidden');
+                arrow.classList.remove('rotate-90');
+            }
+        }
+
+        function getFirstNavUrl() {
+            if (!archboardNav || archboardNav.length === 0) return null;
+            const first = archboardNav[0];
+            if (first.type === 'item') {
+                return first.url;
+            } else if (first.type === 'group' && first.items && first.items.length > 0) {
+                return first.items[0].url;
+            }
+            return null;
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('user-avatar').textContent = username[0].toUpperCase();
+            document.getElementById('user-name').textContent = username;
+            document.getElementById('user-host').textContent = username + '@localhost';
+            renderSidebar();
+            if (window.location.pathname === '/' && currentPage === 'home') {
+                const homeItem = archboardNav.find(n => n.type === 'item' && n.id === 'home');
+                if (!homeItem) {
+                    const firstUrl = getFirstNavUrl();
+                    if (firstUrl && firstUrl !== '/') {
+                        window.location.href = firstUrl;
+                    }
+                }
+            }
+        });
+    </script>
+</aside><main class="flex flex-col flex-1 overflow-hidden min-w-0"><header class="flex items-center justify-between px-6 py-4 bg-zinc-950/80 border-b border-zinc-800/50">
+    <div class="flex items-center gap-3 text-zinc-100">
+        <svg class="w-5 h-5 text-teal-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+        </svg>
+        <span class="text-lg font-medium">Dashboard</span>
+    </div>
+
+    <div class="flex items-center gap-3">
+        <div onclick="openSearch()"
+            class="flex items-center gap-2 px-3 py-2 bg-zinc-900 border border-zinc-800 rounded-lg text-zinc-500 text-sm hover:border-teal-500 transition-colors cursor-pointer">
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+            <span>Search...</span>
+            <kbd class="text-xs px-1.5 py-0.5 bg-zinc-800 rounded text-zinc-400">⌘K</kbd>
+        </div>
+
+        <button class="p-2 rounded-lg text-zinc-400 hover:bg-zinc-900 hover:text-teal-400 transition-colors"
+            title="Notifications">
+            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+            </svg>
+        </button>
+
+        <button class="p-2 rounded-lg text-zinc-400 hover:bg-zinc-900 hover:text-teal-400 transition-colors"
+            title="Settings">
+            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+        </button>
+    </div>
+</header><div class="flex-1 overflow-y-auto overflow-x-hidden p-6 w-full scrollbar-thin scrollbar-thumb-zinc-700 scrollbar-track-transparent"><main class="h-full"><div class="p-6 space-y-6">
+
+    <div class="flex items-center justify-between">
+        <div>
+            <h1 class="text-2xl font-bold text-zinc-100">Themes</h1>
+            <p class="text-zinc-400">Manage and share your system configuration bundles.</p>
+        </div>
+
+        <div class="flex gap-3">
+            <button onclick="document.getElementById('theme-upload').click()"
+                class="px-4 py-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 rounded-lg flex items-center gap-2 transition-colors">
+                <i class="fa-solid fa-upload"></i> Import Theme
+            </button>
+
+            <input type="file" id="theme-upload" accept=".zip" class="hidden" onchange="importTheme(this.files[0])">
+
+            <button onclick="openCreateModal()"
+                class="px-4 py-2 bg-teal-600 hover:bg-teal-500 text-white rounded-lg flex items-center gap-2 transition-colors">
+                <i class="fa-solid fa-plus"></i> Create Theme
+            </button>
+        </div>
+    </div>
+
+    <div id="themes-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <!-- Themes will be rendered here -->
+        <div class="col-span-full text-center py-12 text-zinc-500">
+            <i class="fa-solid fa-circle-notch fa-spin text-2xl mb-2"></i>
+            Loading themes...
+        </div>
+    </div>
+
+    <!-- Create/Edit Theme Modal -->
+    <div id="theme-modal"
+        class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-200 [&.active]:opacity-100 [&.active]:pointer-events-auto"
+        onclick="closeThemeModal()">
+        <div class="bg-zinc-900 border border-zinc-800 rounded-xl w-full max-w-2xl max-h-[80vh] flex flex-col shadow-2xl transform scale-95 transition-transform duration-200 [&.active]:scale-100"
+            onclick="event.stopPropagation()">
+
+            <div class="p-6 border-b border-zinc-800 flex justify-between items-center">
+                <h2 id="modal-title" class="text-xl font-bold text-zinc-100">Create New Theme</h2>
+                <button onclick="closeThemeModal()" class="text-zinc-400 hover:text-white">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <div class="p-6 overflow-y-auto space-y-6">
+                <input type="hidden" id="theme-id">
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-zinc-400 mb-2">Theme Name</label>
+                        <input type="text" id="theme-name" placeholder="My Awesome Theme"
+                            class="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-4 py-2 text-zinc-100 focus:outline-none focus:border-teal-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-zinc-400 mb-2">Author</label>
+                        <input type="text" id="theme-author" placeholder="You"
+                            class="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-4 py-2 text-zinc-100 focus:outline-none focus:border-teal-500">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-zinc-400 mb-2">Description</label>
+                    <textarea id="theme-desc" placeholder="What's in this bundle?"
+                        class="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-4 py-2 text-zinc-100 focus:outline-none focus:border-teal-500 h-20 resize-none"></textarea>
+                </div>
+
+                <div>
+                    <h3 class="text-sm font-medium text-zinc-400 mb-3 uppercase tracking-wider">Dependencies</h3>
+                    <div id="dependencies-list" class="space-y-2 mb-2">
+                        <!-- Dependencies inputs -->
+                    </div>
+                    <button onclick="addDependencyRow()"
+                        class="text-sm text-teal-400 hover:text-teal-300 flex items-center gap-1">
+                        <i class="fa-solid fa-plus"></i> Add Dependency
+                    </button>
+                </div>
+
+                <div>
+                    <h3 class="text-sm font-medium text-zinc-400 mb-3 uppercase tracking-wider">Include Presets</h3>
+                    <div id="preset-selectors" class="space-y-4">
+                        <!-- Preset selectors will be injected here -->
+                        <div class="text-center text-zinc-500 py-4">
+                            Loading presets...
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="p-6 border-t border-zinc-800 flex justify-end gap-3">
+                <button onclick="closeThemeModal()"
+                    class="px-4 py-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 rounded-lg">Cancel</button>
+                <button id="modal-submit-btn" onclick="saveTheme()"
+                    class="px-4 py-2 bg-teal-600 hover:bg-teal-500 text-white rounded-lg">Create Theme</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Export Options Modal -->
+    <div id="export-modal"
+        class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-200 [&.active]:opacity-100 [&.active]:pointer-events-auto"
+        onclick="closeExportModal()">
+        <div class="bg-zinc-900 border border-zinc-800 rounded-xl w-full max-w-md flex flex-col shadow-2xl transform scale-95 transition-transform duration-200 [&.active]:scale-100"
+            onclick="event.stopPropagation()">
+            <div class="p-6 border-b border-zinc-800 flex justify-between items-center">
+                <h2 class="text-xl font-bold text-zinc-100">Export Theme</h2>
+                <button onclick="closeExportModal()" class="text-zinc-400 hover:text-white">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <div class="p-6 space-y-4">
+                <p class="text-zinc-400 text-sm">Select which components to include in the export package.</p>
+                <input type="hidden" id="export-theme-id">
+                <div id="export-presets-list" class="space-y-2">
+                    <!-- Checkboxes -->
+                </div>
+            </div>
+
+            <div class="p-6 border-t border-zinc-800 flex justify-end gap-3">
+                <button onclick="closeExportModal()"
+                    class="px-4 py-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 rounded-lg">Cancel</button>
+                <button onclick="performExport()"
+                    class="px-4 py-2 bg-teal-600 hover:bg-teal-500 text-white rounded-lg flex items-center gap-2">
+                    <i class="fa-solid fa-download"></i> Download Zip
+                </button>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    const TOOLS = ["hyprland", "waybar", "hyprlock", "hypridle", "wpaperd", "gammastep"];
+    let availablePresets = {};
+    let currentThemes = [];
+
+    async function loadThemes() {
+        try {
+            const res = await fetch('/themes/list');
+            currentThemes = await res.json();
+            renderThemes(currentThemes);
+        } catch (e) {
+            console.error(e);
+            showToast('Failed to load themes', 'error');
+        }
+    }
+
+    function renderThemes(themes) {
+        const grid = document.getElementById('themes-grid');
+        if (themes.length === 0) {
+            grid.innerHTML = `
+                <div class="col-span-full text-center py-12 text-zinc-500 bg-zinc-900/50 rounded-xl border border-zinc-800 border-dashed">
+                    <div class="text-4xl mb-4">🎨</div>
+                    <h3 class="text-lg font-medium text-zinc-300 mb-2">No themes found</h3>
+                    <p class="text-zinc-500">Create a bundle from your presets or import one.</p>
+                </div>
+            `;
+            return;
+        }
+
+        grid.innerHTML = themes.map(theme => `
+            <div class="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden hover:border-zinc-700 transition-all hover:shadow-lg group flex flex-col">
+                <div class="p-6 flex-1">
+                    <div class="flex justify-between items-start mb-4">
+                        <div>
+                            <h3 class="text-lg font-bold text-zinc-100 mb-1">${theme.name}</h3>
+                            <div class="text-xs text-zinc-500 flex gap-2">
+                                <span><i class="fa-regular fa-user mr-1"></i> ${theme.author}</span>
+                                <span><i class="fa-regular fa-clock mr-1"></i> ${new Date(theme.updated_at).toLocaleDateString()}</span>
+                            </div>
+                        </div>
+                        <div class="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                             <button onclick="openExportModal('${theme.id}')" class="p-2 text-zinc-400 hover:text-white hover:bg-zinc-800 rounded-lg transition-colors" title="Export">
+                                <i class="fa-solid fa-download"></i>
+                            </button>
+                            <button onclick="openEditModal('${theme.id}')" class="p-2 text-zinc-400 hover:text-teal-400 hover:bg-zinc-800 rounded-lg transition-colors" title="Edit">
+                                <i class="fa-solid fa-pen"></i>
+                            </button>
+                            <button onclick="deleteTheme('${theme.id}')" class="p-2 text-zinc-400 hover:text-red-400 hover:bg-zinc-800 rounded-lg transition-colors" title="Delete">
+                                <i class="fa-solid fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <p class="text-zinc-400 text-sm mb-4 line-clamp-2">${theme.description}</p>
+                    
+                    ${theme.dependencies && theme.dependencies.length > 0 ? `
+                    <div class="mb-4">
+                         <div class="text-xs font-medium text-zinc-500 uppercase tracking-wider mb-1">Requires</div>
+                         <div class="text-xs text-zinc-400 flex flex-wrap gap-x-3 gap-y-1">
+                            ${theme.dependencies.map(d => `<span><i class="fa-solid fa-wrench text-zinc-600 mr-1"></i>${d}</span>`).join('')}
+                         </div>
+                    </div>
+                    ` : ''}
+
+                    <div class="space-y-2 mb-4">
+                        <div class="text-xs font-medium text-zinc-500 uppercase tracking-wider mb-2">Includes</div>
+                        <div class="flex flex-wrap gap-2">
+                            ${Object.keys(theme.presets).map(tool => `
+                                <span class="px-2 py-1 bg-zinc-800 text-zinc-400 text-xs rounded border border-zinc-700">
+                                    ${tool}
+                                </span>
+                            `).join('')}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="p-4 border-t border-zinc-800 bg-zinc-900/50">
+                    <button onclick="applyTheme('${theme.id}')" class="w-full py-2 bg-zinc-800 hover:bg-teal-600 hover:text-white text-zinc-300 rounded-lg transition-all font-medium flex items-center justify-center gap-2 group-apply">
+                        <span>Apply Theme</span>
+                        <i class="fa-solid fa-arrow-right opacity-0 -ml-4 group-apply-hover:opacity-100 group-apply-hover:ml-0 transition-all"></i>
+                    </button>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    async function applyTheme(id) {
+        if (!confirm('Apply this theme? This will overwrite your active configuration.')) return;
+
+        try {
+            showToast('Applying theme...', 'info');
+            const res = await fetch(`/themes/${id}/apply`, { method: 'POST' });
+            const data = await res.json();
+
+            if (data.success) {
+                showToast('Theme applied successfully!', 'success');
+            } else {
+                showToast('Failed to apply some presets', 'warning');
+            }
+        } catch (e) {
+            console.error(e);
+            showToast('Error applying theme', 'error');
+        }
+    }
+
+    async function deleteTheme(id) {
+        if (!confirm('Delete this theme? This cannot be undone.')) return;
+
+        try {
+            const res = await fetch(`/themes/${id}`, { method: 'DELETE' });
+            if (res.ok) {
+                showToast('Theme deleted', 'success');
+                loadThemes();
+            } else {
+                showToast('Failed to delete theme', 'error');
+            }
+        } catch (e) {
+            showToast('Error deleting theme', 'error');
+        }
+    }
+
+    async function importTheme(file) {
+        if (!file) return;
+
+        const formData = new FormData();
+        formData.append('file', file);
+
+        try {
+            showToast('Importing theme...', 'info');
+            const res = await fetch('/themes/import', {
+                method: 'POST',
+                body: formData
+            });
+
+            if (res.ok) {
+                showToast('Theme imported successfully!', 'success');
+                loadThemes();
+                document.getElementById('theme-upload').value = '';
+            } else {
+                const err = await res.json();
+                showToast(err.detail || 'Import failed', 'error');
+            }
+        } catch (e) {
+            console.error(e);
+            showToast('Error importing theme', 'error');
+        }
+    }
+
+    // --- Modal Logic (Create/Edit) ---
+
+    function openCreateModal() {
+        resetModal();
+        document.getElementById('modal-title').textContent = 'Create New Theme';
+        document.getElementById('modal-submit-btn').textContent = 'Create Theme';
+        document.getElementById('theme-id').value = '';
+
+        document.getElementById('theme-modal').classList.add('active');
+        document.getElementById('theme-modal').querySelector('div').classList.add('active');
+        loadPresetOptions(); // Load empty/default options
+    }
+
+    function openEditModal(id) {
+        const theme = currentThemes.find(t => t.id === id);
+        if (!theme) return;
+
+        resetModal();
+        document.getElementById('modal-title').textContent = 'Edit Theme';
+        document.getElementById('modal-submit-btn').textContent = 'Save Changes';
+        document.getElementById('theme-id').value = theme.id;
+
+        document.getElementById('theme-name').value = theme.name;
+        document.getElementById('theme-author').value = theme.author;
+        document.getElementById('theme-desc').value = theme.description;
+
+        // Dependencies
+        if (theme.dependencies) {
+            theme.dependencies.forEach(dep => addDependencyRow(dep));
+        }
+
+        document.getElementById('theme-modal').classList.add('active');
+        document.getElementById('theme-modal').querySelector('div').classList.add('active');
+        loadPresetOptions(theme.presets); // Pre-select presets
+    }
+
+    function closeThemeModal() {
+        const modal = document.getElementById('theme-modal');
+        modal.classList.remove('active');
+        modal.querySelector('div').classList.remove('active');
+    }
+
+    function resetModal() {
+        document.getElementById('theme-name').value = '';
+        document.getElementById('theme-author').value = '';
+        document.getElementById('theme-desc').value = '';
+        document.getElementById('dependencies-list').innerHTML = '';
+        document.getElementById('preset-selectors').innerHTML = '';
+    }
+
+    function addDependencyRow(value = '') {
+        const div = document.createElement('div');
+        div.className = 'flex gap-2';
+        div.innerHTML = `
+            <input type="text" value="${value}" placeholder="e.g. rofi, nerd-fonts" class="flex-1 bg-zinc-800 border border-zinc-700 rounded px-3 py-1.5 text-zinc-100 text-sm outline-none focus:border-teal-500 dep-input">
+            <button onclick="this.parentElement.remove()" class="text-zinc-500 hover:text-red-400 px-2 transition-colors"><i class="fa-solid fa-trash"></i></button>
+        `;
+        document.getElementById('dependencies-list').appendChild(div);
+    }
+
+    async function loadPresetOptions(selectedPresets = {}) {
+        const container = document.getElementById('preset-selectors');
+        container.innerHTML = '<div class="text-center text-zinc-500 py-4"><i class="fa-solid fa-circle-notch fa-spin"></i> Loading presets...</div>';
+
+        availablePresets = {};
+        let html = '';
+
+        for (const tool of TOOLS) {
+            try {
+                const res = await fetch(`/presets/${tool}`);
+                const data = await res.json();
+                availablePresets[tool] = data.presets;
+
+                if (data.presets.length > 0) {
+                    const activeId = selectedPresets[tool] || data.active_preset;
+                    // If editing, we want to select what's in the theme, otherwise active. 
+                    // But if selectedPresets is passed (edit mode), use that.
+                    // If create mode, use active.
+                    // The logic above serves both if selectedPresets is empty object for create mode (undefined lookup).
+                    // Actually for create mode, we might want to default to active? Yes.
+
+                    const valueToSelect = selectedPresets[tool] !== undefined ? selectedPresets[tool] : data.active_preset;
+
+                    html += `
+                        <div class="flex items-center gap-4 p-3 bg-zinc-800/50 rounded-lg border border-zinc-800">
+                            <div class="w-24 font-medium text-zinc-300 capitalize">${tool}</div>
+                            <select id="preset-select-${tool}" class="flex-1 bg-zinc-900 border border-zinc-700 rounded px-3 py-1.5 text-zinc-100 text-sm outline-none focus:border-teal-500">
+                                <option value="">(Don't include)</option>
+                                ${data.presets.map(p => `
+                                    <option value="${p.id}" ${p.id === valueToSelect ? 'selected' : ''}>${p.name} ${p.id === data.active_preset ? '(Active)' : ''}</option>
+                                `).join('')}
+                            </select>
+                        </div>
+                    `;
+                }
+            } catch (e) {
+                console.error(`Failed to load presets for ${tool}`, e);
+            }
+        }
+
+        if (html === '') {
+            html = '<div class="text-center text-amber-500 py-2">No presets found. Create presets in tool settings first.</div>';
+        }
+
+        container.innerHTML = html;
+    }
+
+    async function saveTheme() {
+        const id = document.getElementById('theme-id').value;
+        const name = document.getElementById('theme-name').value;
+        const author = document.getElementById('theme-author').value;
+        const desc = document.getElementById('theme-desc').value;
+
+        // Collect dependencies
+        const dependencies = Array.from(document.querySelectorAll('.dep-input'))
+            .map(input => input.value.trim())
+            .filter(val => val !== '');
+
+        // Collect presets
+        const presets = {};
+        for (const tool of TOOLS) {
+            const select = document.getElementById(`preset-select-${tool}`);
+            if (select && select.value) {
+                presets[tool] = select.value;
+            }
+        }
+
+        if (!name) {
+            showToast('Please enter a theme name', 'warning');
+            return;
+        }
+
+        if (Object.keys(presets).length === 0) {
+            showToast('Please select at least one preset', 'warning');
+            return;
+        }
+
+        const payload = {
+            name,
+            description: desc,
+            author,
+            presets,
+            dependencies
+        };
+
+        try {
+            let res;
+            if (id) {
+                // Update
+                res = await fetch(`/themes/${id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+            } else {
+                // Create
+                res = await fetch('/themes', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+            }
+
+            if (res.ok) {
+                showToast(id ? 'Theme updated!' : 'Theme created!', 'success');
+                closeThemeModal();
+                loadThemes();
+            } else {
+                showToast('Failed to save theme', 'error');
+            }
+        } catch (e) {
+            console.error(e);
+            showToast('Error saving theme', 'error');
+        }
+    }
+
+    // --- Export Modal Logic ---
+
+    function openExportModal(id) {
+        const theme = currentThemes.find(t => t.id === id);
+        if (!theme) return;
+
+        document.getElementById('export-theme-id').value = id;
+        const list = document.getElementById('export-presets-list');
+        list.innerHTML = '';
+
+        if (Object.keys(theme.presets).length === 0) {
+            list.innerHTML = '<div class="text-zinc-500 italic">No presets in this theme?</div>';
+        } else {
+            Object.keys(theme.presets).forEach(tool => {
+                const div = document.createElement('div');
+                div.className = 'flex items-center gap-3 p-2 bg-zinc-800/30 rounded border border-zinc-700/50';
+                div.innerHTML = `
+                    <input type="checkbox" id="export-check-${tool}" value="${tool}" checked class="w-4 h-4 text-teal-600 rounded focus:ring-teal-600 bg-zinc-800 border-zinc-600">
+                    <label for="export-check-${tool}" class="text-zinc-200 capitalize cursor-pointer select-none">${tool}</label>
+                `;
+                list.appendChild(div);
+            });
+        }
+
+        document.getElementById('export-modal').classList.add('active');
+        document.getElementById('export-modal').querySelector('div').classList.add('active');
+    }
+
+    function closeExportModal() {
+        const modal = document.getElementById('export-modal');
+        modal.classList.remove('active');
+        modal.querySelector('div').classList.remove('active');
+    }
+
+    async function performExport() {
+        const id = document.getElementById('export-theme-id').value;
+        const checkboxes = document.querySelectorAll('#export-presets-list input[type="checkbox"]:checked');
+        const include_presets = Array.from(checkboxes).map(cb => cb.value);
+
+        if (include_presets.length === 0) {
+            showToast('Select at least one preset to export', 'warning');
+            return;
+        }
+
+        try {
+            showToast('Preparing download...', 'info');
+
+            const res = await fetch(`/themes/${id}/export`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ include_presets })
+            });
+
+            if (res.ok) {
+                const blob = await res.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `${id}.zip`; // The server might not set Content-Disposition with filename in a way XHR/fetch handles nicely transparently, but we can guess or use existing ID.
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                a.remove();
+                closeExportModal();
+                showToast('Export successful!', 'success');
+            } else {
+                showToast('Export failed', 'error');
+            }
+        } catch (e) {
+            console.error(e);
+            showToast('Error exporting theme', 'error');
+        }
+    }
+
+    // Init
+    loadThemes();
+</script></main></div><footer
     class="flex items-center justify-between px-6 py-3 bg-zinc-950/90 border-t border-zinc-800/50 text-xs text-zinc-500">
     <div class="flex items-center gap-4">
         <div class="flex items-center gap-2">
