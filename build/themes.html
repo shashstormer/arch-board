@@ -357,6 +357,52 @@
         </div>
     </div>
 
+    <!-- Install Dependencies Modal -->
+    <div id="install-deps-modal"
+        class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-200 [&.active]:opacity-100 [&.active]:pointer-events-auto"
+        onclick="closeInstallDepsModal()">
+        <div class="bg-zinc-900 border border-zinc-800 rounded-xl w-full max-w-md flex flex-col shadow-2xl transform scale-95 transition-transform duration-200 [&.active]:scale-100"
+            onclick="event.stopPropagation()">
+            <div class="p-6 border-b border-zinc-800 flex justify-between items-center">
+                <h2 class="text-xl font-bold text-zinc-100">Install Dependencies</h2>
+                <button onclick="closeInstallDepsModal()" class="text-zinc-400 hover:text-white">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <div class="p-6 space-y-4 flex-1 overflow-hidden">
+                <p class="text-zinc-400 text-sm">Select packages to install. The command will be generated below.</p>
+                <div id="install-list" class="space-y-2 overflow-y-auto max-h-[250px] pr-2 custom-scrollbar">
+                </div>
+
+                <div class="mt-4">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-xs text-zinc-500 uppercase tracking-wider font-bold">AUR Helper</span>
+                        <div class="flex gap-1 bg-zinc-800/50 rounded-lg p-0.5">
+                            <button id="btn-yay" onclick="setAurHelper('yay')"
+                                class="px-3 py-1 text-xs rounded-md transition-all font-medium bg-zinc-700 text-white shadow-sm">yay</button>
+                            <button id="btn-paru" onclick="setAurHelper('paru')"
+                                class="px-3 py-1 text-xs rounded-md transition-all font-medium text-zinc-500 hover:text-zinc-300">paru</button>
+                        </div>
+                    </div>
+                    <div
+                        class="bg-zinc-950 border border-zinc-800 rounded-lg p-3 font-mono text-sm text-teal-400 overflow-x-auto">
+                        <code id="install-cmd"># Select packages above</code>
+                    </div>
+                </div>
+            </div>
+
+            <div class="p-6 border-t border-zinc-800 flex justify-end gap-3">
+                <button onclick="closeInstallDepsModal()"
+                    class="px-4 py-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 rounded-lg">Close</button>
+                <button onclick="copyInstallCmd()"
+                    class="px-4 py-2 bg-teal-600 hover:bg-teal-500 text-white rounded-lg flex items-center gap-2">
+                    <i class="fa-solid fa-copy"></i> Copy Command
+                </button>
+            </div>
+        </div>
+    </div>
+
     <div id="github-import-modal"
         class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-200 [&.active]:opacity-100 [&.active]:pointer-events-auto"
         onclick="closeGithubImportModal()">
