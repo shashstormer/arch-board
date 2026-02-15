@@ -456,7 +456,7 @@ class ThemeManager:
                 urllib.request.urlretrieve(download_url, temp_path)
             except Exception:
                 if "main" in download_url:
-                    alt_url = download_url.replace("main", "master")
+                    alt_url = download_url.replace("main", "master", 1)
                     print(f"Retrying with {alt_url}...")
                     urllib.request.urlretrieve(alt_url, temp_path)
                 else:
@@ -522,28 +522,41 @@ class ThemeManager:
                             theme_author = theme_data.get("author", "Unknown")
                             preset_name = f"{theme_data['name']} ({theme_author})"
 
-                            preset_id = manager._generate_unique_id(preset_name)
-
-                            preset_path = manager._get_preset_path(preset_id)
-                            with open(preset_path, 'w') as f:
-                                f.write(content)
-
-                            now = datetime.datetime.now(datetime.UTC).isoformat() + "Z"
-
+                            now = datetime.datetime.now(datetime.timezone.utc).isoformat().replace("+00:00", "Z")
                             p_manifest = manager._load_manifest()
+                            existing_preset_id = existing_theme.presets.get(tool) if existing_theme else None
 
-                            preset_data = {
-                                "id": preset_id,
-                                "name": preset_name,
-                                "description": f"Imported from theme '{theme_data['name']}' by {theme_author}",
-                                "created_at": now,
-                                "updated_at": now,
-                                "is_active": False,
-                                "tool": tool
-                            }
+                            if existing_preset_id:
+                                preset_id = existing_preset_id
+                                preset_path = manager._get_preset_path(preset_id)
+                                with open(preset_path, 'w') as f:
+                                    f.write(content)
+                                for p in p_manifest["presets"]:
+                                    if p["id"] == preset_id:
+                                        p["name"] = preset_name
+                                        p["description"] = f"Imported from theme '{theme_data['name']}' by {theme_author}"
+                                        p["updated_at"] = now
+                                        break
+                                manager._save_manifest(p_manifest)
+                            else:
+                                preset_id = manager._generate_unique_id(preset_name)
+                                preset_path = manager._get_preset_path(preset_id)
+                                with open(preset_path, 'w') as f:
+                                    f.write(content)
 
-                            p_manifest["presets"].append(preset_data)
-                            manager._save_manifest(p_manifest)
+                                preset_data = {
+                                    "id": preset_id,
+                                    "name": preset_name,
+                                    "description": f"Imported from theme '{theme_data['name']}' by {theme_author}",
+                                    "created_at": now,
+                                    "updated_at": now,
+                                    "is_active": False,
+                                    "tool": tool
+                                }
+
+                                p_manifest["presets"].append(preset_data)
+                                manager._save_manifest(p_manifest)
+
                             new_presets_map[tool] = preset_id
 
                         except Exception as e:
