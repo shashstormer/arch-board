@@ -205,7 +205,8 @@
     <div class="flex items-center justify-between mb-6">
         <div>
             <h1 class="text-2xl font-bold text-zinc-100">Awww Wallpaper Daemon</h1>
-            <p class="text-sm text-zinc-500">Configure Wayland wallpaper settings, dynamic transitions & Matugen colors</p>
+            <p class="text-sm text-zinc-500">Configure Wayland wallpaper settings, dynamic transitions & Matugen colors
+            </p>
         </div>
         <div class="flex items-center gap-3">
             <!-- Preset Manager Container -->
@@ -256,7 +257,8 @@
         <div class="w-64 flex flex-col bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden">
             <div class="px-4 py-3 border-b border-zinc-800 bg-zinc-900/80 flex items-center justify-between">
                 <h2 class="text-lg font-semibold text-white">Displays</h2>
-                <button onclick="awwwEditor.addDisplay()" class="text-teal-500 hover:text-teal-400 text-sm font-medium">+ Add</button>
+                <button onclick="awwwEditor.addDisplay()"
+                    class="text-teal-500 hover:text-teal-400 text-sm font-medium">+ Add</button>
             </div>
             <div id="displays-list" class="flex-1 overflow-y-auto p-2 space-y-1">
                 <div class="text-zinc-500 text-center py-10">Loading displays...</div>
@@ -268,7 +270,8 @@
             <div class="px-4 py-3 border-b border-zinc-800 bg-zinc-900/80 flex items-center justify-between">
                 <h2 id="display-title" class="text-lg font-semibold text-white">Select a display</h2>
                 <div id="display-actions" class="hidden">
-                    <button onclick="awwwEditor.deleteCurrentDisplay()" class="text-red-400 hover:text-red-300 text-xs px-2 py-1 rounded bg-red-950/40 border border-red-900/50">Remove</button>
+                    <button onclick="awwwEditor.deleteCurrentDisplay()"
+                        class="text-red-400 hover:text-red-300 text-xs px-2 py-1 rounded bg-red-950/40 border border-red-900/50">Remove</button>
                 </div>
             </div>
             <div id="display-settings" class="flex-1 overflow-y-auto p-6 space-y-6">
@@ -283,7 +286,8 @@
         <div class="w-80 flex flex-col bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden">
             <div class="px-4 py-3 border-b border-zinc-800 bg-zinc-900/80 flex items-center justify-between">
                 <h2 class="text-lg font-semibold text-white">Active Status</h2>
-                <button onclick="awwwEditor.loadCurrent()" title="Refresh" class="text-zinc-400 hover:text-white text-xs">🔄</button>
+                <button onclick="awwwEditor.loadCurrent()" title="Refresh"
+                    class="text-zinc-400 hover:text-white text-xs">🔄</button>
             </div>
             <div id="current-preview" class="flex-1 overflow-y-auto p-4 space-y-4">
                 <div class="text-zinc-500 text-center py-10">Loading status...</div>
@@ -295,17 +299,21 @@
                     <h3 class="text-sm font-semibold text-zinc-200 flex items-center gap-1.5">
                         <span>🎨</span> Matugen Palette (1st Screen)
                     </h3>
-                    <button onclick="awwwEditor.refreshMatugenPalette()" class="text-indigo-400 hover:text-indigo-300 text-xs font-medium">Generate</button>
+                    <button onclick="awwwEditor.refreshMatugenPalette()"
+                        class="text-indigo-400 hover:text-indigo-300 text-xs font-medium">Generate</button>
                 </div>
-                <div id="matugen-swatch-container" class="rounded-lg overflow-hidden border border-zinc-800 bg-zinc-900 aspect-[80/26] flex items-center justify-center">
+                <div id="matugen-swatch-container"
+                    class="rounded-lg overflow-hidden border border-zinc-800 bg-zinc-900 aspect-[80/26] flex items-center justify-center">
                     <span class="text-xs text-zinc-500">Click Generate to preview palette</span>
                 </div>
                 <div class="flex items-center justify-between text-xs gap-2">
-                    <select id="matugen-mode-select" onchange="awwwEditor.refreshMatugenPalette()" class="bg-zinc-900 border border-zinc-700/80 text-zinc-300 rounded px-2 py-1 text-xs">
+                    <select id="matugen-mode-select" onchange="awwwEditor.refreshMatugenPalette()"
+                        class="bg-zinc-900 border border-zinc-700/80 text-zinc-300 rounded px-2 py-1 text-xs">
                         <option value="dark">Dark Mode</option>
                         <option value="light">Light Mode</option>
                     </select>
-                    <select id="matugen-type-select" onchange="awwwEditor.refreshMatugenPalette()" class="bg-zinc-900 border border-zinc-700/80 text-zinc-300 rounded px-2 py-1 text-xs truncate max-w-[140px]">
+                    <select id="matugen-type-select" onchange="awwwEditor.refreshMatugenPalette()"
+                        class="bg-zinc-900 border border-zinc-700/80 text-zinc-300 rounded px-2 py-1 text-xs truncate max-w-[140px]">
                         <option value="scheme-tonal-spot">Tonal Spot</option>
                         <option value="scheme-vibrant">Vibrant</option>
                         <option value="scheme-expressive">Expressive</option>
@@ -325,8 +333,7 @@
             window.awwwEditor = new AwwwEditor();
         }
     });
-</script>
-</div><footer
+</script></div><footer
     class="flex items-center justify-between px-6 py-3 bg-zinc-950/90 border-t border-zinc-800/50 text-xs text-zinc-500">
     <div class="flex items-center gap-4">
         <div class="flex items-center gap-2">

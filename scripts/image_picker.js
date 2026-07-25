@@ -415,13 +415,33 @@ class ImagePicker {
         if (!menu) return;
 
         menu.classList.remove('hidden');
-        menu.style.left = `${e.clientX}px`;
-        menu.style.top = `${e.clientY}px`;
+
+        const offsetParent = menu.offsetParent;
+        const parentRect = offsetParent ? offsetParent.getBoundingClientRect() : { left: 0, top: 0 };
+
+        let left = e.clientX - parentRect.left;
+        let top = e.clientY - parentRect.top;
+
+        const menuWidth = menu.offsetWidth || 192;
+        const menuHeight = menu.offsetHeight || 80;
+        const parentWidth = parentRect.width || window.innerWidth;
+        const parentHeight = parentRect.height || window.innerHeight;
+
+        if (left + menuWidth > parentWidth) {
+            left = Math.max(0, left - menuWidth);
+        }
+        if (top + menuHeight > parentHeight) {
+            top = Math.max(0, top - menuHeight);
+        }
+
+        menu.style.left = `${left}px`;
+        menu.style.top = `${top}px`;
+
         const close = () => {
             this.closeCtxMenu();
             document.removeEventListener('click', close);
         };
-        document.addEventListener('click', close);
+        setTimeout(() => document.addEventListener('click', close), 10);
     }
 
     closeCtxMenu() {

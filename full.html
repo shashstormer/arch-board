@@ -8210,7 +8210,8 @@
     <div class="flex items-center justify-between mb-6">
         <div>
             <h1 class="text-2xl font-bold text-zinc-100">Awww Wallpaper Daemon</h1>
-            <p class="text-sm text-zinc-500">Configure Wayland wallpaper settings, dynamic transitions & Matugen colors</p>
+            <p class="text-sm text-zinc-500">Configure Wayland wallpaper settings, dynamic transitions & Matugen colors
+            </p>
         </div>
         <div class="flex items-center gap-3">
             <!-- Preset Manager Container -->
@@ -8261,7 +8262,8 @@
         <div class="w-64 flex flex-col bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden">
             <div class="px-4 py-3 border-b border-zinc-800 bg-zinc-900/80 flex items-center justify-between">
                 <h2 class="text-lg font-semibold text-white">Displays</h2>
-                <button onclick="awwwEditor.addDisplay()" class="text-teal-500 hover:text-teal-400 text-sm font-medium">+ Add</button>
+                <button onclick="awwwEditor.addDisplay()"
+                    class="text-teal-500 hover:text-teal-400 text-sm font-medium">+ Add</button>
             </div>
             <div id="displays-list" class="flex-1 overflow-y-auto p-2 space-y-1">
                 <div class="text-zinc-500 text-center py-10">Loading displays...</div>
@@ -8273,7 +8275,8 @@
             <div class="px-4 py-3 border-b border-zinc-800 bg-zinc-900/80 flex items-center justify-between">
                 <h2 id="display-title" class="text-lg font-semibold text-white">Select a display</h2>
                 <div id="display-actions" class="hidden">
-                    <button onclick="awwwEditor.deleteCurrentDisplay()" class="text-red-400 hover:text-red-300 text-xs px-2 py-1 rounded bg-red-950/40 border border-red-900/50">Remove</button>
+                    <button onclick="awwwEditor.deleteCurrentDisplay()"
+                        class="text-red-400 hover:text-red-300 text-xs px-2 py-1 rounded bg-red-950/40 border border-red-900/50">Remove</button>
                 </div>
             </div>
             <div id="display-settings" class="flex-1 overflow-y-auto p-6 space-y-6">
@@ -8288,7 +8291,8 @@
         <div class="w-80 flex flex-col bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden">
             <div class="px-4 py-3 border-b border-zinc-800 bg-zinc-900/80 flex items-center justify-between">
                 <h2 class="text-lg font-semibold text-white">Active Status</h2>
-                <button onclick="awwwEditor.loadCurrent()" title="Refresh" class="text-zinc-400 hover:text-white text-xs">🔄</button>
+                <button onclick="awwwEditor.loadCurrent()" title="Refresh"
+                    class="text-zinc-400 hover:text-white text-xs">🔄</button>
             </div>
             <div id="current-preview" class="flex-1 overflow-y-auto p-4 space-y-4">
                 <div class="text-zinc-500 text-center py-10">Loading status...</div>
@@ -8300,17 +8304,21 @@
                     <h3 class="text-sm font-semibold text-zinc-200 flex items-center gap-1.5">
                         <span>🎨</span> Matugen Palette (1st Screen)
                     </h3>
-                    <button onclick="awwwEditor.refreshMatugenPalette()" class="text-indigo-400 hover:text-indigo-300 text-xs font-medium">Generate</button>
+                    <button onclick="awwwEditor.refreshMatugenPalette()"
+                        class="text-indigo-400 hover:text-indigo-300 text-xs font-medium">Generate</button>
                 </div>
-                <div id="matugen-swatch-container" class="rounded-lg overflow-hidden border border-zinc-800 bg-zinc-900 aspect-[80/26] flex items-center justify-center">
+                <div id="matugen-swatch-container"
+                    class="rounded-lg overflow-hidden border border-zinc-800 bg-zinc-900 aspect-[80/26] flex items-center justify-center">
                     <span class="text-xs text-zinc-500">Click Generate to preview palette</span>
                 </div>
                 <div class="flex items-center justify-between text-xs gap-2">
-                    <select id="matugen-mode-select" onchange="awwwEditor.refreshMatugenPalette()" class="bg-zinc-900 border border-zinc-700/80 text-zinc-300 rounded px-2 py-1 text-xs">
+                    <select id="matugen-mode-select" onchange="awwwEditor.refreshMatugenPalette()"
+                        class="bg-zinc-900 border border-zinc-700/80 text-zinc-300 rounded px-2 py-1 text-xs">
                         <option value="dark">Dark Mode</option>
                         <option value="light">Light Mode</option>
                     </select>
-                    <select id="matugen-type-select" onchange="awwwEditor.refreshMatugenPalette()" class="bg-zinc-900 border border-zinc-700/80 text-zinc-300 rounded px-2 py-1 text-xs truncate max-w-[140px]">
+                    <select id="matugen-type-select" onchange="awwwEditor.refreshMatugenPalette()"
+                        class="bg-zinc-900 border border-zinc-700/80 text-zinc-300 rounded px-2 py-1 text-xs truncate max-w-[140px]">
                         <option value="scheme-tonal-spot">Tonal Spot</option>
                         <option value="scheme-vibrant">Vibrant</option>
                         <option value="scheme-expressive">Expressive</option>
@@ -8330,8 +8338,7 @@
             window.awwwEditor = new AwwwEditor();
         }
     });
-</script>
-</div><footer
+</script></div><footer
     class="flex items-center justify-between px-6 py-3 bg-zinc-950/90 border-t border-zinc-800/50 text-xs text-zinc-500">
     <div class="flex items-center gap-4">
         <div class="flex items-center gap-2">
@@ -9473,13 +9480,33 @@ class ImagePicker {
         if (!menu) return;
 
         menu.classList.remove('hidden');
-        menu.style.left = `${e.clientX}px`;
-        menu.style.top = `${e.clientY}px`;
+
+        const offsetParent = menu.offsetParent;
+        const parentRect = offsetParent ? offsetParent.getBoundingClientRect() : { left: 0, top: 0 };
+
+        let left = e.clientX - parentRect.left;
+        let top = e.clientY - parentRect.top;
+
+        const menuWidth = menu.offsetWidth || 192;
+        const menuHeight = menu.offsetHeight || 80;
+        const parentWidth = parentRect.width || window.innerWidth;
+        const parentHeight = parentRect.height || window.innerHeight;
+
+        if (left + menuWidth > parentWidth) {
+            left = Math.max(0, left - menuWidth);
+        }
+        if (top + menuHeight > parentHeight) {
+            top = Math.max(0, top - menuHeight);
+        }
+
+        menu.style.left = `${left}px`;
+        menu.style.top = `${top}px`;
+
         const close = () => {
             this.closeCtxMenu();
             document.removeEventListener('click', close);
         };
-        document.addEventListener('click', close);
+        setTimeout(() => document.addEventListener('click', close), 10);
     }
 
     closeCtxMenu() {
@@ -17940,6 +17967,7 @@ class AwwwEditor {
         this.monitors = [];
         this.current = {};
         this.selectedDisplay = null;
+        this.saveTimeout = null;
         this.init();
     }
 
@@ -18083,7 +18111,7 @@ class AwwwEditor {
 
     addDisplay() {
         const name = prompt("Enter monitor/display name (e.g. eDP-1, HDMI-A-1):");
-        if (name) {
+        if (name && name.trim()) {
             this.addDisplayConfig(name.trim());
         }
     }
@@ -18106,20 +18134,23 @@ class AwwwEditor {
             };
         }
         this.selectDisplay(name);
+        this.triggerAutosave();
     }
 
-    deleteCurrentDisplay() {
-        if (!this.selectedDisplay || ['default', 'any'].includes(this.selectedDisplay)) return;
-        if (confirm(`Remove configuration for ${this.selectedDisplay}?`)) {
-            delete this.config.displays[this.selectedDisplay];
+    deleteCurrentDisplay(displayToDelete = null) {
+        const target = displayToDelete || this.selectedDisplay;
+        if (!target || ['default', 'any'].includes(target)) return;
+        if (confirm(`Remove configuration for "${target}"?`)) {
+            delete this.config.displays[target];
             this.selectDisplay('default');
+            this.triggerAutosave();
         }
     }
 
     renderDisplaySettings(name) {
+        const container = document.getElementById('display-settings');
         const titleEl = document.getElementById('display-title');
         const actionsEl = document.getElementById('display-actions');
-        const container = document.getElementById('display-settings');
         if (!container) return;
 
         if (titleEl) titleEl.textContent = `Display: ${name}`;
@@ -18148,152 +18179,205 @@ class AwwwEditor {
             };
         }
 
-        const conf = this.config.displays[name];
+        const settings = this.config.displays[name];
+        container.innerHTML = '';
 
-        container.innerHTML = `
-            <div class="space-y-6">
-                <!-- Image Path Selection -->
-                <div class="bg-zinc-950/60 p-4 rounded-xl border border-zinc-800/80 space-y-3">
-                    <label class="block text-xs font-semibold text-zinc-400 uppercase tracking-wider">Wallpaper Image / GIF</label>
-                    <div class="flex items-center gap-2">
-                        <input type="text" id="cfg-path" value="${conf.path || ''}"
-                            onchange="awwwEditor.updateField('${name}', 'path', this.value)"
-                            placeholder="/path/to/image.png or gif"
-                            class="flex-1 bg-zinc-900 border border-zinc-700/80 rounded-lg px-3 py-2 text-sm text-zinc-200 focus:outline-none focus:border-teal-500">
-                        <button onclick="awwwEditor.browseImage('${name}')"
-                            class="px-3 py-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 rounded-lg text-sm font-medium border border-zinc-700">
-                            📁 Browse
-                        </button>
-                    </div>
-                    ${conf.path ? `
-                        <div class="mt-2 relative rounded-lg overflow-hidden border border-zinc-800 bg-zinc-900 h-40 flex items-center justify-center">
-                            <img src="/awww/preview?path=${encodeURIComponent(conf.path)}" class="max-h-full max-w-full object-contain" alt="Preview" onerror="this.style.display='none'">
-                        </div>
-                    ` : ''}
-                </div>
+        const children = [];
 
-                <!-- Scaling & Alignment -->
-                <div class="bg-zinc-950/60 p-4 rounded-xl border border-zinc-800/80 space-y-4">
-                    <h3 class="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Scaling & Fit Settings</h3>
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-xs text-zinc-400 mb-1">Resize Mode</label>
-                            <select onchange="awwwEditor.updateField('${name}', 'resize', this.value)"
-                                class="w-full bg-zinc-900 border border-zinc-700/80 rounded-lg px-3 py-2 text-sm text-zinc-200 focus:outline-none focus:border-teal-500">
-                                <option value="crop" ${conf.resize === 'crop' ? 'selected' : ''}>Crop (Fill Screen)</option>
-                                <option value="fit" ${conf.resize === 'fit' ? 'selected' : ''}>Fit (Keep Aspect Ratio)</option>
-                                <option value="stretch" ${conf.resize === 'stretch' ? 'selected' : ''}>Stretch</option>
-                                <option value="no" ${conf.resize === 'no' ? 'selected' : ''}>No Resize (Original Size)</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-xs text-zinc-400 mb-1">Crop Gravity</label>
-                            <select onchange="awwwEditor.updateField('${name}', 'crop_gravity', this.value)"
-                                class="w-full bg-zinc-900 border border-zinc-700/80 rounded-lg px-3 py-2 text-sm text-zinc-200 focus:outline-none focus:border-teal-500">
-                                <option value="center" ${conf.crop_gravity === 'center' ? 'selected' : ''}>Center</option>
-                                <option value="top" ${conf.crop_gravity === 'top' ? 'selected' : ''}>Top</option>
-                                <option value="bottom" ${conf.crop_gravity === 'bottom' ? 'selected' : ''}>Bottom</option>
-                                <option value="left" ${conf.crop_gravity === 'left' ? 'selected' : ''}>Left</option>
-                                <option value="right" ${conf.crop_gravity === 'right' ? 'selected' : ''}>Right</option>
-                                <option value="top-left" ${conf.crop_gravity === 'top-left' ? 'selected' : ''}>Top-Left</option>
-                                <option value="top-right" ${conf.crop_gravity === 'top-right' ? 'selected' : ''}>Top-Right</option>
-                                <option value="bottom-left" ${conf.crop_gravity === 'bottom-left' ? 'selected' : ''}>Bottom-Left</option>
-                                <option value="bottom-right" ${conf.crop_gravity === 'bottom-right' ? 'selected' : ''}>Bottom-Right</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-xs text-zinc-400 mb-1">Filter Algorithm</label>
-                            <select onchange="awwwEditor.updateField('${name}', 'filter', this.value)"
-                                class="w-full bg-zinc-900 border border-zinc-700/80 rounded-lg px-3 py-2 text-sm text-zinc-200 focus:outline-none focus:border-teal-500">
-                                <option value="Lanczos3" ${conf.filter === 'Lanczos3' ? 'selected' : ''}>Lanczos3 (High Quality)</option>
-                                <option value="Mitchell" ${conf.filter === 'Mitchell' ? 'selected' : ''}>Mitchell</option>
-                                <option value="CatmullRom" ${conf.filter === 'CatmullRom' ? 'selected' : ''}>CatmullRom</option>
-                                <option value="Bilinear" ${conf.filter === 'Bilinear' ? 'selected' : ''}>Bilinear</option>
-                                <option value="Nearest" ${conf.filter === 'Nearest' ? 'selected' : ''}>Nearest (Fastest / Pixel Art)</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-xs text-zinc-400 mb-1">Padding Fill Color (Hex)</label>
-                            <input type="text" value="${conf.fill_color || '000000ff'}"
-                                onchange="awwwEditor.updateField('${name}', 'fill_color', this.value)"
-                                placeholder="000000ff"
-                                class="w-full bg-zinc-900 border border-zinc-700/80 rounded-lg px-3 py-2 text-sm text-zinc-200 focus:outline-none focus:border-teal-500">
-                        </div>
-                    </div>
-                </div>
+        // Wallpaper Path Input with File Module Browser
+        children.push(UIManager.createActionInput(
+            "Wallpaper Path",
+            "Image file or directory containing wallpapers",
+            settings.path || '',
+            "/path/to/wallpaper.png or /path/to/folder",
+            "📁",
+            () => this.browsePath(name),
+            (val) => {
+                this.updateField(name, 'path', val);
+                setTimeout(() => this.renderDisplaySettings(name), 10);
+            }
+        ));
 
-                <!-- Transition Options -->
-                <div class="bg-zinc-950/60 p-4 rounded-xl border border-zinc-800/80 space-y-4">
-                    <h3 class="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Transition Animation Settings</h3>
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-xs text-zinc-400 mb-1">Transition Type</label>
-                            <select onchange="awwwEditor.updateField('${name}', 'transition_type', this.value)"
-                                class="w-full bg-zinc-900 border border-zinc-700/80 rounded-lg px-3 py-2 text-sm text-zinc-200 focus:outline-none focus:border-teal-500">
-                                ${['simple', 'fade', 'wipe', 'wave', 'grow', 'center', 'any', 'outer', 'random', 'left', 'right', 'top', 'bottom', 'none'].map(t =>
-            `<option value="${t}" ${conf.transition_type === t ? 'selected' : ''}>${t}</option>`
-        ).join('')}
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-xs text-zinc-400 mb-1">Duration (Seconds)</label>
-                            <input type="number" step="0.1" min="0.1" value="${conf.transition_duration ?? 3.0}"
-                                onchange="awwwEditor.updateField('${name}', 'transition_duration', parseFloat(this.value))"
-                                class="w-full bg-zinc-900 border border-zinc-700/80 rounded-lg px-3 py-2 text-sm text-zinc-200 focus:outline-none focus:border-teal-500">
-                        </div>
-                        <div>
-                            <label class="block text-xs text-zinc-400 mb-1">Frame Rate (FPS)</label>
-                            <input type="number" min="1" max="240" value="${conf.transition_fps ?? 30}"
-                                onchange="awwwEditor.updateField('${name}', 'transition_fps', parseInt(this.value))"
-                                class="w-full bg-zinc-900 border border-zinc-700/80 rounded-lg px-3 py-2 text-sm text-zinc-200 focus:outline-none focus:border-teal-500">
-                        </div>
-                        <div>
-                            <label class="block text-xs text-zinc-400 mb-1">Transition Step (Speed)</label>
-                            <input type="number" min="1" max="255" value="${conf.transition_step ?? 90}"
-                                onchange="awwwEditor.updateField('${name}', 'transition_step', parseInt(this.value))"
-                                class="w-full bg-zinc-900 border border-zinc-700/80 rounded-lg px-3 py-2 text-sm text-zinc-200 focus:outline-none focus:border-teal-500">
-                        </div>
-                        <div>
-                            <label class="block text-xs text-zinc-400 mb-1">Wipe/Wave Angle (Degrees)</label>
-                            <input type="number" min="0" max="360" value="${conf.transition_angle ?? 45}"
-                                onchange="awwwEditor.updateField('${name}', 'transition_angle', parseInt(this.value))"
-                                class="w-full bg-zinc-900 border border-zinc-700/80 rounded-lg px-3 py-2 text-sm text-zinc-200 focus:outline-none focus:border-teal-500">
-                        </div>
-                        <div>
-                            <label class="block text-xs text-zinc-400 mb-1">Transition Position</label>
-                            <input type="text" value="${conf.transition_pos || 'center'}"
-                                onchange="awwwEditor.updateField('${name}', 'transition_pos', this.value)"
-                                placeholder="center, top-left, or 0.5,0.5"
-                                class="w-full bg-zinc-900 border border-zinc-700/80 rounded-lg px-3 py-2 text-sm text-zinc-200 focus:outline-none focus:border-teal-500">
-                        </div>
-                    </div>
+        // Preview Element
+        if (settings.path) {
+            const prevDiv = document.createElement('div');
+            prevDiv.className = "px-5 py-2 hover:bg-zinc-800/30 transition-colors";
+            prevDiv.innerHTML = `
+                <div class="relative rounded-lg overflow-hidden border border-zinc-800 bg-zinc-950 h-44 flex items-center justify-center">
+                    <img src="/awww/preview?path=${encodeURIComponent(settings.path)}" class="max-h-full max-w-full object-contain" alt="Preview" onerror="this.style.display='none'">
                 </div>
-            </div>
-        `;
+            `;
+            children.push(prevDiv);
+        }
+
+        // Resize Mode
+        children.push(UIManager.createSelect(
+            "Resize Mode",
+            "How image is scaled to screen dimensions",
+            settings.resize || "crop",
+            [
+                { label: 'Crop (Fill Screen)', value: 'crop' },
+                { label: 'Fit (Keep Aspect Ratio)', value: 'fit' },
+                { label: 'Stretch', value: 'stretch' },
+                { label: 'No Resize (Original Size)', value: 'no' }
+            ],
+            (val) => this.updateField(name, 'resize', val)
+        ));
+
+        // Crop Gravity
+        children.push(UIManager.createSelect(
+            "Crop Gravity",
+            "Anchor position when crop mode is active",
+            settings.crop_gravity || "center",
+            [
+                { label: 'Center', value: 'center' },
+                { label: 'Top', value: 'top' },
+                { label: 'Bottom', value: 'bottom' },
+                { label: 'Left', value: 'left' },
+                { label: 'Right', value: 'right' },
+                { label: 'Top-Left', value: 'top-left' },
+                { label: 'Top-Right', value: 'top-right' },
+                { label: 'Bottom-Left', value: 'bottom-left' },
+                { label: 'Bottom-Right', value: 'bottom-right' }
+            ],
+            (val) => this.updateField(name, 'crop_gravity', val)
+        ));
+
+        // Filter Algorithm
+        children.push(UIManager.createSelect(
+            "Filter Algorithm",
+            "Scaling filter quality algorithm",
+            settings.filter || "Lanczos3",
+            [
+                { label: 'Lanczos3 (High Quality)', value: 'Lanczos3' },
+                { label: 'Mitchell', value: 'Mitchell' },
+                { label: 'CatmullRom', value: 'CatmullRom' },
+                { label: 'Bilinear', value: 'Bilinear' },
+                { label: 'Nearest (Fastest / Pixel Art)', value: 'Nearest' }
+            ],
+            (val) => this.updateField(name, 'filter', val)
+        ));
+
+        // Padding Fill Color
+        children.push(UIManager.createInput(
+            "Padding Fill Color (Hex)",
+            "Hex color for padding when fit mode is used",
+            settings.fill_color || "000000ff",
+            "000000ff",
+            (val) => this.updateField(name, 'fill_color', val)
+        ));
+
+        // Transition Type
+        children.push(UIManager.createSelect(
+            "Transition Type",
+            "Wallpaper transition animation effect",
+            settings.transition_type || "simple",
+            ['simple', 'fade', 'wipe', 'wave', 'grow', 'center', 'any', 'outer', 'random', 'left', 'right', 'top', 'bottom', 'none'].map(t => ({ label: t, value: t })),
+            (val) => this.updateField(name, 'transition_type', val)
+        ));
+
+        // Transition Duration
+        children.push(UIManager.createInput(
+            "Transition Duration (s)",
+            "Duration of transition animation in seconds",
+            settings.transition_duration ?? 3.0,
+            "3.0",
+            (val) => this.updateField(name, 'transition_duration', val ? parseFloat(val) : 3.0),
+            null,
+            "number"
+        ));
+
+        // Transition FPS
+        children.push(UIManager.createInput(
+            "Transition Frame Rate (FPS)",
+            "Animation target frame rate",
+            settings.transition_fps ?? 30,
+            "30",
+            (val) => this.updateField(name, 'transition_fps', val ? parseInt(val) : 30),
+            null,
+            "number"
+        ));
+
+        // Transition Step
+        children.push(UIManager.createInput(
+            "Transition Step Speed",
+            "Step speed factor (1-255)",
+            settings.transition_step ?? 90,
+            "90",
+            (val) => this.updateField(name, 'transition_step', val ? parseInt(val) : 90),
+            null,
+            "number"
+        ));
+
+        // Transition Angle
+        children.push(UIManager.createInput(
+            "Wipe/Wave Angle (deg)",
+            "Transition angle in degrees (0-360)",
+            settings.transition_angle ?? 45,
+            "45",
+            (val) => this.updateField(name, 'transition_angle', val ? parseInt(val) : 45),
+            null,
+            "number"
+        ));
+
+        // Transition Position
+        children.push(UIManager.createInput(
+            "Transition Position",
+            "Center point for grow/outer (e.g. center or 0.5,0.5)",
+            settings.transition_pos || "center",
+            "center",
+            (val) => this.updateField(name, 'transition_pos', val)
+        ));
+
+        // Delete Button Container
+        if (name !== 'default' && name !== 'any') {
+            const btnContainer = document.createElement('div');
+            btnContainer.className = "p-5 border-t border-zinc-800 flex justify-end";
+            const delBtn = document.createElement('button');
+            delBtn.className = "px-4 py-2 bg-red-500/10 hover:bg-red-500/20 text-red-400 rounded-lg text-sm transition-colors border border-red-500/20 font-medium";
+            delBtn.textContent = "Delete Display Config";
+            delBtn.onclick = () => this.deleteCurrentDisplay(name);
+            btnContainer.appendChild(delBtn);
+            children.push(btnContainer);
+        }
+
+        const section = UIManager.createSection(null, null, children);
+        container.appendChild(section);
+    }
+
+    browsePath(displayName) {
+        ImagePicker.open({
+            multiselect: false,
+            allowFolderSelect: true,
+            onSelect: (items) => {
+                if (items && items.length > 0) {
+                    const item = items[0];
+                    const finalPath = item.path || item.name;
+                    this.updateField(displayName, 'path', finalPath);
+                    this.renderDisplaySettings(displayName);
+                    this.triggerAutosave();
+                }
+            }
+        });
     }
 
     updateField(displayName, key, value) {
         if (!this.config.displays[displayName]) {
             this.config.displays[displayName] = {};
         }
-        this.config.displays[displayName][key] = value;
+        if (value === null || value === '' || value === undefined) {
+            delete this.config.displays[displayName][key];
+        } else {
+            this.config.displays[displayName][key] = value;
+        }
+        this.triggerAutosave();
     }
 
-    browseImage(displayName) {
-        if (window.ImagePicker) {
-            new ImagePicker({
-                onSelect: (path) => {
-                    this.updateField(displayName, 'path', path);
-                    this.renderDisplaySettings(displayName);
-                }
-            });
-        } else {
-            const path = prompt("Enter full path to image file:");
-            if (path) {
-                this.updateField(displayName, 'path', path);
-                this.renderDisplaySettings(displayName);
-            }
-        }
+    triggerAutosave() {
+        if (this.saveTimeout) clearTimeout(this.saveTimeout);
+        this.saveTimeout = setTimeout(async () => {
+            await this.save(true);
+        }, 500);
     }
 
     renderCurrentPreview() {
@@ -18376,7 +18460,7 @@ class AwwwEditor {
         }
     }
 
-    async save() {
+    async save(silent = false) {
         try {
             const res = await fetch('/awww/config', {
                 method: 'POST',
@@ -18384,16 +18468,19 @@ class AwwwEditor {
                 body: JSON.stringify(this.config)
             });
             if (res.ok) {
-                if (window.showToast) showToast('Awww config saved & applied!', 'success');
+                if (!silent && window.showToast) showToast('Awww config saved & applied!', 'success');
+                if (window._presetManagers?.['awww']) {
+                    window._presetManagers['awww'].updateActivePreset(true);
+                }
                 await this.loadCurrent();
                 this.renderCurrentPreview();
                 this.refreshMatugenPalette();
             } else {
-                if (window.showToast) showToast('Failed to save awww config', 'error');
+                if (!silent && window.showToast) showToast('Failed to save awww config', 'error');
             }
         } catch (e) {
             console.error("Save error", e);
-            if (window.showToast) showToast('Error saving config', 'error');
+            if (!silent && window.showToast) showToast('Error saving config', 'error');
         }
     }
 
