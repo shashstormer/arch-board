@@ -2,6 +2,8 @@
 
 A modern web-based configuration manager for Arch Linux systems, focused on Hyprland and related tools.
 
+> I will not be adding support for hyprland lua config as I was not able to figure out a way for simpler scripting and better config tools using UI only so have left it for now.
+
 ## Features
 
 - **Dashboard**: System overview with CPU, memory, and disk usage statistics
