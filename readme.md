@@ -102,6 +102,7 @@ Default included plugins are
 - hyprlock
 - hypridle
 - wpaperd
+- awww
 - system (the system stats on dashboard page need this router)
 - presets (presets on all pages need this)
 - static (needed for serving the js files etc)

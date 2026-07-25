@@ -191,7 +191,7 @@ class ThemeManager:
                     preset_content = manager.get_preset_content(preset_id)
                     if preset_content:
 
-                        if tool in ["wpaperd", "hyprlock", "hyprland"]:
+                        if tool in ["wpaperd", "awww", "hyprlock", "hyprland"]:
                             preset_content = self._process_and_bundle_assets(preset_content, zf, tool, included_assets)
 
                         if tool == "waybar":
@@ -218,9 +218,9 @@ class ThemeManager:
 
     def _get_asset_patterns(self, tool: str) -> List[str]:
         patterns = []
-        if tool in ["wpaperd", "hyprlock"]:
-            patterns.append(r'path\s*=\s*["\']?([^"\']+\.(png|jpg|jpeg|conf))["\']?')
-            patterns.append(r'image\s*=\s*["\']?([^"\']+\.(png|jpg|jpeg))["\']?')
+        if tool in ["wpaperd", "awww", "hyprlock"]:
+            patterns.append(r'path\s*=\s*["\']?([^"\']+\.(png|jpg|jpeg|gif|conf))["\']?')
+            patterns.append(r'image\s*=\s*["\']?([^"\']+\.(png|jpg|jpeg|gif))["\']?')
         elif tool == "hyprland":
             patterns.append(r'source\s*=\s*["\']?([^"\']+\.conf)["\']?')
             patterns.append(r'exec-once\s*=\s*["\']?([^"\s\']+\.(sh|py))["\']?')
@@ -241,7 +241,7 @@ class ThemeManager:
         import re
 
         IGNORE_LIST = {
-            "hyprland", "waybar", "hypridle", "hyprlock", "wpaperd", "bash", "sh", "python", "python3",
+            "hyprland", "waybar", "hypridle", "hyprlock", "wpaperd", "awww", "awww-daemon", "bash", "sh", "python", "python3",
             "mkdir", "rm", "cp", "mv", "cat", "echo", "sleep", "true", "false", "grep", "sed", "awk",
             "pkill", "pidof", "systemctl", "notify-send", "playerctl", "brightnessctl", "pamixer", "wpctl",
             "loginctl", "nm-connection-editor", "blueman-manager", "pavucontrol", "firefox", "kitty", "alacritty",
@@ -254,7 +254,7 @@ class ThemeManager:
             "bash", "sh", "python", "python3", "mkdir", "rm", "cp", "mv", "cat", "echo", "sleep", "true", "false",
             "grep", "sed", "awk", "cut", "tr", "wc", "sort", "uniq", "whoami", "hostname", "uptime", "free",
             "pkill", "pidof", "systemctl", "loginctl", "date", "ls", "find", "xargs", "kill", "nice", "renice",
-            "hyprland", "waybar", "hypridle", "hyprlock", "wpaperd", "exec", "activate", "apply-gsettings"
+            "hyprland", "waybar", "hypridle", "hyprlock", "wpaperd", "awww", "exec", "activate", "apply-gsettings"
         }
 
         for tool, preset_id in presets.items():
@@ -337,7 +337,7 @@ class ThemeManager:
                         })
 
                 content = manager.get_preset_content(preset_id)
-                if content and tool in ["wpaperd", "hyprlock", "hyprland", "waybar"]:
+                if content and tool in ["wpaperd", "awww", "hyprlock", "hyprland", "waybar"]:
                     found = self._analyze_assets_in_content(content, tool)
                     assets.extend(found)
 
@@ -512,7 +512,7 @@ class ThemeManager:
 
                         content = zf.read(file).decode('utf-8')
 
-                        if tool in ["wpaperd", "hyprlock", "hyprland"]:
+                        if tool in ["wpaperd", "awww", "hyprlock", "hyprland"]:
                             abs_path_prefix = str(assets_dir).rstrip("/") + "/"
                             content = content.replace("assets/", abs_path_prefix)
 
