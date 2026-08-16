@@ -24,6 +24,7 @@ register_navigation(
 )
 
 CONFIG_PATH = os.path.expanduser("~/.config/awww/config.json")
+MATUGEN_MONO_CACHE = {}
 
 
 # ========== Models ==========
@@ -31,7 +32,8 @@ CONFIG_PATH = os.path.expanduser("~/.config/awww/config.json")
 class DisplayConfig(BaseModel):
     path: str = ""
     resize: Optional[Literal["crop", "fit", "stretch", "no"]] = "crop"
-    crop_gravity: Optional[Literal["top-left", "top", "top-right", "left", "center", "right", "bottom-left", "bottom", "bottom-right"]] = "center"
+    crop_gravity: Optional[Literal[
+        "top-left", "top", "top-right", "left", "center", "right", "bottom-left", "bottom", "bottom-right"]] = "center"
     fill_color: Optional[str] = "000000ff"
     filter: Optional[Literal["Lanczos3", "Nearest", "Bilinear", "CatmullRom", "Mitchell"]] = "Lanczos3"
     transition_type: Optional[str] = "simple"
@@ -80,7 +82,7 @@ def get_first_screen_wallpaper(path: Optional[str] = None) -> tuple[str, str]:
     """
     if path and os.path.exists(path) and os.path.isfile(path):
         return ("custom", path)
-    
+
     current = get_current_wallpapers().get("current", {})
     if current:
         first_display = list(current.keys())[0]
@@ -100,6 +102,9 @@ def get_first_screen_wallpaper(path: Optional[str] = None) -> tuple[str, str]:
 
 def run_matugen_json(img_path: str, mode: str = "dark", scheme_type: str = "scheme-tonal-spot") -> dict:
     """Run matugen CLI to generate JSON color scheme."""
+    global MATUGEN_MONO_CACHE
+    if img_path in MATUGEN_MONO_CACHE:
+        return MATUGEN_MONO_CACHE[img_path]
     cmd = [
         "matugen", "image", img_path,
         "--json", "hex",
@@ -110,7 +115,9 @@ def run_matugen_json(img_path: str, mode: str = "dark", scheme_type: str = "sche
     try:
         result = subprocess.run(cmd, capture_output=True, text=True)
         if result.returncode == 0:
-            return json.loads(result.stdout)
+            res = json.loads(result.stdout)
+            MATUGEN_MONO_CACHE = {img_path: res}
+            return res
         else:
             raise HTTPException(status_code=500, detail=f"Matugen error: {result.stderr}")
     except Exception as e:
@@ -132,7 +139,7 @@ def generate_matugen_swatch_image(colors_dict: dict, title: str = "Matugen Color
     start_y = 45
     gap = 12
 
-    items = list(colors_dict.items())[:14] # Up to 14 key colors
+    items = list(colors_dict.items())[:14]  # Up to 14 key colors
     for i, (name, hex_code) in enumerate(items):
         col = i % 7
         row = i // 7
@@ -175,7 +182,7 @@ def get_config():
     """Parse and return current awww config."""
     if not os.path.exists(CONFIG_PATH):
         return {"displays": {}}
-    
+
     try:
         with open(CONFIG_PATH, "r", encoding="utf-8") as f:
             data = json.load(f)
@@ -209,7 +216,7 @@ def apply_wallpaper_setting(display: str, settings: DisplayConfig):
     cmd = ["awww", "img"]
     if display and display not in ["default", "any"]:
         cmd.extend(["-o", display])
-    
+
     if settings.resize:
         cmd.extend(["--resize", settings.resize])
     if settings.crop_gravity and settings.resize == "crop":
@@ -358,7 +365,7 @@ def get_current_wallpapers():
                     current[display_name] = parts[1].strip()
     except Exception as e:
         print(f"Error getting awww query output: {e}")
-    
+
     return {"current": current}
 
 
@@ -369,7 +376,7 @@ def get_preview(path: str):
     if os.path.exists(real_path) and os.path.isfile(real_path):
         mime, _ = mimetypes.guess_type(real_path)
         return FileResponse(real_path, media_type=mime or "image/png")
-    
+
     raise HTTPException(404, "Image not found")
 
 
@@ -393,9 +400,9 @@ def extract_color_dict(matugen_data: dict, mode: str = "dark") -> Dict[str, str]
 
 @awww_router.get("/matugen/current")
 def get_matugen_current(
-    path: Optional[str] = Query(None, description="Optional image path. Defaults to 1st screen wallpaper."),
-    mode: str = Query("dark", description="dark or light mode"),
-    type: str = Query("scheme-tonal-spot", description="Matugen scheme type")
+        path: Optional[str] = Query(None, description="Optional image path. Defaults to 1st screen wallpaper."),
+        mode: str = Query("dark", description="dark or light mode"),
+        type: str = Query("scheme-tonal-spot", description="Matugen scheme type")
 ):
     """
     Generate Matugen color palette JSON based on current wallpaper of 1st screen (or specified image).
@@ -418,9 +425,9 @@ def get_matugen_current(
 
 @awww_router.get("/matugen/colors")
 def get_matugen_colors(
-    path: Optional[str] = Query(None, description="Optional image path. Defaults to 1st screen wallpaper."),
-    mode: str = Query("dark", description="dark or light mode"),
-    type: str = Query("scheme-tonal-spot", description="Matugen scheme type")
+        path: Optional[str] = Query(None, description="Optional image path. Defaults to 1st screen wallpaper."),
+        mode: str = Query("dark", description="dark or light mode"),
+        type: str = Query("scheme-tonal-spot", description="Matugen scheme type")
 ) -> Dict[str, str]:
     """
     Directly return a flat {name: hex} dictionary of colors derived from 1st screen wallpaper for use in other programs.
@@ -432,9 +439,9 @@ def get_matugen_colors(
 
 @awww_router.get("/matugen/image")
 def get_matugen_palette_image(
-    path: Optional[str] = Query(None, description="Optional image path. Defaults to 1st screen wallpaper."),
-    mode: str = Query("dark", description="dark or light mode"),
-    type: str = Query("scheme-tonal-spot", description="Matugen scheme type")
+        path: Optional[str] = Query(None, description="Optional image path. Defaults to 1st screen wallpaper."),
+        mode: str = Query("dark", description="dark or light mode"),
+        type: str = Query("scheme-tonal-spot", description="Matugen scheme type")
 ):
     """
     Generate and return a visual swatch PNG image of the Matugen palette derived from 1st screen wallpaper.
@@ -443,7 +450,8 @@ def get_matugen_palette_image(
     matugen_data = run_matugen_json(img_path, mode=mode, scheme_type=type)
     colors = extract_color_dict(matugen_data, mode=mode)
 
-    img_bytes = generate_matugen_swatch_image(colors, title=f"Matugen Palette ({display_name}: {os.path.basename(img_path)})")
+    img_bytes = generate_matugen_swatch_image(colors,
+                                              title=f"Matugen Palette ({display_name}: {os.path.basename(img_path)})")
     return Response(content=img_bytes, media_type="image/png")
 
 
